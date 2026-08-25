@@ -1,3 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* Agent skill docs contain Tailwind examples in fenced code blocks. Tailwind scans
+   every non-ignored file as plain text, so without these exclusions their example
+   classes are compiled into the production bundle (~37 kB of dead CSS). */
+@source not '../.claude';
+@source not '../.agents';
