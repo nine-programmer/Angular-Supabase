@@ -65,18 +65,33 @@ Applies when the project has `@angular/ssr` enabled (hydration via `provideClien
 - For browser-only code, prefer `afterNextRender()` / `afterRenderEffect()` over `isPlatformBrowser(inject(PLATFORM_ID))`. Use the platform check only when you need to branch logic at injection time.
 - Define per-route render modes in `src/app/app.routes.server.ts`. Public/static pages: `RenderMode.Prerender`. Pages that depend on the logged-in user or dynamic data: `RenderMode.Server` or `RenderMode.Client`. Do NOT prerender pages that require authentication.
 - Use `httpResource()` / `resource()` for data fetching so results are transferred to the client via hydration and not re-fetched on bootstrap.
-- Keep `src/server.ts` free of application logic; it is only the Express host.
+- Relative `/api/...` URLs do not resolve during server-side rendering. Provide a server-only `HttpInterceptorFn` (registered in `app.config.server.ts`) that prefixes the local origin (`http://localhost:${PORT}`) so the same `httpResource()` call works in both the browser and the SSR pass.
+- Keep `src/server.ts` free of application logic; it is only the Express host. It mounts the API router from `src/server/` and then hands every other request to the Angular engine.
+
+## API Layer (Angular SSR + Express)
+
+The same Angular SSR process serves BOTH the frontend and the backend API. The browser never talks to Supabase; it only calls `/api/*`.
+
+- All API code lives under `src/server/` and runs on Node only:
+  - `src/server/routes/` — one `express.Router` per resource (e.g. `items.routes.ts`), mounted under `/api` from `src/server.ts`.
+  - `src/server/services/` — business logic per resource; the only place that calls Supabase.
+  - `src/server/supabase.ts` — the ONE Supabase client (see Supabase section).
+  - `src/server/env.ts` — reads and validates `process.env` once; every other server file imports config from here.
+- Code under `src/app/` MUST NOT import anything from `src/server/`. Doing so pulls Node-only code and secrets into the browser bundle.
+- Code shared by both sides (generated `Database` types, request/response DTOs) lives in `src/shared/` and must be plain TypeScript with no Node or browser globals.
+- Browser-side Angular services call `/api/*` via `HttpClient` / `httpResource()` and expose signals or Promises to components. Components must not call `HttpClient` directly.
+- Every API route validates its input, returns JSON, and maps errors to an HTTP status plus a `{ error: string }` body. Never leak raw Supabase/Postgres errors to the browser.
+- Business rules that must be atomic (stock counters, sequential numbers, status transitions) are enforced in a single Postgres function called with `.rpc()` or in a DB constraint, never by read-then-write in the API handler.
+- Authentication and authorization, when a project needs them, are enforced in `src/server/` middleware. Never rely on browser-side checks.
 
 ## Supabase
 
-- Create exactly ONE Supabase client, owned by a single singleton service (e.g. `SupabaseService`). All other services depend on it via `inject()`. Never call `createClient()` anywhere else.
-- Read the project URL and anon key from the project's environment configuration (e.g. Angular `environment*.ts` files). Never hard-code keys and never ship the `service_role` key to the client.
-- The Supabase client touches `localStorage` for auth persistence. Initialize it lazily on the browser only (see SSR section). On the server, either skip client creation or create it with `persistSession: false` and `autoRefreshToken: false`.
-- Use a typed client: generate `Database` types with `supabase gen types typescript` into the location the project's architecture designates for generated/shared types, and pass them as `createClient<Database>(...)`. Do NOT hand-write table types.
-- Every table MUST have Row Level Security enabled with explicit policies. Never rely on client-side checks for authorization.
-- Wrap Supabase calls in services that return Promises or `resource()` signals. Components must not import `@supabase/supabase-js` directly.
-- Handle the `{ data, error }` result explicitly. Never ignore `error`; surface it to the user or rethrow.
-- Keep schema changes as Supabase CLI migration files (default `supabase/migrations/`, or wherever the project already keeps them). Do not edit the database schema manually through the dashboard without a matching migration.
+- Create exactly ONE Supabase client, in `src/server/supabase.ts`, with `createClient<Database>(...)`, `persistSession: false`, and `autoRefreshToken: false`. Never call `createClient()` anywhere else, and never import `@supabase/supabase-js` under `src/app/` or `src/shared/`.
+- The server uses the `service_role` key, read from `process.env` (via `src/server/env.ts`, loaded from `.env`). It is a secret: never put it in `environment*.ts`, never commit `.env`, and always keep `.env.example` up to date with the variable names.
+- Use a typed client: generate `Database` types with `supabase gen types typescript` into `src/shared/types/database.types.ts`. Do NOT hand-write table types; derive row types with `Tables<'table_name'>`.
+- Every table MUST have Row Level Security enabled. Because the browser has no Supabase access, tables normally have NO policies for `anon`/`authenticated` (deny-all); only the server's `service_role` key can reach them. Authorization lives in the API layer.
+- Handle the `{ data, error }` result explicitly in `src/server/services/`. Never ignore `error`; map it to an API error response.
+- Keep schema changes as Supabase CLI migration files in `supabase/migrations/` (one file per schema change, named `NNN_description.sql`). Do not edit the database schema manually through the dashboard without a matching migration.
 
 ## Tailwind CSS v4
 
@@ -92,14 +107,37 @@ Applies when the project has `@angular/ssr` enabled (hydration via `provideClien
 
 - Unit tests run on Vitest with jsdom (`ng test`). Use `describe`, `it`, `expect`, and `vi` (for mocks/spies). Do NOT use Jasmine (`jasmine.createSpy`, `spyOn` from Jasmine) or Karma APIs.
 - Use `TestBed` for component and service tests. Because the app is zoneless, use `await fixture.whenStable()` instead of `fixture.detectChanges()` to flush signal updates before asserting on the DOM.
-- Mock the Supabase service at the DI boundary (`TestBed.overrideProvider` / `{ provide: SupabaseService, useValue: ... }`). Never hit a real Supabase project from unit tests.
+- Browser-side services: mock HTTP with `provideHttpClient()` + `provideHttpClientTesting()` and assert on the `/api/*` calls. Server-side services under `src/server/`: mock the Supabase client module with `vi.mock('./supabase')`. Never hit a real Supabase project from unit tests.
 - Co-locate spec files with the code under test (`foo.ts` → `foo.spec.ts`).
 - Every new service and non-trivial component MUST ship with a spec.
 
 ## Project Structure
 
-- Before creating or moving any file, look for an existing architecture definition (`ARCHITECTURE.md`, `README.md`, or the established folder layout) and follow it. The project's existing structure ALWAYS takes precedence over any path mentioned in this document.
-- Paths in this document (`environments/`, `shared/`, `supabase/migrations/`, etc.) are defaults for a fresh Angular CLI + Supabase project only. If the project already organizes these concerns differently, use its convention instead.
+This repository is a template: each customer mini app is cloned from it into its own repo. The canonical layout is:
+
+```
+src/
+├── app/                      Angular app (browser + SSR render)
+│   ├── pages/                one folder per routed page
+│   ├── components/           reusable UI pieces
+│   ├── services/             HttpClient / httpResource wrappers for /api/*
+│   ├── app.routes.ts
+│   └── app.routes.server.ts  per-route RenderMode
+├── server/                   API layer, Node only (see API Layer section)
+│   ├── env.ts
+│   ├── supabase.ts
+│   ├── routes/
+│   └── services/
+├── shared/                   imported by BOTH app/ and server/
+│   ├── types/database.types.ts   generated by `supabase gen types`
+│   └── dto/                  request/response types for /api/*
+├── server.ts                 Express host only
+└── environments/             non-secret browser config only
+supabase/migrations/          SQL migrations
+.env / .env.example           server secrets (never commit .env)
+```
+
+- Before creating or moving any file, check the layout above and any `SYSTEM_SPEC.md` / `docs/` the project ships with, and follow them. An existing project's structure takes precedence over the defaults here.
 - Do NOT introduce a new top-level folder or naming convention without asking the user first.
 
 ## Working Rules
