@@ -65,21 +65,19 @@ Applies when the project has `@angular/ssr` enabled (hydration via `provideClien
 - For browser-only code, prefer `afterNextRender()` / `afterRenderEffect()` over `isPlatformBrowser(inject(PLATFORM_ID))`. Use the platform check only when you need to branch logic at injection time.
 - Define per-route render modes in `src/app/app.routes.server.ts`. Public/static pages: `RenderMode.Prerender`. Pages that depend on the logged-in user or dynamic data: `RenderMode.Server` or `RenderMode.Client`. Do NOT prerender pages that require authentication.
 - Use `httpResource()` / `resource()` for data fetching so results are transferred to the client via hydration and not re-fetched on bootstrap.
-- Relative `/api/...` URLs do not resolve during server-side rendering. Provide a server-only `HttpInterceptorFn` (registered in `app.config.server.ts`) that prefixes the local origin (`http://localhost:${PORT}`) so the same `httpResource()` call works in both the browser and the SSR pass.
+- Relative `/api/...` URLs do not resolve during server-side rendering. Register `provideHttpClient(withFetch())` in `app.config.ts`, and in `app.config.server.ts` add a server-only `HttpInterceptorFn` that prefixes the origin of the incoming request (`new URL(inject(REQUEST).url).origin`, falling back to `http://localhost:${PORT}`) so the same `httpResource()` call works in the browser, in `ng serve` (port 4200), and in production (port 4000).
 - Keep `src/server.ts` free of application logic; it is only the Express host. It mounts the API router from `src/server/` and then hands every other request to the Angular engine.
 
 ## API Layer (Angular SSR + Express)
 
 The same Angular SSR process serves BOTH the frontend and the backend API. The browser never talks to Supabase; it only calls `/api/*`.
 
-- All API code lives under `src/server/` and runs on Node only:
-  - `src/server/routes/` — one `express.Router` per resource (e.g. `items.routes.ts`), mounted under `/api` from `src/server.ts`.
-  - `src/server/services/` — business logic per resource; the only place that calls Supabase.
-  - `src/server/supabase.ts` — the ONE Supabase client (see Supabase section).
-  - `src/server/env.ts` — reads and validates `process.env` once; every other server file imports config from here.
-- Code under `src/app/` MUST NOT import anything from `src/server/`. Doing so pulls Node-only code and secrets into the browser bundle.
-- Code shared by both sides (generated `Database` types, request/response DTOs) lives in `src/shared/` and must be plain TypeScript with no Node or browser globals.
-- Browser-side Angular services call `/api/*` via `HttpClient` / `httpResource()` and expose signals or Promises to components. Components must not call `HttpClient` directly.
+- All API code lives under `src/server/` and runs on Node only. File layout and naming are defined in `docs/ARCHITECTURE.md` (sections 3 and 5); follow it exactly.
+- Import direction is one-way: `src/app/` → `src/shared/` ← `src/server/` (see `docs/ARCHITECTURE.md` section 4). `src/app/` MUST NOT import from `src/server/`; `src/server/` MUST NOT import from `src/app/`; `src/shared/` imports only from within `src/shared/`.
+- `src/server/services/` is the ONLY place that calls Supabase. Route files validate input and call a service; they never query the database themselves.
+- `src/server/env.ts` reads and validates `process.env` once; every other server file imports config from there. Never read `process.env` elsewhere.
+- `src/shared/` is plain TypeScript with no Node or browser globals: generated `Database` types, request/response DTOs, and enums/constants. Write enums as `as const` objects plus a derived union type, not TypeScript `enum`, and keep their values identical to the DB `CHECK` constraints.
+- Browser-side Angular services (`<feature>-client.service.ts`) call `/api/*` via `HttpClient` / `httpResource()` and expose signals or Promises to components. Components must not call `HttpClient` directly.
 - Every API route validates its input, returns JSON, and maps errors to an HTTP status plus a `{ error: string }` body. Never leak raw Supabase/Postgres errors to the browser.
 - Business rules that must be atomic (stock counters, sequential numbers, status transitions) are enforced in a single Postgres function called with `.rpc()` or in a DB constraint, never by read-then-write in the API handler.
 - Authentication and authorization, when a project needs them, are enforced in `src/server/` middleware. Never rely on browser-side checks.
@@ -111,33 +109,13 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - Co-locate spec files with the code under test (`foo.ts` → `foo.spec.ts`).
 - Every new service and non-trivial component MUST ship with a spec.
 
-## Project Structure
+## Project Structure & Docs
 
-This repository is a template: each customer mini app is cloned from it into its own repo. The canonical layout is:
+This repository is a template: each customer mini app is cloned from it into its own repo.
 
-```
-src/
-├── app/                      Angular app (browser + SSR render)
-│   ├── pages/                one folder per routed page
-│   ├── components/           reusable UI pieces
-│   ├── services/             HttpClient / httpResource wrappers for /api/*
-│   ├── app.routes.ts
-│   └── app.routes.server.ts  per-route RenderMode
-├── server/                   API layer, Node only (see API Layer section)
-│   ├── env.ts
-│   ├── supabase.ts
-│   ├── routes/
-│   └── services/
-├── shared/                   imported by BOTH app/ and server/
-│   ├── types/database.types.ts   generated by `supabase gen types`
-│   └── dto/                  request/response types for /api/*
-├── server.ts                 Express host only
-└── environments/             non-secret browser config only
-supabase/migrations/          SQL migrations
-.env / .env.example           server secrets (never commit .env)
-```
-
-- Before creating or moving any file, check the layout above and any `SYSTEM_SPEC.md` / `docs/` the project ships with, and follow them. An existing project's structure takes precedence over the defaults here.
+- The canonical folder layout, file naming, import direction, and database conventions are defined ONCE in `docs/ARCHITECTURE.md`. Read it before creating or moving any file, and follow it exactly. Do NOT modify `docs/ARCHITECTURE.md` inside a customer project; changes belong in the template.
+- A customer project ships `docs/SYSTEM_SPEC.md` (what to build; tables, business rules, and API paths are LOCKED after review) and `docs/TASKS.md` (living progress file). Later rounds add `docs/features/<name>/SPEC.md` + `TASKS.md`.
+- When these docs exist: read `AGENTS.md`, `docs/ARCHITECTURE.md`, and the relevant SPEC before writing code; work on exactly ONE task from the TASKS file at a time; when a task passes, mark it `[x]` in TASKS.md with the commit hash and date and update its header line. Never change code away from a LOCKED spec item without updating the spec (and bumping its version) first.
 - Do NOT introduce a new top-level folder or naming convention without asking the user first.
 
 ## Working Rules
