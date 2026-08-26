@@ -1,3 +1,7 @@
+// Must run first: loads .env and sets the NG_ALLOWED_HOSTS default before
+// AngularNodeAppEngine is constructed below, since it reads that var at
+// construction time to build its SSRF host allowlist.
+import './server/env';
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,

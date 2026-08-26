@@ -67,6 +67,7 @@ Applies when the project has `@angular/ssr` enabled (hydration via `provideClien
 - Use `httpResource()` / `resource()` for data fetching so results are transferred to the client via hydration and not re-fetched on bootstrap.
 - Relative `/api/...` URLs do not resolve during server-side rendering. Register `provideHttpClient()` in `app.config.ts` (no `withFetch()` — `FetchBackend` is already the default `HttpBackend`; `withFetch()` is deprecated), and in `app.config.server.ts` add a server-only `HttpInterceptorFn` that prefixes the origin of the incoming request (`new URL(inject(REQUEST).url).origin`, falling back to `http://localhost:${PORT}`) so the same `httpResource()` call works in the browser, in `ng serve` (port 4200), and in production (port 4000).
 - Keep `src/server.ts` free of application logic; it is only the Express host. It mounts the API router from `src/server/` and then hands every other request to the Angular engine.
+- `AngularNodeAppEngine` rejects every SSR request with a 400 unless its `Host` header is in an allowlist (SSRF prevention). The template reads this from `NG_ALLOWED_HOSTS` (comma-separated, set in `src/server/env.ts` with a `localhost` default for local dev) — before deploying a project, set `NG_ALLOWED_HOSTS` to its real domain(s) via the hosting platform's env vars, or every page will 400 in production.
 
 ## API Layer (Angular SSR + Express)
 

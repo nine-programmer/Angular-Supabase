@@ -10,12 +10,12 @@
 
 ### [ ] Task 1: ตั้งโปรเจกต์ + เชื่อม Supabase
 - ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `[project-name]` (แก้ `name` ใน package.json และ angular.json, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:[project-name]` และ path `dist/[project-name]/...`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ของโปรเจกต์นี้; หน้า `/` แสดงชื่อระบบเฉยๆ — โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`), interceptor (`src/app/core/api-origin.interceptor.ts`) และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
-- ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นชื่อระบบ; เปิด `/api/health` เห็น `{ ok: true }`; ลบ `.env` แล้วรัน server ต้อง error บอกชื่อตัวแปรที่ขาด; `npm test` ผ่าน
+- ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นชื่อระบบ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน (ยังตรวจ `.env` ไม่ได้ที่ Task นี้ — ไม่มีจุดใดเรียก Supabase จริงจนกว่าจะถึง Task 2)
 - ผล: —
 
 ### [ ] Task 2: ฐานข้อมูล
 - ทำ: `supabase init` (ถ้ายังไม่มีโฟลเดอร์ `supabase/`) → `supabase/migrations/001_init.sql` สร้างตารางตาม SPEC 1.5 + constraint/function ตาม 1.7 + เปิด RLS ทุกตาราง; ข้อมูลตัวอย่างตาม SPEC 1.9 (ถ้ามี); `supabase gen types typescript` → `src/shared/types/database.types.ts`; `src/shared/enums/[name].enums.ts` ค่าสถานะตรงกับ `CHECK`; `/api/health` เปลี่ยนเป็นตอบ `{ ok: true, count: N }`
-- ทดสอบ: รัน migration สำเร็จ; เปิด `/api/health` เห็น count ตรงกับข้อมูลตัวอย่าง; [เรียก function ตาม 1.7 ด้วยค่าที่ต้องถูกปฏิเสธ → ต้อง error]
+- ทดสอบ: รัน migration สำเร็จ; เปิด `/api/health` เห็น count ตรงกับข้อมูลตัวอย่าง; ลบ `.env` แล้วเปิด `/api/health` ต้อง error บอกชื่อตัวแปรที่ขาด (จุดแรกที่โค้ดเรียก Supabase จริง); [เรียก function ตาม 1.7 ด้วยค่าที่ต้องถูกปฏิเสธ → ต้อง error]
 - ผล: —
 
 ### [ ] Task 3: F1 [ชื่อฟีเจอร์]

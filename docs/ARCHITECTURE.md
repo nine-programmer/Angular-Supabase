@@ -128,6 +128,7 @@ docs/
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=      # server เท่านั้น ห้าม commit
 PORT=4000
+NG_ALLOWED_HOSTS=localhost      # โดเมนที่ SSR ยอมเรนเดอร์ให้ (คั่นด้วย , ) ตั้งเป็นโดเมนจริงก่อน deploy มิฉะนั้นทุกหน้าจะได้ 400
 ```
 
 ```
