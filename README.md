@@ -1,59 +1,66 @@
-# AngularSupabase
+# Angular-Supabase
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.5.
+Template ตั้งต้นสำหรับสร้าง mini app ต่อลูกค้า 1 repo — Angular SSR ทำหน้าที่ทั้ง frontend และ API (`/api/*`) โดยมีแค่ server เท่านั้นที่เชื่อม Supabase (ดูรายละเอียดสถาปัตยกรรมที่ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) และกติกาการเขียนโค้ดที่ [AGENTS.md](AGENTS.md))
 
-## Development server
+## เริ่มใช้งานระบบใหม่
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. Clone template ไปเป็นโปรเจกต์ของลูกค้า
 
 ```bash
-ng generate component component-name
+git clone <this-repo> <ชื่อโปรเจกต์ลูกค้า>
+cd <ชื่อโปรเจกต์ลูกค้า>
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 2. เขียน spec ด้วย skill `system-spec-builder`
+
+เปิดโปรเจกต์ด้วย Claude Code (หรือ AI agent ที่รองรับ skill นี้) แล้วพิมพ์ไอเดียของระบบเป็นประโยคเดียว เช่น "อยากได้ระบบยืมคืนอุปกรณ์ในออฟฟิศ" — skill จะ:
+
+1. เช็คว่าไอเดียอยู่ในขอบเขตของ template ไหม (ดู [ARCHITECTURE.md ข้อ 10](docs/ARCHITECTURE.md))
+2. เทียบกับ pattern สำเร็จรูป (ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, คำขอ/ใบแจ้ง, รายการทั่วไป) ถ้าตรง
+3. สัมภาษณ์เป็นรอบสั้นๆ จนข้อมูลครบพอจะสร้างระบบได้จริง (ไม่ถามซ้ำสิ่งที่รู้แล้ว)
+4. สรุปให้ยืนยันก่อนเขียนไฟล์
+5. เขียน `docs/SYSTEM_SPEC.md` (สิ่งที่ต้องสร้าง — locked หลัง review) และ `docs/TASKS.md` (ลำดับงาน + ความคืบหน้า)
+6. ส่งให้ agent อีกตัวตรวจแบบ "Tech Lead ขี้บ่น" ก่อนเปลี่ยนสถานะเป็น "พร้อมสร้าง"
+
+### 3. ตั้งค่า Supabase
+
+สร้างโปรเจกต์ใหม่ที่ [supabase.com](https://supabase.com) แล้วคัดลอก `.env.example` เป็น `.env`:
 
 ```bash
-ng generate --help
+cp .env.example .env
 ```
 
-## Building
+ใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ให้ครบ (ห้าม commit ไฟล์ `.env`)
 
-To build the project run:
+### 4. สั่งให้ agent เริ่มสร้างทีละ Task
+
+เปิดแชทใหม่กับ agent แล้วพิมพ์:
+
+```
+อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
+```
+
+Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" ก่อนไป Task ถัดไป — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+
+### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
+
+เรียก skill `system-spec-builder` อีกครั้งพร้อมบอกฟีเจอร์ที่ต้องการ — จะได้ `docs/features/<name>/SPEC.md` + `TASKS.md` แยกต่างหาก โดยอ้างอิงตารางเดิมจาก `docs/SYSTEM_SPEC.md`
+
+## คำสั่งที่ใช้บ่อย
 
 ```bash
-ng build
+npm install
+npm start                              # dev server (SSR) ที่ http://localhost:4200
+npm test                               # รัน unit test (Vitest)
+npm run build                          # build production
+npm run serve:ssr:<project-name>       # รัน build จริงที่ http://localhost:4000
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## เอกสารของ template
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| ไฟล์ | เนื้อหา |
+|---|---|
+| [AGENTS.md](AGENTS.md) | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing) |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template |
+| `.claude/skills/system-spec-builder/` | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่ |
