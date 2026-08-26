@@ -97,7 +97,7 @@ Rules that make the documents buildable by any agent:
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.
 - **Every task has a test line** with behaviour the user can see, plus "spec ผ่าน `npm test`" for any task that adds a service.
 - **Task size is fixed**: 1 task = 1 screen, or 1 API resource together with the screen that uses it (list + create + edit of one resource is one task). Round 1 has 6–12 tasks; if more, merge or move features to "รอบถัดไป"; if fewer than 6, split.
-- **Tasks are ordered**: clone template → server skeleton + Supabase connection → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 always clones the template; Task 2 builds `src/server/` and the SSR interceptor exactly as `templates/TASKS.md` lists them, because the template repo does not ship them yet.
+- **Tasks are ordered**: clone template + connect Supabase → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 always clones the template and sets up `.env` — the server skeleton (`src/server/`, the SSR interceptor, `provideHttpClient`) already ships with the template, so it is not a task.
 - **Every table is used by at least one feature.**
 - **Field names in English (snake_case), labels in Thai.**
 - **Keep it small.** SYSTEM_SPEC 100–180 lines, TASKS 40–80 lines. If longer, trim into "รอบถัดไป".
