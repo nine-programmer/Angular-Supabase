@@ -80,6 +80,7 @@ Re-checked the log against every doc, both skill copies, all tool configs, and `
 - ARCHITECTURE §5 contradicted itself (`<feature>.routes.ts` exists on both sides): the "names must differ" sentence now applies to services only. §6 states that primary keys stay `uuid` (never `bigint identity` as the Postgres skill suggests) and that `uuidv7()` may replace `gen_random_uuid()` on Postgres 18+. Version 1.1 → 1.2; the queue-booking example pins 1.2.
 - AGENTS.md → Testing: `vi.mock('../supabase')` (specs live in `src/server/services/`).
 - AGENTS.md → Project Structure: third-party skills lose to AGENTS.md/ARCHITECTURE with the known differences listed; `ng generate` only with `--skip-tests` + rename to ARCHITECTURE §5 names (the `angular-developer` skill's "Intent over Role" naming and spec-per-file scaffolding conflict with the template).
+- Comment density (13:30): trimmed duplicate/long comments in `env.ts`, `supabase.ts`, `app.config.server.ts`, `api-origin.interceptor.ts` (68 → 54 comment lines in `src/`). The comment rule now lives ONLY in AGENTS.md (with a per-file budget and bad/good examples); the "โค้ดทุกไฟล์ต้องมี comment" bullet was removed from the SYSTEM_SPEC template and example so the skill does not duplicate a coding rule.
 - This log's 12:40 entry wrongly listed README among the files stripped of git mentions; README keeps its human-facing `git clone ถ้ามี git` option on purpose.
 
 ## Final state (what is true now)

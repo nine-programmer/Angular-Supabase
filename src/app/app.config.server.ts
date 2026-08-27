@@ -9,8 +9,6 @@ import { apiOriginInterceptor } from './core/api-origin.interceptor';
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    // Registered after appConfig's provideHttpClient (see mergeApplicationConfig below),
-    // so this server-only instance — with apiOriginInterceptor — wins during SSR.
     provideHttpClient(withInterceptors([apiOriginInterceptor])),
   ],
 };

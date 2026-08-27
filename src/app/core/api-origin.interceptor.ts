@@ -2,11 +2,9 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, REQUEST } from '@angular/core';
 
-// Relative /api/* URLs don't resolve during SSR, so prefix the origin of the
-// incoming request (falls back to PORT when there is none, e.g. during
-// prerendering). Registered only in app.config.server.ts. Reading process.env
-// here is the one allowed exception to "only env.ts reads process.env":
-// src/app/ must not import from src/server/, and this code only runs on Node.
+// Relative /api/* URLs don't resolve during SSR, so prefix the incoming request's
+// origin (PORT fallback when there is none, e.g. prerendering). Reading process.env
+// here is the one allowed exception: src/app/ must not import src/server/env.ts.
 export const apiOriginInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith('/api')) {
     return next(req);
