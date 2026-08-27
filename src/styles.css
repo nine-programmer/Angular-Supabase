@@ -7,3 +7,5 @@
    classes are compiled into the production bundle (~37 kB of dead CSS). */
 @source not '../.claude';
 @source not '../.agents';
+/* Session logs (.sessions/) are free-form markdown that may quote class names too. */
+@source not '../.sessions';

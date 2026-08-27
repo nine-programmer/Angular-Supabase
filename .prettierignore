@@ -11,6 +11,9 @@ skills-lock.json
 .agents/
 .cursor/
 
+# Session logs are free-form notes written by agents
+.sessions/
+
 # Editor settings
 .vscode/
 

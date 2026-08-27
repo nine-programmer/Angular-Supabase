@@ -25,7 +25,7 @@ docs/
 
 Round 1 is always flat. Create `docs/features/<name>/` only when a SYSTEM_SPEC already exists and the user asks for a new feature or round; then add a feature index table at the end of SYSTEM_SPEC 1.3 and bump SYSTEM_SPEC's version if the feature changes an existing table.
 
-SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks, records commits, and updates the header line.
+SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks and updates the header line; after each passed task it offers to write a `.sessions/` log (only on the user's yes), reminds the user to commit — or commits itself when Section 0 `การ commit` says so — (only when a `.git` folder exists), and asks whether to continue in this session or a new one — it never commits unprompted and never starts the next task unprompted.
 
 If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and note in Task 1 that the files move into the cloned repo.
 
@@ -91,7 +91,7 @@ Use the templates exactly — same headings, same order. Fill every section; nev
 
 Rules that make the documents buildable by any agent:
 
-- **Section 0 is not optional.** It tells the agent the reading order, the one-task-at-a-time loop against TASKS.md, and what is LOCKED.
+- **Section 0 is not optional.** It tells the agent the reading order, the one-task-at-a-time loop against TASKS.md, and what is LOCKED. Fill `การ commit` in รูปแบบคำตอบ: default `ผู้ใช้ commit เอง`; write `ให้ agent commit ให้ 1 ครั้งต่อ Task` only when the user said so — ask once in the confirmation step, and only if the user is a developer or mentioned git; never ask a non-programmer.
 - **Every business rule (1.7) names where it is enforced** — DB constraint, Postgres function, or API — and names the function or constraint. A rule enforced only in the browser is not a rule. Atomic rules (counters, sequential numbers, status transitions) go in a Postgres function or constraint.
 - **Every field in 1.5 is used** by a feature, a flow step, or a rule. A field nobody reads is scope creep.
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.

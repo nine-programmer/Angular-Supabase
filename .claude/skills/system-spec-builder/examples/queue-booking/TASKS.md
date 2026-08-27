@@ -4,7 +4,7 @@
 
 (ไฟล์ตัวอย่างนี้จงใจแสดงสภาพ "ระหว่างทำ" — ไฟล์ที่ skill ส่งมอบจริงเริ่มที่ ผ่านแล้ว 0/N)
 
-สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
+สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน (บรรทัด "ผล:" ใส่วันที่ + ชื่อไฟล์บันทึกใน `.sessions/` ถ้าบันทึก) · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
 
 กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรก 6–12 Task; รอบ feature 2–6 Task ไม่มี Task 1–2 ด้านล่าง เริ่มที่ migration `NNN_<name>.sql` + gen types + enums; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
 
@@ -13,12 +13,12 @@
 ### [x] Task 1: ตั้งโปรเจกต์ + เชื่อม Supabase
 - ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`; หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ — โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
 - ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นข้อความ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน (ยังตรวจ `.env` ไม่ได้ที่ Task นี้ — ไม่มีจุดใดเรียก Supabase จริงจนกว่าจะถึง Task 2)
-- ผล: commit 3f9a1c2 (2026-08-26)
+- ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1540-task-1-setup.md`
 
 ### [x] Task 2: ฐานข้อมูล
 - ทำ: `supabase init`; `supabase/migrations/001_init.sql` ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `supabase gen types` → `src/shared/types/database.types.ts`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เปลี่ยนเป็นตอบ `{ ok: true, count: 3 }`
 - ทดสอบ: รัน migration สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; ลบ `.env` แล้วเปิด `/api/health` ต้อง error บอกชื่อตัวแปรที่ขาด; เรียก `create_booking()` 3 ครั้งได้ 1,2,3; `set_booking_status` จาก done → waiting ต้อง error
-- ผล: commit 8b2d4e7 (2026-08-27) — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
+- ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-2-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
 
 ### [~] Task 3: F1 จัดการบริการ
 - ทำ: API GET/POST/PUT `/api/services` (`src/server/routes/services.routes.ts` + `services/services-server.service.ts`, dto ใน `src/shared/dto/services.dto.ts`); หน้า `/staff/services` ใน `src/app/features/services/` (`service-manager.page.ts`, `services-client.service.ts`): ตารางบริการ + ฟอร์มเพิ่ม/แก้ + สวิตช์เปิด/ปิดใช้; route lazy-load + `RenderMode.Server`

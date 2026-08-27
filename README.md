@@ -41,7 +41,7 @@ cp .env.example .env
 อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
 ```
 
-Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" ก่อนไป Task ถัดไป — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" จากนั้น agent จะถามว่าจะบันทึกงานลง `.sessions/` ไหม เตือนให้ commit (หรือ commit ให้ ถ้าตั้งค่าไว้ใน SYSTEM_SPEC Section 0) และถามว่าจะทำ Task ถัดไปใน session นี้หรือเปิดใหม่ (agent ไม่เริ่ม Task ถัดไปเอง) — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
 
 ### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
 
