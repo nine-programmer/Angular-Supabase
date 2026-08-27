@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.4 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.5 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -59,7 +59,7 @@ src/
 ├── server.ts                              Express host เท่านั้น: mount /api แล้วส่งที่เหลือให้ Angular
 ├── main.ts · main.server.ts · index.html
 ├── styles.css                             Tailwind: @import, @theme, @source not
-└── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ
+└── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ (`environment.ts` + `environment.development.ts` สลับด้วย fileReplacements ใน angular.json)
 
 supabase/config.toml                       มากับ template (ไม่ต้องรัน `supabase init`); `.temp/` = ข้อมูล link ของเครื่องนี้
 supabase/migrations/<timestamp>_description.sql   1 ไฟล์ต่อ 1 การเปลี่ยน schema (CLI ตั้งชื่อให้ ห้ามเปลี่ยน)
@@ -69,7 +69,12 @@ public/                                    static assets
 .env.example                               ชื่อตัวแปร (อยู่ใน template) · .env ค่าจริง (เครื่องนี้เท่านั้น ห้ามส่งต่อ)
 AGENTS.md · CLAUDE.md                      กติกาโค้ด
 .claude/skills/ · .agents/skills/          skill ของ AI agent (สองโฟลเดอร์ต้องเหมือนกันทุกไฟล์) — ถ้าขัดกับ AGENTS.md ให้ยึด AGENTS.md
+skills-lock.json                           บันทึกเวอร์ชันของ skill ที่ดึงมาจากภายนอก (skill ที่ดูแลเองไม่อยู่ในนี้)
+.cursor/ · .codex/ · .gemini/ · .vscode/ · .mcp.json   config ของเครื่องมือ AI/editor (ส่วนใหญ่คือ MCP server ของ Angular CLI) ไม่ใช่โค้ดของระบบ
+.prettierrc · .prettierignore · .editorconfig         Prettier เป็นตัวจัดรูปแบบเดียวของ repo (ไม่มี ESLint)
 ```
+
+โฟลเดอร์ระดับบนสุดมีเท่าที่อยู่ในผังนี้ ถ้าจะเพิ่มใหม่ต้องถามผู้ใช้ก่อน (AGENTS.md → Project Structure & Docs)
 
 ## 4. ทิศทาง import (ทางเดียว)
 

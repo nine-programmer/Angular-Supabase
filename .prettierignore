@@ -6,16 +6,16 @@ dist/
 package-lock.json
 skills-lock.json
 
-# Agent skill folders: docs/templates owned by the skills, not project code
+# Agent skill folders and editor/tool config: owned by the tools, not project code
 .claude/
 .agents/
 .cursor/
+.codex/
+.gemini/
+.vscode/
 
 # Session logs are free-form notes written by agents
 .sessions/
-
-# Editor settings
-.vscode/
 
 # Supabase CLI output (migrations are SQL, generated types are overwritten by db:types)
 supabase/

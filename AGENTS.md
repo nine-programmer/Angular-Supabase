@@ -53,8 +53,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Services
 
 - Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
+- Declare singleton services with the `@Service()` decorator (Angular v22+). It provides the class in the root injector on its own — there is no `providedIn` option on it, and `@Injectable({providedIn: 'root'})` is the old spelling of the same thing. Pass `{ autoProvided: false }` only for a service that a `providers` array must supply instead.
 - Use the `inject()` function instead of constructor injection
 
 ## Server-Side Rendering (SSR)
@@ -67,7 +66,7 @@ Applies when the project has `@angular/ssr` enabled (hydration via `provideClien
 - Use `httpResource()` / `resource()` for data fetching so results are transferred to the client via hydration and not re-fetched on bootstrap.
 - Relative `/api/...` URLs do not resolve during server-side rendering. Register `provideHttpClient()` in `app.config.ts` (no `withFetch()` — `FetchBackend` is already the default `HttpBackend`; `withFetch()` is deprecated), and in `app.config.server.ts` add a server-only `HttpInterceptorFn` that prefixes the origin of the incoming request (`new URL(inject(REQUEST).url).origin`, falling back to `http://localhost:${PORT}`) so the same `httpResource()` call works in the browser, in `ng serve` (port 4200), and in production (port 4000).
 - Keep `src/server.ts` free of application logic; it is only the Express host. It mounts the API router from `src/server/` and then hands every other request to the Angular engine.
-- `AngularNodeAppEngine` rejects every SSR request with a 400 unless its `Host` header is in an allowlist (SSRF prevention). The template reads this from `NG_ALLOWED_HOSTS` (comma-separated, set in `src/server/env.ts` with a `localhost` default for local dev) — before deploying a project, set `NG_ALLOWED_HOSTS` to its real domain(s) via the hosting platform's env vars, or every page will 400 in production.
+- `AngularNodeAppEngine` rejects every SSR request with a 400 unless its `Host` header is in an allowlist (SSRF prevention). The template reads this from `NG_ALLOWED_HOSTS` (comma-separated, set in `src/server/env.ts` with a `localhost` default for local dev) — before deploying a project, set `NG_ALLOWED_HOSTS` to its real domain(s) via the hosting platform's env vars, or every page will 400 in production. The engine unions that env var with `security.allowedHosts` in `angular.json`, which is left empty on purpose: baking a domain into the build would tie one bundle to one deployment.
 
 ## API Layer (Angular SSR + Express)
 
@@ -101,7 +100,7 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - Define colors, fonts, spacing, and breakpoints as CSS variables inside `@theme`, not in JavaScript.
 - Apply utility classes directly in templates. Use `@apply` sparingly and only inside component stylesheets for repeated patterns that cannot be expressed as a component.
 - Use `class` bindings (`[class.active]="isActive()"`) or `computed()` signals to toggle utility classes. Do NOT concatenate class strings in templates.
-- Keep `@source not` exclusions for agent skill directories (`.claude`, `.agents`) so their docs are not scanned into the production bundle.
+- Keep the `@source not` exclusions in `src/styles.css` (agent skill folders, editor/tool config, `.sessions/`, `docs/`) so markdown that quotes class names is not scanned into the production bundle. Angular templates only live under `src/`, so add a new exclusion whenever a documentation or tool folder is added.
 - Use `dark:` variants with `prefers-color-scheme`, and container queries (`@container`, `@md:`) for component-level responsiveness.
 - All color pairings MUST meet WCAG AA contrast (see Accessibility Requirements).
 
@@ -111,6 +110,7 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - Use `TestBed` for component and service tests. Because the app is zoneless, use `await fixture.whenStable()` instead of `fixture.detectChanges()` to flush signal updates before asserting on the DOM.
 - Browser-side services: mock HTTP with `provideHttpClient()` + `provideHttpClientTesting()` and assert on the `/api/*` calls. Server-side services under `src/server/`: mock the Supabase client module with `vi.mock('../supabase')` (spec files live in `src/server/services/`). Never hit a real Supabase project from unit tests.
 - Co-locate spec files with the code under test (`foo.ts` → `foo.spec.ts`).
+- `ng test` errors out when a project contains no spec at all, so the template keeps `src/app/app.spec.ts` as a deliberate exception to the rule below: it only asserts that the root component bootstraps. Do not extend it — replace it once the project has real specs.
 - Do NOT write a spec for every file. Write unit tests ONLY for code that meets at least one of these: (1) it performs calculations or non-trivial data transformation (totals, date/queue arithmetic, sorting/grouping rules, status-transition logic); (2) it is expected to change frequently; (3) it is complex enough that a test is needed to verify or safely modify it. Plain CRUD routes, pass-through services that only forward to Supabase/`.rpc()`, simple display components, DTOs, and enums do NOT need a spec.
 - When a task does need tests, the TASKS.md test line must say which file/function is tested and why (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). If no file in the task meets the criteria, do not add a spec line.
 
@@ -122,7 +122,7 @@ This repository is a template: each customer mini app is cloned from it into its
 - A customer project ships `docs/SYSTEM_SPEC.md` (what to build; tables, business rules, and API paths are LOCKED after review) and `docs/TASKS.md` (living progress file). Later rounds add `docs/features/<name>/SPEC.md` + `TASKS.md`.
 - When these docs exist: read `AGENTS.md`, `docs/ARCHITECTURE.md`, and the relevant SPEC before writing code; work on exactly ONE task from the TASKS file at a time; when a task passes, mark it `[x]` in TASKS.md with the date (plus the session-log filename if one was written), update its header line, then follow the end-of-task steps in Working Rules and STOP — never start the next task on your own. Never change code away from a LOCKED spec item without updating the spec (and bumping its version) first.
 - Do NOT introduce a top-level folder or naming convention that is not listed in `docs/ARCHITECTURE.md` section 3 without asking the user first.
-- The third-party skills in `.claude/skills/` / `.agents/skills/` (`angular-developer`, `angular-new-app`, `tailwind-css-patterns`, `supabase-postgres-best-practices`) are reference material only; wherever they differ from this file or `docs/ARCHITECTURE.md`, this file wins. Known differences: their file naming and one-spec-per-file scaffolding (next bullet), `bigint identity` primary keys and RLS policies (see Supabase), and local-database workflows.
+- The skills in `.claude/skills/` / `.agents/skills/` are reference material only; wherever they differ from this file or `docs/ARCHITECTURE.md`, this file wins. `angular-developer`, `angular-new-app`, and `supabase-postgres-best-practices` come from upstream and are tracked in `skills-lock.json`; `tailwind-css-patterns` (an in-house fork adapted for Angular) and `system-spec-builder` are maintained here, so they are deliberately absent from that lock file. Known differences: their file naming and one-spec-per-file scaffolding (next bullet), `bigint identity` primary keys and RLS policies (see Supabase), and local-database workflows.
 - Do NOT scaffold feature files with plain `ng generate`: it emits Angular's default file names and a `.spec.ts` for every file. If you use it, pass `--skip-tests` and rename the output to the names in `docs/ARCHITECTURE.md` section 5.
 
 ## Working Rules
