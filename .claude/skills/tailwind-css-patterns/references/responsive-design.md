@@ -180,25 +180,29 @@ service, and an anti-flash script.
 ```
 
 **2. A signal-based, SSR-safe service.** This app prerenders, so `document`, `window`, and
-`localStorage` do not exist during the build — every DOM access must be guarded.
+`localStorage` do not exist during the build. Apply the theme from `afterRenderEffect()`, which
+never runs on the server; keep the platform check only for the value that must be read at
+construction, before the first render.
 
 ```ts
-import { DOCUMENT, Injectable, PLATFORM_ID, effect, inject, signal } from '@angular/core';
+import { DOCUMENT, PLATFORM_ID, Service, afterRenderEffect, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
+  // The stored preference has to seed the signal at construction time, so this is the one place
+  // a platform check is right — afterNextRender() would land too late.
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly preference = signal<ThemePreference>(this.readStoredPreference());
 
   constructor() {
-    effect(() => {
+    // Browser-only by construction: no isBrowser guard needed inside.
+    afterRenderEffect(() => {
       const preference = this.preference();
-      if (!this.isBrowser) return;
 
       const prefersDark = this.document.defaultView?.matchMedia(
         '(prefers-color-scheme: dark)',

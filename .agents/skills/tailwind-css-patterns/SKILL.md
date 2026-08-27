@@ -260,8 +260,8 @@ scan that and nothing else — an allowlist, rather than chasing each new doc fo
 `@custom-variant` — see `references/responsive-design.md`.
 
 **`document is not defined` during build or `ng serve`** — this app uses SSR with prerendering. Any
-DOM access must be guarded with `isPlatformBrowser(inject(PLATFORM_ID))` or run inside
-`afterNextRender()`.
+DOM access belongs inside `afterNextRender()` / `afterRenderEffect()`; reach for
+`isPlatformBrowser(inject(PLATFORM_ID))` only when the branch has to happen at injection time.
 
 **`@apply` fails inside a component's `styles:`** — either use `var(--color-*)` directly
 (preferred) or add `@reference "../../styles.css";` at the top of that style block.
