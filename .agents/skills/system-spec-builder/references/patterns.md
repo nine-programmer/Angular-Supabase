@@ -16,7 +16,7 @@
 **ตาราง**
 - `items` — name, code (รหัส, unique), category, quantity, available_qty, is_active, note
 - `borrowers` — name, phone, department (ถ้าองค์กร)
-- `loans` — item_id → items, borrower_id → borrowers, qty, borrowed_at, due_at, returned_at (null = ยังไม่คืน), note
+- `loans` — item_id → items, borrower_id → borrowers, qty, due_at, returned_at (null = ยังไม่คืน), note (เวลายืมใช้ `created_at`)
 
 **ฟีเจอร์ MVP**
 - F1 จัดการรายการของ (เพิ่ม/แก้/ปิดใช้/ค้นหา)
@@ -103,7 +103,7 @@
 
 **ตาราง**
 - `products` — name, sku (unique), unit, min_qty, current_qty, is_active
-- `movements` — product_id → products, type (`in`/`out`/`adjust`), qty, note, moved_at
+- `movements` — product_id → products, type (`in`/`out`/`adjust`), qty, note (เวลาเคลื่อนไหวใช้ `created_at`)
 
 **ฟีเจอร์ MVP**
 - F1 จัดการสินค้า (เพิ่ม/แก้/ปิดใช้)

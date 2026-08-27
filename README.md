@@ -6,8 +6,9 @@ Template ตั้งต้นสำหรับสร้าง mini app ต่�
 
 ### 1. Clone template ไปเป็นโปรเจกต์ของลูกค้า
 
+คัดลอก template ไปเป็นโฟลเดอร์ใหม่ (ดาวน์โหลด ZIP แล้วแตกไฟล์ หรือ `git clone` ถ้ามี git) แล้วติดตั้ง:
+
 ```bash
-git clone <this-repo> <ชื่อโปรเจกต์ลูกค้า>
 cd <ชื่อโปรเจกต์ลูกค้า>
 npm install
 ```
@@ -31,7 +32,12 @@ npm install
 cp .env.example .env
 ```
 
-ใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ให้ครบ (ห้าม commit ไฟล์ `.env`)
+ใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ให้ครบ (ไฟล์ `.env` อยู่เครื่องนี้เท่านั้น ห้ามส่งต่อหรืออัปโหลด) แล้วเชื่อม Supabase CLI กับโปรเจกต์ครั้งเดียว — ไม่ต้องมี Docker:
+
+```bash
+npx supabase login                       # เปิด browser ให้ล็อกอิน
+npm run db:link -- --project-ref <ref>   # <ref> คือรหัสใน URL: supabase.com/dashboard/project/<ref> (ถ้าถามรหัสผ่านฐานข้อมูล ใส่รหัสที่ตั้งตอนสร้างโปรเจกต์)
+```
 
 ### 4. สั่งให้ agent เริ่มสร้างทีละ Task
 
@@ -41,7 +47,7 @@ cp .env.example .env
 อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
 ```
 
-Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" จากนั้น agent จะถามว่าจะบันทึกงานลง `.sessions/` ไหม เตือนให้ commit (หรือ commit ให้ ถ้าตั้งค่าไว้ใน SYSTEM_SPEC Section 0) และถามว่าจะทำ Task ถัดไปใน session นี้หรือเปิดใหม่ (agent ไม่เริ่ม Task ถัดไปเอง) — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" จากนั้น agent จะถามว่าจะบันทึกงานลง `.sessions/` ไหม และถามว่าจะทำ Task ถัดไปใน session นี้หรือเปิดใหม่ (agent ไม่เริ่ม Task ถัดไปเอง) — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
 
 ### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
 
@@ -56,8 +62,10 @@ npm test                               # รัน unit test (Vitest)
 npm run build                          # build production
 npm run serve:ssr:<project-name>       # รัน build จริงที่ http://localhost:4000
 npm run format                         # จัดรูปแบบโค้ดด้วย Prettier
+npm run db:link -- --project-ref <ref> # เชื่อม CLI กับโปรเจกต์ Supabase (ครั้งเดียว)
 npm run db:migration -- <description>  # สร้างไฟล์ migration ใหม่ใน supabase/migrations/
-npm run db:types                       # สร้าง src/shared/types/database.types.ts จาก schema (ต้องมี supabase start รันอยู่)
+npm run db:push                        # apply migration ขึ้นโปรเจกต์ Supabase
+npm run db:types                       # สร้าง src/shared/types/database.types.ts จากโปรเจกต์ที่ link ไว้
 ```
 
 Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่ต้องติดตั้ง global — เรียกผ่าน `npx supabase <cmd>` หรือ script ด้านบนได้เลย

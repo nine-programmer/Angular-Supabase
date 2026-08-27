@@ -2,20 +2,20 @@
 
 > จาก `docs/SYSTEM_SPEC.md` v1.0 [รอบ feature: `docs/features/<name>/SPEC.md` v1.0] | ผ่านแล้ว 0/[N] | Task ปัจจุบัน: 1 | อัปเดต: [YYYY-MM-DD]
 
-สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน (บรรทัด "ผล:" ใส่วันที่ + ชื่อไฟล์บันทึกใน `.sessions/` ถ้าบันทึก) · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
+สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน (บรรทัด "ผล:" ตาม Section 0 ข้อ 5) · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
 
-กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรก 6–12 Task; รอบ feature 2–6 Task ไม่มี Task 1–2 ด้านล่าง เริ่มที่ migration `NNN_<name>.sql` + gen types + enums; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
+กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรก 6–12 Task; รอบ feature 2–6 Task: ข้าม 2 Task ตัวอย่างด้านล่าง — Task 1 ของรอบ feature คือ migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
 
 ---
 
 ### [ ] Task 1: ตั้งโปรเจกต์ + เชื่อม Supabase
-- ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `[project-name]` (แก้ `name` ใน package.json และ angular.json, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:[project-name]` และ path `dist/[project-name]/...`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ของโปรเจกต์นี้; หน้า `/` แสดงชื่อระบบเฉยๆ — โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`), interceptor (`src/app/core/api-origin.interceptor.ts`) และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
+- ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `[project-name]` (แก้ `name` ใน package.json และ angular.json, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:[project-name]` และ path `dist/[project-name]/...`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ของโปรเจกต์นี้; `npx supabase login` แล้ว `npm run db:link -- --project-ref <ref>` (<ref> จาก URL ของ dashboard); หน้า `/` แสดงชื่อระบบเฉยๆ — โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`), interceptor (`src/app/core/api-origin.interceptor.ts`) และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
 - ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นชื่อระบบ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน (ยังตรวจ `.env` ไม่ได้ที่ Task นี้ — ไม่มีจุดใดเรียก Supabase จริงจนกว่าจะถึง Task 2)
 - ผล: —
 
 ### [ ] Task 2: ฐานข้อมูล
-- ทำ: `supabase init` (ถ้ายังไม่มีโฟลเดอร์ `supabase/`) → `supabase/migrations/001_init.sql` สร้างตารางตาม SPEC 1.5 + constraint/function ตาม 1.7 + เปิด RLS ทุกตาราง; ข้อมูลตัวอย่างตาม SPEC 1.9 (ถ้ามี); `supabase gen types typescript` → `src/shared/types/database.types.ts`; `src/shared/enums/[name].enums.ts` ค่าสถานะตรงกับ `CHECK`; `/api/health` เปลี่ยนเป็นตอบ `{ ok: true, count: N }`
-- ทดสอบ: รัน migration สำเร็จ; เปิด `/api/health` เห็น count ตรงกับข้อมูลตัวอย่าง; ลบ `.env` แล้วเปิด `/api/health` ต้อง error บอกชื่อตัวแปรที่ขาด (จุดแรกที่โค้ดเรียก Supabase จริง); [เรียก function ตาม 1.7 ด้วยค่าที่ต้องถูกปฏิเสธ → ต้อง error]
+- ทำ: `npm run db:migration -- init` → เขียนไฟล์ที่ได้ใน `supabase/migrations/` สร้างตารางตาม SPEC 1.5 + constraint/function ตาม 1.7 + เปิด RLS ทุกตาราง; ข้อมูลตัวอย่างตาม SPEC 1.9 (ถ้ามี); `npm run db:push` → `npm run db:types`; `src/shared/enums/[name].enums.ts` ค่าสถานะตรงกับ `CHECK`; `/api/health` เปลี่ยนเป็นตอบ `{ ok: true, count: N }`
+- ทดสอบ: `npm run db:push` สำเร็จ; เปิด `/api/health` เห็น count ตรงกับข้อมูลตัวอย่าง; ลบ `.env` แล้วเปิด `/api/health` ต้อง error บอกชื่อตัวแปรที่ขาด (จุดแรกที่โค้ดเรียก Supabase จริง); [เรียก function ตาม 1.7 ด้วยค่าที่ต้องถูกปฏิเสธ → ต้อง error]
 - ผล: —
 
 ### [ ] Task 3: F1 [ชื่อฟีเจอร์]
@@ -26,6 +26,6 @@
 [ต่อไปจนครบทุกฟีเจอร์ใน SPEC 1.3]
 
 ### [ ] Task [N]: ปิดงาน
-- ทำ: ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; error ทุกจุดแสดงข้อความไทย; เขียน README.md (วิธีตั้ง Supabase, วิธีรัน, วิธี deploy, ตัวแปร .env)
+- ทำ: ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; error ทุกจุดแสดงข้อความไทย; เขียน README.md (วิธีตั้ง Supabase, วิธีรัน, วิธี deploy, ตัวแปร .env — ย้ำว่า `NG_ALLOWED_HOSTS` ต้องเป็นโดเมนจริงก่อน deploy ไม่งั้นทุกหน้าได้ 400)
 - ทดสอบ: คนอื่นอ่าน README แล้วรันได้โดยไม่ต้องถาม
 - ผล: —

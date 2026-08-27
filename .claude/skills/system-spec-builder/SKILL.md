@@ -25,7 +25,7 @@ docs/
 
 Round 1 is always flat. Create `docs/features/<name>/` only when a SYSTEM_SPEC already exists and the user asks for a new feature or round; then add a feature index table at the end of SYSTEM_SPEC 1.3 and bump SYSTEM_SPEC's version if the feature changes an existing table.
 
-SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks and updates the header line; after each passed task it offers to write a `.sessions/` log (only on the user's yes), reminds the user to commit — or commits itself when Section 0 `การ commit` says so — (only when a `.git` folder exists), and asks whether to continue in this session or a new one — it never commits unprompted and never starts the next task unprompted.
+SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks and updates the header line; after each passed task it offers to write a `.sessions/` log (only on the user's yes) and asks whether to continue in this session or a new one — it never starts the next task unprompted.
 
 If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and note in Task 1 that the files move into the cloned repo.
 
@@ -79,7 +79,7 @@ Read `references/interview-guide.md` for the question bank and techniques. The r
 
 **Budget.** A small system typically needs 6–12 questions over 3–5 turns. The number is a guide, not a cap: stop as soon as the gate is satisfied, and keep going while a ✗ item is open. If the user explicitly says "พอแล้ว เขียนเลย" while a ✗ item is open: for M1/M4/M7 explain in one line why you cannot write yet and ask that single question; for any other ✗ item write the spec with it as an explicit assumption in 1.9 and tell them which one.
 
-**Feature round.** Ask only: what the feature adds (M3), which existing tables it touches and what changes (M4), new statuses or transitions (M6), new rules and their interaction with existing ones (M8), and whether existing data needs migrating. Everything else inherits from SYSTEM_SPEC. Feature-round TASKS have 2–6 tasks, no clone task: Task 1 = migration `NNN_<name>.sql` + `supabase gen types` + enums; the TASKS header cites `docs/features/<name>/SPEC.md`.
+**Feature round.** Ask only: what the feature adds (M3), which existing tables it touches and what changes (M4), new statuses or transitions (M6), new rules and their interaction with existing ones (M8), and whether existing data needs migrating. Everything else inherits from SYSTEM_SPEC. Feature-round TASKS have 2–6 tasks, no clone task: Task 1 = migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums; the TASKS header cites `docs/features/<name>/SPEC.md`.
 
 ### 3. Confirm before writing
 
@@ -91,7 +91,7 @@ Use the templates exactly — same headings, same order. Fill every section; nev
 
 Rules that make the documents buildable by any agent:
 
-- **Section 0 is not optional.** It tells the agent the reading order, the one-task-at-a-time loop against TASKS.md, and what is LOCKED. Fill `การ commit` in รูปแบบคำตอบ: default `ผู้ใช้ commit เอง`; write `ให้ agent commit ให้ 1 ครั้งต่อ Task` only when the user said so — ask once in the confirmation step, and only if the user is a developer or mentioned git; never ask a non-programmer.
+- **Section 0 is not optional.** It tells the agent the reading order, the one-task-at-a-time loop against TASKS.md, and what is LOCKED.
 - **Every business rule (1.7) names where it is enforced** — DB constraint, Postgres function, or API — and names the function or constraint. A rule enforced only in the browser is not a rule. Atomic rules (counters, sequential numbers, status transitions) go in a Postgres function or constraint.
 - **Every field in 1.5 is used** by a feature, a flow step, or a rule. A field nobody reads is scope creep.
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.
@@ -125,7 +125,7 @@ The writer is bad at spotting its own contradictions, so both files are reviewed
 
 Give the reviewer this brief (Thai):
 
-> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม รูปแบบตอบกลับชัดพอให้เขียน dto ได้ไหม (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะข้อ 10 ขอบเขตของ template (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
+> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะข้อ 10 ขอบเขตของ template (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
 
 Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0".
 

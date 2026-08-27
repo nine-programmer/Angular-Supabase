@@ -11,7 +11,7 @@ Section 2 ของ SYSTEM_SPEC จึงมีแค่ *สิ่งที่�
 | 2.2 API ที่ต้องมี [LOCKED] | ทุก endpoint 1 แถว + คอลัมน์ "กติกาที่เกี่ยว" อ้าง R ใน 1.7 | ต้องมี `GET /api/health`; ทุก path ถูกอ้างในอย่างน้อย 1 Task |
 | 2.3 ฟีเจอร์ → ไฟล์ | map F แต่ละตัว → feature folder, routes/service, dto/enums | ใช้ชื่อไฟล์ตาม ARCHITECTURE.md ข้อ 5; 1 feature ≈ 1 resource |
 | 2.4 การตัดสินใจทางเทคนิค | เฉพาะที่เลือกให้ระบบนี้ เช่น polling vs realtime, ปัดเวลา, timezone | ทุกข้อที่เป็นการเดา ให้ซ้ำใน 1.9 ด้วย |
-| 2.5 .env เพิ่มเติม | ตัวแปรนอกจาก `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `PORT` | ปกติ "ไม่มี" |
+| 2.5 .env เพิ่มเติม | ตัวแปรนอกจาก `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `PORT`, `NG_ALLOWED_HOSTS` (มาตรฐานใน ARCHITECTURE.md ข้อ 8) | ปกติ "ไม่มี" — แต่ 2.1 ต้องย้ำว่าตอน deploy ตั้ง `NG_ALLOWED_HOSTS` เป็นโดเมนจริง |
 
 ## สิ่งที่ต้องรู้ตอนออกแบบ (สรุปจาก ARCHITECTURE.md เพื่อไม่ต้องเปิดบ่อย)
 
@@ -19,6 +19,8 @@ Section 2 ของ SYSTEM_SPEC จึงมีแค่ *สิ่งที่�
 - ทุกตารางเปิด RLS ไม่มี policy (ปิดตาย) สิทธิ์ตัดสินที่ API
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรัน, เปลี่ยนสถานะ) → Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint; เขียนชื่อ function ไว้ในคอลัมน์ "บังคับที่" ของ 1.7 เลย
 - ค่าสถานะ = `CHECK` ใน DB + `shared/enums/<feature>.enums.ts` ค่าเดียวกัน
+- ทุก request body ตรวจด้วย zod schema ใน `shared/dto/<feature>.dto.ts` (type ได้จาก `z.infer`) → 1.5/1.7 ต้องบอกพอที่จะเขียน schema ได้: ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า รูปแบบ
+- ฐานข้อมูลอยู่บน Supabase cloud เท่านั้น ไม่มี local/Docker: migration ใช้ `npm run db:migration` → `npm run db:push`, types ใช้ `npm run db:types` (ชื่อไฟล์ migration CLI ตั้งให้เป็น `<timestamp>_name.sql`)
 - 1 feature = 1 โฟลเดอร์ใน `src/app/features/` + 1 คู่ `routes/services` ใน `src/server/` + 1 `dto`
 - ทุกตารางมี `id uuid` + `created_at timestamptz` อัตโนมัติ ไม่ต้องเขียนใน spec ซ้ำทุกครั้ง แต่ template 1.5 แสดงไว้ให้เห็น
 - ระบบเล็ก: `src/server/routes/` + `services/` แบบ flat; ถ้า spec มี > 5 resource ให้ระบุใน 2.4 ว่าใช้ `src/server/features/<feature>/` (ARCHITECTURE.md ข้อ 9)

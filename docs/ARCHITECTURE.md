@@ -52,7 +52,7 @@ src/
 │   └── services/<feature>-server.service.ts   business logic; ที่เดียวที่เรียก Supabase
 │
 ├── shared/                                ใช้ร่วมทั้ง app/ และ server/ — TypeScript ล้วน ไม่มี Node/browser global
-│   ├── types/database.types.ts            สร้างจาก `supabase gen types` ห้ามเขียนมือ
+│   ├── types/database.types.ts            สร้างจาก `npm run db:types` ห้ามเขียนมือ
 │   ├── dto/<feature>.dto.ts               zod schema ของ request / response ของ /api/* + type จาก z.infer
 │   └── enums/<feature>.enums.ts           ค่าสถานะ / ค่าคงที่ที่ DB, API, UI ต้องตรงกัน
 │
@@ -61,11 +61,11 @@ src/
 ├── styles.css                             Tailwind: @import, @theme, @source not
 └── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ
 
-supabase/migrations/NNN_description.sql    1 ไฟล์ต่อ 1 การเปลี่ยน schema
+supabase/migrations/<timestamp>_description.sql   1 ไฟล์ต่อ 1 การเปลี่ยน schema (CLI ตั้งชื่อให้ ห้ามเปลี่ยน)
 docs/                                      เอกสารของโปรเจกต์ (ดูข้อ 7)
-.sessions/YYYY-MM-DD-HHmm-<task>.md        บันทึกงานเมื่อ Task ผ่าน (agent ถามผู้ใช้ก่อนทุกครั้ง) — ความจำร่วมให้ AI เจ้าอื่นทำต่อได้ (ดูข้อ 7)
+.sessions/YYYY-MM-DD-HHmm-<task-slug>.md   บันทึกงานเมื่อ Task ผ่าน (agent ถามผู้ใช้ก่อนทุกครั้ง) — ความจำร่วมให้ AI เจ้าอื่นทำต่อได้ (ดูข้อ 7)
 public/                                    static assets
-.env.example                               ชื่อตัวแปร (commit) · .env ค่าจริง (ห้าม commit)
+.env.example                               ชื่อตัวแปร (อยู่ใน template) · .env ค่าจริง (เครื่องนี้เท่านั้น ห้ามส่งต่อ)
 AGENTS.md · CLAUDE.md                      กติกาโค้ด
 ```
 
@@ -82,16 +82,16 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 
 ## 5. การตั้งชื่อไฟล์
 
-| ชนิด                 | รูปแบบ                           | ตัวอย่าง                          |
-| -------------------- | -------------------------------- | --------------------------------- |
-| หน้า (routed)        | `<name>.page.ts`                 | `booking-form.page.ts`            |
-| service ฝั่ง browser | `<feature>-client.service.ts`    | `bookings-client.service.ts`      |
-| service ฝั่ง server  | `<feature>-server.service.ts`    | `bookings-server.service.ts`      |
-| router ฝั่ง server   | `<feature>.routes.ts`            | `bookings.routes.ts`              |
-| DTO                  | `<feature>.dto.ts`               | `bookings.dto.ts`                 |
-| enum                 | `<feature>.enums.ts`             | `bookings.enums.ts`               |
-| spec                 | ชื่อเดิม + `.spec.ts` วางข้างกัน | `bookings-server.service.spec.ts` |
-| migration            | `NNN_description.sql`            | `001_init.sql`                    |
+| ชนิด                 | รูปแบบ                                      | ตัวอย่าง                          |
+| -------------------- | ------------------------------------------- | --------------------------------- |
+| หน้า (routed)        | `<name>.page.ts`                            | `booking-form.page.ts`            |
+| service ฝั่ง browser | `<feature>-client.service.ts`               | `bookings-client.service.ts`      |
+| service ฝั่ง server  | `<feature>-server.service.ts`               | `bookings-server.service.ts`      |
+| router ฝั่ง server   | `<feature>.routes.ts`                       | `bookings.routes.ts`              |
+| DTO                  | `<feature>.dto.ts`                          | `bookings.dto.ts`                 |
+| enum                 | `<feature>.enums.ts`                        | `bookings.enums.ts`               |
+| spec                 | ชื่อเดิม + `.spec.ts` วางข้างกัน            | `bookings-server.service.spec.ts` |
+| migration            | `<timestamp>_description.sql` (CLI ตั้งให้) | `20260827120000_init.sql`         |
 
 ชื่อไฟล์ browser กับ server ของ feature เดียวกันต้องไม่ซ้ำกัน (จึงมี `-client` / `-server`)
 
@@ -101,9 +101,10 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 - ทุกตาราง **เปิด RLS โดยไม่มี policy** ให้ `anon` / `authenticated` (ปิดตาย) — เข้าถึงได้ทาง `service_role` ของ server เท่านั้น
 - ค่าสถานะใน DB บังคับด้วย `CHECK (status IN (...))` และค่าเดียวกันประกาศใน `shared/enums/` เป็น `as const` object + union type (ไม่ใช้ TS `enum`)
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรันต่อเนื่อง, เปลี่ยนสถานะ) อยู่ใน Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint — ไม่ทำแบบอ่านแล้วค่อยเขียนใน API
-- เปลี่ยน schema = เพิ่มไฟล์ migration เท่านั้น (`npm run db:migration -- <description>`) แล้วรัน `npm run db:types` ใหม่
+- ฐานข้อมูลอยู่บน Supabase cloud เท่านั้น (ไม่ใช้ local/Docker) — เชื่อม CLI ครั้งเดียวด้วย `npx supabase login` + `npm run db:link -- --project-ref <ref>`
+- เปลี่ยน schema = เพิ่มไฟล์ migration เท่านั้น (`npm run db:migration -- <description>`) → `npm run db:push` ขึ้น cloud → `npm run db:types` ใหม่
 
-## 7. เอกสารของโปรเจกต์ (`docs/`)
+## 7. เอกสารและบันทึกของโปรเจกต์
 
 ```
 AGENTS.md                      กติกาโค้ด (root — เครื่องมือ AI โหลดอัตโนมัติ)
@@ -116,12 +117,12 @@ docs/
     └── TASKS.md               ความคืบหน้าของ feature นั้น
 ```
 
-| ไฟล์                       | ใครเขียน                    | เปลี่ยนเมื่อ                                                                                                                                                                                                                                                                                                                          |
-| -------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AGENTS.md, ARCHITECTURE.md | template                    | แทบไม่เปลี่ยน                                                                                                                                                                                                                                                                                                                         |
-| SYSTEM_SPEC.md, SPEC.md    | skill `system-spec-builder` | เฉพาะเมื่อ bump เวอร์ชัน (แก้เอกสารก่อนแก้โค้ดเสมอ)                                                                                                                                                                                                                                                                                   |
-| TASKS.md                   | agent ที่ทำงาน              | ทุกครั้งที่ Task ผ่าน: ติ๊ก `[x]` + วันที่ (+ ชื่อไฟล์ `.sessions/` ถ้าบันทึก) + header                                                                                                                                                                                                                                               |
-| `.sessions/*.md`           | agent ที่ทำงาน              | เมื่อ Task ผ่านและผู้ใช้ตอบว่าให้บันทึก: ทำอะไร ไฟล์ไหน ตัดสินใจอะไรเพราะอะไร ทดสอบอย่างไร Task ถัดไป — agent **ไม่ commit เองโดยไม่ถูกสั่ง** — ค่าเริ่มต้นคือแจ้งผู้ใช้ให้ commit (เฉพาะโปรเจกต์ที่มี `.git`) เว้นแต่ SYSTEM_SPEC Section 0 หรือผู้ใช้ในแชทสั่งให้ agent commit ให้ และ**ไม่เริ่ม Task ถัดไปเอง** จนกว่าผู้ใช้จะสั่ง |
+| ไฟล์                       | ใครเขียน                    | เปลี่ยนเมื่อ                                                                                                                                                |
+| -------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AGENTS.md, ARCHITECTURE.md | template                    | แทบไม่เปลี่ยน                                                                                                                                               |
+| SYSTEM_SPEC.md, SPEC.md    | skill `system-spec-builder` | เฉพาะเมื่อ bump เวอร์ชัน (แก้เอกสารก่อนแก้โค้ดเสมอ)                                                                                                         |
+| TASKS.md                   | agent ที่ทำงาน              | ทุกครั้งที่ Task ผ่าน: ติ๊ก `[x]` + วันที่ (+ ชื่อไฟล์ `.sessions/` ถ้าบันทึก) + header                                                                     |
+| `.sessions/*.md`           | agent ที่ทำงาน              | เมื่อ Task ผ่านและผู้ใช้ตอบว่าให้บันทึก: ทำอะไร ไฟล์ไหน ตัดสินใจอะไรเพราะอะไร ทดสอบอย่างไร Task ถัดไป — agent **ไม่เริ่ม Task ถัดไปเอง** จนกว่าผู้ใช้จะสั่ง |
 
 รอบแรกใช้แบบ flat (`docs/SYSTEM_SPEC.md` + `docs/TASKS.md`) ไม่สร้าง `features/` เผื่อ เมื่อมีรอบถัดไปค่อยสร้าง และเพิ่มตาราง index ใน SYSTEM_SPEC ชี้ไปแต่ละ feature; ถ้า feature ใหม่แก้ตารางเดิม ต้อง bump เวอร์ชัน SYSTEM_SPEC ด้วย
 
@@ -129,7 +130,7 @@ docs/
 
 ```
 SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=      # server เท่านั้น ห้าม commit
+SUPABASE_SERVICE_ROLE_KEY=      # server เท่านั้น ห้ามส่งต่อ
 PORT=4000
 NG_ALLOWED_HOSTS=localhost      # โดเมนที่ SSR ยอมเรนเดอร์ให้ (คั่นด้วย , ) ตั้งเป็นโดเมนจริงก่อน deploy มิฉะนั้นทุกหน้าจะได้ 400
 ```
@@ -141,8 +142,11 @@ npm test                               # Vitest
 npm run build
 npm run serve:ssr:<project-name>       # รัน build จริง http://localhost:4000 (ชื่อตาม angular.json)
 npm run format                         # Prettier (format:check สำหรับ CI)
+npx supabase login                     # ครั้งเดียวต่อเครื่อง (เปิด browser)
+npm run db:link -- --project-ref <ref> # ครั้งเดียวต่อโปรเจกต์ (<ref> จาก URL dashboard: supabase.com/dashboard/project/<ref>)
 npm run db:migration -- <description>  # สร้างไฟล์ migration ใน supabase/migrations/
-npm run db:types                       # gen src/shared/types/database.types.ts (Supabase CLI อยู่ใน devDependencies)
+npm run db:push                        # apply migration ที่ยังไม่ได้รันขึ้นโปรเจกต์ cloud
+npm run db:types                       # gen src/shared/types/database.types.ts จากโปรเจกต์ cloud (Supabase CLI อยู่ใน devDependencies)
 ```
 
 ## 9. เมื่อระบบใหญ่ขึ้น

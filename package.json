@@ -10,8 +10,10 @@
     "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "db:link": "supabase link",
     "db:migration": "supabase migration new",
-    "db:types": "supabase gen types typescript --local > src/shared/types/database.types.ts"
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > src/shared/types/database.types.ts"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

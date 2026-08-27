@@ -1,7 +1,7 @@
 # [ชื่อฟีเจอร์] — feature ของ [ชื่อระบบ]
 
 > ไฟล์: `docs/features/[name]/SPEC.md` | ทำงานตาม `docs/features/[name]/TASKS.md`
-> ต่อยอดจาก `docs/SYSTEM_SPEC.md` v[X.Y] — Section 0 (คำสั่งสำหรับ AI) ใช้ของ SYSTEM_SPEC ทุกข้อ **โดยแทน `docs/TASKS.md` ด้วย `docs/features/[name]/TASKS.md`** และสิ่งที่ LOCKED ของไฟล์นี้คือ 1.5, 1.7, 2.1
+> ต่อยอดจาก `docs/SYSTEM_SPEC.md` v[X.Y] — Section 0 (คำสั่งสำหรับ AI) ใช้ของ SYSTEM_SPEC ทุกข้อ **โดยแทน `docs/TASKS.md` ด้วย `docs/features/[name]/TASKS.md`** และแทน prompt ปิดท้ายด้วย `อ่าน docs/features/[name]/SPEC.md แล้วเริ่มตาม Section 0 ของ docs/SYSTEM_SPEC.md` (เลข section ที่ LOCKED — 1.5, 1.7, 2.2 — ตรงกับ SYSTEM_SPEC)
 > เวอร์ชัน: 1.0 | วันที่: [YYYY-MM-DD] | สถานะ: [ร่าง (รอ review) / พร้อมสร้าง]
 
 ## 1. ฟีเจอร์นี้ทำอะไร
@@ -41,16 +41,19 @@
 
 ## 2. Architecture — เฉพาะส่วนของฟีเจอร์นี้
 
-### 2.1 API ที่เพิ่ม/เปลี่ยน [LOCKED]
+### 2.1 Stack และ deploy
+- ตาม SYSTEM_SPEC 2.1 [หรือระบุสิ่งที่ต่างเฉพาะฟีเจอร์นี้]
+
+### 2.2 API ที่เพิ่ม/เปลี่ยน [LOCKED]
 | Method | Path | ทำอะไร | กติกาที่เกี่ยว |
 |---|---|---|---|
 | [ ] | /api/[ ] | [ ] | [ ] |
 
-### 2.2 ไฟล์ที่จะเกิด
+### 2.3 ไฟล์ที่จะเกิด
 - `src/app/features/[name]/` หน้า: [ ]
 - `src/server/routes/[name].routes.ts`, `src/server/services/[name]-server.service.ts`
 - `src/shared/dto/[name].dto.ts`, `src/shared/enums/[name].enums.ts` (ถ้ามีสถานะ)
-- `supabase/migrations/[NNN]_[name].sql`
+- `supabase/migrations/<timestamp>_[name].sql` (จาก `npm run db:migration -- [name]`)
 
-### 2.3 การตัดสินใจทางเทคนิค
+### 2.4 การตัดสินใจทางเทคนิค
 - [ ]

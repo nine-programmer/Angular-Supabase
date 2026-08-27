@@ -43,3 +43,13 @@ Rules refined: the `.sessions/` log is now opt-in (agent asks first); after a ta
 ## Update 12:10
 
 Commit rule made flexible: default is still "user commits, agent reminds", but SYSTEM_SPEC Section 0 now has `การ commit: [ผู้ใช้ commit เอง / ให้ agent commit ให้ 1 ครั้งต่อ Task]` (skill asks developers once at confirmation, never non-programmers) and a chat instruction overrides at any time. When the agent commits, it records the hash on the ผล: line.
+
+## Update 12:40 — consistency audit applied
+
+- ALL git/commit instructions removed from agent-facing docs (AGENTS.md, ARCHITECTURE §7, README, SYSTEM_SPEC Section 0, SKILL.md): the user is assumed to be a non-programmer who may not have git. End-of-task = tick TASKS → ask about `.sessions/` log → closing question → wait.
+- Supabase workflow is cloud-only (no Docker): `npx supabase login` + `npm run db:link -- --project-ref <ref>` once, then `db:migration` → `db:push` → `db:types` (`--linked`). `supabase/config.toml` now ships with the template (ran `npx supabase init` once) so customer projects never run `supabase init`.
+- Migration file names are whatever the CLI generates (`<timestamp>_description.sql`); docs no longer say `NNN_`.
+- `NG_ALLOWED_HOSTS` added to the skill (default-stack 2.5, closing task README line, example deploy line).
+- FEATURE_SPEC renumbered to 2.1 Stack / 2.2 API / 2.3 files / 2.4 decisions so reviewer/self-check references match; feature-round closing prompt points to `docs/features/[name]/SPEC.md`.
+- SYSTEM_SPEC 1.3 next-round block is now a real index table; TASKS legend defers to Section 0 step 5; zod request validation mentioned in default-stack, SYSTEM_SPEC 2.2 note, and reviewer brief; patterns P1/P4 use `created_at`; example TASKS uses `pages/`; example pins template 1.1.
+- AGENTS.md top-level-folder rule now says "not listed in ARCHITECTURE §3".
