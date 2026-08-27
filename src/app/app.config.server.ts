@@ -11,7 +11,7 @@ const serverConfig: ApplicationConfig = {
     // Registered after appConfig's provideHttpClient (see mergeApplicationConfig below),
     // so this server-only instance — with apiOriginInterceptor — wins during SSR.
     provideHttpClient(withInterceptors([apiOriginInterceptor])),
-  ]
+  ],
 };
 
 // Provider order matters: serverConfig is merged LAST, so its HttpClient

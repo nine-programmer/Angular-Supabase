@@ -1,21 +1,22 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.0 | อัปเดต: 2026-08-26
+> เวอร์ชัน template: 1.1 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
 
 ## 1. เทคโนโลยี
 
-| ส่วน | ใช้ | หมายเหตุ |
-|---|---|---|
-| Frontend + SSR | Angular 22 + `@angular/ssr` | standalone, signals, zoneless |
-| API | Express ใน process เดียวกับ SSR | ทุก endpoint อยู่ใต้ `/api/*` |
-| ฐานข้อมูล | Supabase (PostgreSQL) | `@supabase/supabase-js` **ฝั่ง server เท่านั้น** |
-| UI | Tailwind CSS v4 (CSS-first) | ต้องรองรับมือถือ (375px) |
-| ภาษา | TypeScript strict | |
-| Test | Vitest (`npm test`) | jsdom |
-| Deploy | Node web service (Render / Vercel / เซิร์ฟเวอร์ตัวเอง) | ระบุใน SYSTEM_SPEC |
+| ส่วน           | ใช้                                                    | หมายเหตุ                                              |
+| -------------- | ------------------------------------------------------ | ----------------------------------------------------- |
+| Frontend + SSR | Angular 22 + `@angular/ssr`                            | standalone, signals, zoneless                         |
+| API            | Express ใน process เดียวกับ SSR                        | ทุก endpoint อยู่ใต้ `/api/*`                         |
+| ฐานข้อมูล      | Supabase (PostgreSQL)                                  | `@supabase/supabase-js` **ฝั่ง server เท่านั้น**      |
+| UI             | Tailwind CSS v4 (CSS-first)                            | ต้องรองรับมือถือ (375px)                              |
+| ภาษา           | TypeScript strict                                      |                                                       |
+| Validation     | zod                                                    | schema ใน `src/shared/dto/` ใช้ร่วมกันทั้ง API และ UI |
+| Test           | Vitest (`npm test`)                                    | jsdom                                                 |
+| Deploy         | Node web service (Render / Vercel / เซิร์ฟเวอร์ตัวเอง) | ระบุใน SYSTEM_SPEC                                    |
 
 ## 2. การไหลของข้อมูล
 
@@ -52,7 +53,7 @@ src/
 │
 ├── shared/                                ใช้ร่วมทั้ง app/ และ server/ — TypeScript ล้วน ไม่มี Node/browser global
 │   ├── types/database.types.ts            สร้างจาก `supabase gen types` ห้ามเขียนมือ
-│   ├── dto/<feature>.dto.ts               interface ของ request / response ของ /api/*
+│   ├── dto/<feature>.dto.ts               zod schema ของ request / response ของ /api/* + type จาก z.infer
 │   └── enums/<feature>.enums.ts           ค่าสถานะ / ค่าคงที่ที่ DB, API, UI ต้องตรงกัน
 │
 ├── server.ts                              Express host เท่านั้น: mount /api แล้วส่งที่เหลือให้ Angular
@@ -80,16 +81,16 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 
 ## 5. การตั้งชื่อไฟล์
 
-| ชนิด | รูปแบบ | ตัวอย่าง |
-|---|---|---|
-| หน้า (routed) | `<name>.page.ts` | `booking-form.page.ts` |
-| service ฝั่ง browser | `<feature>-client.service.ts` | `bookings-client.service.ts` |
-| service ฝั่ง server | `<feature>-server.service.ts` | `bookings-server.service.ts` |
-| router ฝั่ง server | `<feature>.routes.ts` | `bookings.routes.ts` |
-| DTO | `<feature>.dto.ts` | `bookings.dto.ts` |
-| enum | `<feature>.enums.ts` | `bookings.enums.ts` |
-| spec | ชื่อเดิม + `.spec.ts` วางข้างกัน | `bookings-server.service.spec.ts` |
-| migration | `NNN_description.sql` | `001_init.sql` |
+| ชนิด                 | รูปแบบ                           | ตัวอย่าง                          |
+| -------------------- | -------------------------------- | --------------------------------- |
+| หน้า (routed)        | `<name>.page.ts`                 | `booking-form.page.ts`            |
+| service ฝั่ง browser | `<feature>-client.service.ts`    | `bookings-client.service.ts`      |
+| service ฝั่ง server  | `<feature>-server.service.ts`    | `bookings-server.service.ts`      |
+| router ฝั่ง server   | `<feature>.routes.ts`            | `bookings.routes.ts`              |
+| DTO                  | `<feature>.dto.ts`               | `bookings.dto.ts`                 |
+| enum                 | `<feature>.enums.ts`             | `bookings.enums.ts`               |
+| spec                 | ชื่อเดิม + `.spec.ts` วางข้างกัน | `bookings-server.service.spec.ts` |
+| migration            | `NNN_description.sql`            | `001_init.sql`                    |
 
 ชื่อไฟล์ browser กับ server ของ feature เดียวกันต้องไม่ซ้ำกัน (จึงมี `-client` / `-server`)
 
@@ -99,7 +100,7 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 - ทุกตาราง **เปิด RLS โดยไม่มี policy** ให้ `anon` / `authenticated` (ปิดตาย) — เข้าถึงได้ทาง `service_role` ของ server เท่านั้น
 - ค่าสถานะใน DB บังคับด้วย `CHECK (status IN (...))` และค่าเดียวกันประกาศใน `shared/enums/` เป็น `as const` object + union type (ไม่ใช้ TS `enum`)
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรันต่อเนื่อง, เปลี่ยนสถานะ) อยู่ใน Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint — ไม่ทำแบบอ่านแล้วค่อยเขียนใน API
-- เปลี่ยน schema = เพิ่มไฟล์ migration เท่านั้น แล้วรัน `supabase gen types` ใหม่
+- เปลี่ยน schema = เพิ่มไฟล์ migration เท่านั้น (`npm run db:migration -- <description>`) แล้วรัน `npm run db:types` ใหม่
 
 ## 7. เอกสารของโปรเจกต์ (`docs/`)
 
@@ -114,11 +115,11 @@ docs/
     └── TASKS.md               ความคืบหน้าของ feature นั้น
 ```
 
-| ไฟล์ | ใครเขียน | เปลี่ยนเมื่อ |
-|---|---|---|
-| AGENTS.md, ARCHITECTURE.md | template | แทบไม่เปลี่ยน |
-| SYSTEM_SPEC.md, SPEC.md | skill `system-spec-builder` | เฉพาะเมื่อ bump เวอร์ชัน (แก้เอกสารก่อนแก้โค้ดเสมอ) |
-| TASKS.md | agent ที่ทำงาน | ทุกครั้งที่ Task ผ่าน: ติ๊ก `[x]` + commit + วันที่ + header |
+| ไฟล์                       | ใครเขียน                    | เปลี่ยนเมื่อ                                                 |
+| -------------------------- | --------------------------- | ------------------------------------------------------------ |
+| AGENTS.md, ARCHITECTURE.md | template                    | แทบไม่เปลี่ยน                                                |
+| SYSTEM_SPEC.md, SPEC.md    | skill `system-spec-builder` | เฉพาะเมื่อ bump เวอร์ชัน (แก้เอกสารก่อนแก้โค้ดเสมอ)          |
+| TASKS.md                   | agent ที่ทำงาน              | ทุกครั้งที่ Task ผ่าน: ติ๊ก `[x]` + commit + วันที่ + header |
 
 รอบแรกใช้แบบ flat (`docs/SYSTEM_SPEC.md` + `docs/TASKS.md`) ไม่สร้าง `features/` เผื่อ เมื่อมีรอบถัดไปค่อยสร้าง และเพิ่มตาราง index ใน SYSTEM_SPEC ชี้ไปแต่ละ feature; ถ้า feature ใหม่แก้ตารางเดิม ต้อง bump เวอร์ชัน SYSTEM_SPEC ด้วย
 
@@ -137,6 +138,9 @@ npm start                              # dev server (SSR) http://localhost:4200
 npm test                               # Vitest
 npm run build
 npm run serve:ssr:<project-name>       # รัน build จริง http://localhost:4000 (ชื่อตาม angular.json)
+npm run format                         # Prettier (format:check สำหรับ CI)
+npm run db:migration -- <description>  # สร้างไฟล์ migration ใน supabase/migrations/
+npm run db:types                       # gen src/shared/types/database.types.ts (Supabase CLI อยู่ใน devDependencies)
 ```
 
 ## 9. เมื่อระบบใหญ่ขึ้น
@@ -149,10 +153,10 @@ npm run serve:ssr:<project-name>       # รัน build จริง http://loc
 
 Template นี้ออกแบบสำหรับ **mini app ต่อลูกค้า 1 repo** ที่เป็น "กรอกข้อมูล → เก็บ → ดู → เปลี่ยนสถานะ" โดยทุกอย่างผ่าน API ที่ server ตัวเดียว
 
-| ระดับ | ตัวอย่าง | ทำอย่างไร |
-|---|---|---|
-| **พอดี** — ไม่ต้องคิดเพิ่ม | ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, ทะเบียน/รายการ, ใบขอ-อนุมัติ, แจ้งซ่อม, จองห้อง, บันทึกเข้างาน | ใช้ pattern ใน skill (P1–P6) หรือ pattern ที่ใกล้เคียงที่สุดได้เลย |
-| **พอดี แต่ต้องตัดสินใจใน SYSTEM_SPEC 2.4** | login/หลายบทบาท (middleware ใน `src/server/`) · resource > 5 (`src/server/features/`) · อัปโหลดไฟล์ (server → Supabase Storage) · ส่ง LINE/อีเมล (server เรียก API ภายนอก) · งานตามเวลา (`pg_cron` หรือ endpoint ให้ cron เรียก) · รายงาน/CSV (server สร้างไฟล์) · หน้าจออัปเดตเอง (polling; ถ้าต้องเร็วกว่า 5 วินาที ใช้ SSE จาก Express) | เขียนวิธีที่เลือกไว้ใน SPEC 2.4 — ยังไม่ให้ browser แตะ Supabase |
-| **ไม่พอดี** — ต้องอัปเกรด template หรือใช้ template อื่น | realtime หนัก (แชท, ติดตามตำแหน่งสด) · mobile native / offline-first · SaaS หลายลูกค้าใน DB เดียว (multi-tenant) · เปิด API ให้บุคคลที่สามเป็นหลัก · traffic สูงจน SSR + API ใน Node ตัวเดียวไม่พอ | **ห้าม** ฝืนยัดลง SPEC 2.4 — เป็นการตัดสินใจระดับ template ให้คุยกับเจ้าของ template ก่อน |
+| ระดับ                                                    | ตัวอย่าง                                                                                                                                                                                                                                                                                                                                   | ทำอย่างไร                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **พอดี** — ไม่ต้องคิดเพิ่ม                               | ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, ทะเบียน/รายการ, ใบขอ-อนุมัติ, แจ้งซ่อม, จองห้อง, บันทึกเข้างาน                                                                                                                                                                                                                                          | ใช้ pattern ใน skill (P1–P6) หรือ pattern ที่ใกล้เคียงที่สุดได้เลย                        |
+| **พอดี แต่ต้องตัดสินใจใน SYSTEM_SPEC 2.4**               | login/หลายบทบาท (middleware ใน `src/server/`) · resource > 5 (`src/server/features/`) · อัปโหลดไฟล์ (server → Supabase Storage) · ส่ง LINE/อีเมล (server เรียก API ภายนอก) · งานตามเวลา (`pg_cron` หรือ endpoint ให้ cron เรียก) · รายงาน/CSV (server สร้างไฟล์) · หน้าจออัปเดตเอง (polling; ถ้าต้องเร็วกว่า 5 วินาที ใช้ SSE จาก Express) | เขียนวิธีที่เลือกไว้ใน SPEC 2.4 — ยังไม่ให้ browser แตะ Supabase                          |
+| **ไม่พอดี** — ต้องอัปเกรด template หรือใช้ template อื่น | realtime หนัก (แชท, ติดตามตำแหน่งสด) · mobile native / offline-first · SaaS หลายลูกค้าใน DB เดียว (multi-tenant) · เปิด API ให้บุคคลที่สามเป็นหลัก · traffic สูงจน SSR + API ใน Node ตัวเดียวไม่พอ                                                                                                                                         | **ห้าม** ฝืนยัดลง SPEC 2.4 — เป็นการตัดสินใจระดับ template ให้คุยกับเจ้าของ template ก่อน |
 
 เกณฑ์ตัดสินเร็ว: ถ้าวิธีที่ "เป็นธรรมชาติ" ของความต้องการนั้นคือให้ browser คุยกับ Supabase โดยตรง (Realtime, Auth ฝั่ง client, Storage ตรง) แปลว่าอยู่นอกกรอบของ template นี้

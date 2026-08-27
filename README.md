@@ -55,12 +55,17 @@ npm start                              # dev server (SSR) ที่ http://local
 npm test                               # รัน unit test (Vitest)
 npm run build                          # build production
 npm run serve:ssr:<project-name>       # รัน build จริงที่ http://localhost:4000
+npm run format                         # จัดรูปแบบโค้ดด้วย Prettier
+npm run db:migration -- <description>  # สร้างไฟล์ migration ใหม่ใน supabase/migrations/
+npm run db:types                       # สร้าง src/shared/types/database.types.ts จาก schema (ต้องมี supabase start รันอยู่)
 ```
+
+Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่ต้องติดตั้ง global — เรียกผ่าน `npx supabase <cmd>` หรือ script ด้านบนได้เลย
 
 ## เอกสารของ template
 
-| ไฟล์ | เนื้อหา |
-|---|---|
-| [AGENTS.md](AGENTS.md) | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing) |
+| ไฟล์                                         | เนื้อหา                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------- |
+| [AGENTS.md](AGENTS.md)                       | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template |
-| `.claude/skills/system-spec-builder/` | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่ |
+| `.claude/skills/system-spec-builder/`        | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                            |

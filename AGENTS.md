@@ -79,7 +79,8 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - `src/server/env.ts` reads and validates `process.env` once; every other server file imports config from there. Never read `process.env` elsewhere.
 - `src/shared/` is plain TypeScript with no Node or browser globals: generated `Database` types, request/response DTOs, and enums/constants. Write enums as `as const` objects plus a derived union type, not TypeScript `enum`, and keep their values identical to the DB `CHECK` constraints.
 - Browser-side Angular services (`<feature>-client.service.ts`) call `/api/*` via `HttpClient` / `httpResource()` and expose signals or Promises to components. Components must not call `HttpClient` directly.
-- Every API route validates its input, returns JSON, and maps errors to an HTTP status plus a `{ error: string }` body. Never leak raw Supabase/Postgres errors to the browser.
+- Every API route validates its input with a `zod` schema (`schema.safeParse(req.body)`; on failure respond `400`), returns JSON, and maps errors to an HTTP status plus a `{ error: string }` body. Never leak raw Supabase/Postgres errors to the browser.
+- Declare request/response schemas in `src/shared/dto/<feature>.dto.ts` as `zod` schemas and derive the TypeScript types with `z.infer<typeof schema>`; never write a separate interface for the same shape. `zod` is plain TypeScript, so it is allowed in `src/shared/` and may be reused by browser-side forms.
 - Business rules that must be atomic (stock counters, sequential numbers, status transitions) are enforced in a single Postgres function called with `.rpc()` or in a DB constraint, never by read-then-write in the API handler.
 - Authentication and authorization, when a project needs them, are enforced in `src/server/` middleware. Never rely on browser-side checks.
 
@@ -87,10 +88,10 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 
 - Create exactly ONE Supabase client, in `src/server/supabase.ts`, with `createClient<Database>(...)`, `persistSession: false`, and `autoRefreshToken: false`. Never call `createClient()` anywhere else, and never import `@supabase/supabase-js` under `src/app/` or `src/shared/`.
 - The server uses the `service_role` key, read from `process.env` (via `src/server/env.ts`, loaded from `.env`). It is a secret: never put it in `environment*.ts`, never commit `.env`, and always keep `.env.example` up to date with the variable names.
-- Use a typed client: generate `Database` types with `supabase gen types typescript` into `src/shared/types/database.types.ts`. Do NOT hand-write table types; derive row types with `Tables<'table_name'>`.
+- Use a typed client: generate `Database` types with `npm run db:types` (Supabase CLI is a devDependency; do not assume a global install) into `src/shared/types/database.types.ts`. Do NOT hand-write table types; derive row types with `Tables<'table_name'>`.
 - Every table MUST have Row Level Security enabled. Because the browser has no Supabase access, tables normally have NO policies for `anon`/`authenticated` (deny-all); only the server's `service_role` key can reach them. Authorization lives in the API layer.
 - Handle the `{ data, error }` result explicitly in `src/server/services/`. Never ignore `error`; map it to an API error response.
-- Keep schema changes as Supabase CLI migration files in `supabase/migrations/` (one file per schema change, named `NNN_description.sql`). Do not edit the database schema manually through the dashboard without a matching migration.
+- Keep schema changes as Supabase CLI migration files in `supabase/migrations/` (one file per schema change, named `NNN_description.sql`; create with `npm run db:migration -- <description>`). Do not edit the database schema manually through the dashboard without a matching migration.
 
 ## Tailwind CSS v4
 
@@ -127,4 +128,4 @@ This repository is a template: each customer mini app is cloned from it into its
 - Keep every file under 300 lines unless truly unavoidable. If a file grows beyond that, split it into smaller components, services, or modules and import them.
 - Write unit tests only for code that has calculations, is complex, or is expected to change frequently — see the Testing section for the exact criteria. Do not add specs to simple CRUD or pass-through code.
 - Any variable, constant, or function used more than once MUST be extracted into the project's designated shared location and imported, never duplicated.
-- Comment every function, component, variable, or block that is important or non-obvious: the single Supabase client, environment validation, HTTP interceptors, provider/registration order that matters (e.g. why a server-only provider is registered after the shared one so it overrides it), business-rule enforcement (Postgres functions/constraints), workarounds, and anything a future reader could misuse without the reasoning. One short line explaining *why* is enough — do not restate *what* the code already says, and do not comment routine CRUD or self-explanatory code.
+- Comment every function, component, variable, or block that is important or non-obvious: the single Supabase client, environment validation, HTTP interceptors, provider/registration order that matters (e.g. why a server-only provider is registered after the shared one so it overrides it), business-rule enforcement (Postgres functions/constraints), workarounds, and anything a future reader could misuse without the reasoning. One short line explaining _why_ is enough — do not restate _what_ the code already says, and do not comment routine CRUD or self-explanatory code.

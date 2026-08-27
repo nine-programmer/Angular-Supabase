@@ -7,7 +7,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs"
+    "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migration": "supabase migration new",
+    "db:types": "supabase gen types typescript --local > src/shared/types/database.types.ts"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
@@ -24,7 +28,8 @@
     "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@angular/build": "^22.1.5",
@@ -32,10 +37,11 @@
     "@angular/compiler-cli": "^22.1.0",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/express": "^5.0.1",
-    "@types/node": "^20.17.19",
+    "@types/node": "^22.20.1",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",
+    "supabase": "^2.116.0",
     "tailwindcss": "^4.1.12",
     "typescript": "~6.0.2",
     "vitest": "^4.0.8"

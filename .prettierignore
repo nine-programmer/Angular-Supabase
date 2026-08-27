@@ -1,0 +1,19 @@
+# Build output and caches
+dist/
+.angular/
+
+# Lockfiles are machine-generated
+package-lock.json
+skills-lock.json
+
+# Agent skill folders: docs/templates owned by the skills, not project code
+.claude/
+.agents/
+.cursor/
+
+# Editor settings
+.vscode/
+
+# Supabase CLI output (migrations are SQL, generated types are overwritten by db:types)
+supabase/
+src/shared/types/database.types.ts
