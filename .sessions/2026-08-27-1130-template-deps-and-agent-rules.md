@@ -2,11 +2,13 @@
 
 Context: this is the template repo itself (no `docs/SYSTEM_SPEC.md` / `docs/TASKS.md`), so this log covers the whole working session rather than one Task.
 
+> **Read "Final state" at the bottom first.** The sections below are chronological; items marked _(superseded)_ were changed later in the same session and no longer describe the template.
+
 ## What was done
 
 1. **Dependency audit** — all 25 existing packages are used (directly or via config/peer). Nothing removed. `@angular/forms` has no import yet but stays for Signal Forms; `zone.js` is intentionally absent (zoneless).
 2. **Added** `zod` (dependencies) and `supabase` CLI (devDependencies); bumped `@types/node` ^20 → ^22.
-3. **New npm scripts**: `format`, `format:check`, `db:migration`, `db:types` (`--local`, needs `npx supabase start`).
+3. **New npm scripts**: `format`, `format:check`, `db:migration`, `db:types` _(superseded — `db:types` now uses `--linked`; see 12:40 and Final state)_.
 4. `tsconfig.json`: added explicit `"strict": true` (build already passed under strict).
 5. `.prettierignore` created (skips `.claude/`, `.agents/`, `.cursor/`, `.vscode/`, `.sessions/`, lockfiles, `dist/`, `supabase/`, generated `database.types.ts`); ran `npm run format` once over the repo (whitespace-only changes, incl. markdown table alignment).
 6. `.vscode/settings.json` (format-on-save with Prettier) + `esbenp.prettier-vscode` in `extensions.json`.
@@ -15,8 +17,8 @@ Context: this is the template repo itself (no `docs/SYSTEM_SPEC.md` / `docs/TASK
    - Supabase types/migrations via `npm run db:types` / `npm run db:migration`.
    - 300-line limit is counted AFTER `npm run format`; never compress code to dodge it.
    - Run `npm run format` then `npm test` before reporting a task done.
-   - Agent must NOT `git commit`/`git push`. If `.git` exists, ask the user to commit before the next task (suggest a one-line message); if no `.git`, don't mention commits.
-   - After every passed task (or substantial work), write `.sessions/YYYY-MM-DD-HHmm-<task-slug>.md` — shared memory across AI tools. Read newest logs before starting.
+   - _(superseded by 12:40)_ Agent must NOT `git commit`/`git push`; ask the user to commit — replaced by "never use or mention git at all".
+   - _(superseded by 11:55)_ Write a `.sessions/` log after every passed task — now opt-in: the agent asks first. Read newest logs before starting.
 8. Same rules mirrored into `docs/ARCHITECTURE.md` (§1 Validation row, §3 tree, §6, §7 table, §8 commands; version 1.0 → 1.1) and into the `system-spec-builder` skill (SKILL.md, templates + example SYSTEM_SPEC/TASKS) in BOTH `.claude/skills/` and `.agents/skills/` (they are identical copies — keep them in sync).
 9. `src/styles.css`: `@source not '../.sessions'` so Tailwind does not scan session logs.
 
@@ -24,8 +26,8 @@ Context: this is the template repo itself (no `docs/SYSTEM_SPEC.md` / `docs/TASK
 
 - Kept Prettier (ships with `ng new`): near-zero cost, keeps agent-written diffs clean. Made its use explicit instead of removing it.
 - No ESLint (user's choice).
-- `db:types` uses `--local` to match the migration-first workflow; switch to `--project-id <ref>` if generating from a cloud project.
-- TASKS.md "ผล:" now records date + session-log filename instead of a commit hash, because the agent no longer commits.
+- _(superseded by 12:40)_ `db:types` used `--local`; the template is now cloud-only and uses `--linked`.
+- TASKS.md "ผล:" records date + session-log filename (no commit hash — the agent never uses git).
 
 ## How it was verified
 
@@ -33,16 +35,15 @@ Context: this is the template repo itself (no `docs/SYSTEM_SPEC.md` / `docs/TASK
 
 ## Next
 
-- User to commit this session's changes (≈25 files) — nothing committed by the agent.
 - Future customer projects: Task 1 of TASKS.md should now work without a global Supabase CLI.
 
 ## Update 11:55
 
-Rules refined: the `.sessions/` log is now opt-in (agent asks first); after a task passes the agent ticks TASKS.md, asks about the log, reminds to commit (if `.git`), then asks whether to continue in this session or a new one (offering the prompt `อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0`) and waits — it never starts the next task by itself. Section 0 step 1 now also reads the newest `.sessions/` log.
+Rules refined: the `.sessions/` log is now opt-in (agent asks first); after a task passes the agent ticks TASKS.md, asks about the log, reminds to commit (if `.git`) _(superseded by 12:40)_, then asks whether to continue in this session or a new one (offering the prompt `อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0`) and waits — it never starts the next task by itself. Section 0 step 1 now also reads the newest `.sessions/` log.
 
-## Update 12:10
+## Update 12:10 _(superseded by 12:40 — no commit option exists any more)_
 
-Commit rule made flexible: default is still "user commits, agent reminds", but SYSTEM_SPEC Section 0 now has `การ commit: [ผู้ใช้ commit เอง / ให้ agent commit ให้ 1 ครั้งต่อ Task]` (skill asks developers once at confirmation, never non-programmers) and a chat instruction overrides at any time. When the agent commits, it records the hash on the ผล: line.
+Commit rule was made flexible via a `การ commit:` line in SYSTEM_SPEC Section 0; removed again 30 minutes later together with every other git mention.
 
 ## Update 12:40 — consistency audit applied
 
@@ -53,3 +54,22 @@ Commit rule made flexible: default is still "user commits, agent reminds", but S
 - FEATURE_SPEC renumbered to 2.1 Stack / 2.2 API / 2.3 files / 2.4 decisions so reviewer/self-check references match; feature-round closing prompt points to `docs/features/[name]/SPEC.md`.
 - SYSTEM_SPEC 1.3 next-round block is now a real index table; TASKS legend defers to Section 0 step 5; zod request validation mentioned in default-stack, SYSTEM_SPEC 2.2 note, and reviewer brief; patterns P1/P4 use `created_at`; example TASKS uses `pages/`; example pins template 1.1.
 - AGENTS.md top-level-folder rule now says "not listed in ARCHITECTURE §3".
+
+## Update 13:00 — second consistency pass (docs ↔ skills ↔ code)
+
+Re-checked this log against AGENTS.md, ARCHITECTURE.md, README, the `system-spec-builder` skill (both copies), the third-party skills, and the code in `src/`. Fixed:
+
+- `src/shared/types/database.types.ts` header said `gen types --local` → now says `npm run db:types`.
+- `src/server/routes/health.routes.ts` comment said Task 3 adds `count` → Task 2 (matches the TASKS template).
+- `src/server/env.ts` header said "fails at boot" while the getters are lazy → reworded.
+- AGENTS.md: closing prompt now has the feature-round variant (matches `templates/FEATURE_SPEC.md`); Supabase section states that the `supabase` / `supabase-postgres-best-practices` skills lose to AGENTS.md (no local DB, no declarative schema, no RLS policies); comment rule now requires a one-line file header (matches SYSTEM_SPEC Section 0).
+- ARCHITECTURE §3: added `supabase/config.toml` and `.claude/skills/ · .agents/skills/` (must stay identical; AGENTS.md wins on conflict). README: same note + `.agents/skills/` row.
+- `db:types` writes to `database.types.tmp` then renames, so a failed CLI call (not logged in / not linked) no longer truncates the real file; `.gitignore` ignores the `.tmp`.
+- TASKS template + example Task 1: also rename `project_id` in `supabase/config.toml`.
+
+## Final state (what is true now)
+
+- Git is never used or mentioned by the agent. End of task = tick TASKS.md → ask about `.sessions/` log → closing question (feature round: prompt from that feature's SPEC.md) → wait.
+- Supabase is cloud-only: `npx supabase login` + `npm run db:link -- --project-ref <ref>` once; then `db:migration` → `db:push` → `db:types` (`--linked`, via tmp file). `supabase/config.toml` ships with the template.
+- `.claude/skills/` and `.agents/skills/` are identical copies; third-party skills are reference only and AGENTS.md wins.
+- Prettier is the only formatter (no ESLint); `npm run format` then `npm test` before reporting a task done; 300-line limit counted after formatting.

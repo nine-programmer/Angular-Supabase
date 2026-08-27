@@ -9,7 +9,7 @@
 ---
 
 ### [ ] Task 1: ตั้งโปรเจกต์ + เชื่อม Supabase
-- ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `[project-name]` (แก้ `name` ใน package.json และ angular.json, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:[project-name]` และ path `dist/[project-name]/...`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ของโปรเจกต์นี้; `npx supabase login` แล้ว `npm run db:link -- --project-ref <ref>` (<ref> จาก URL ของ dashboard); หน้า `/` แสดงชื่อระบบเฉยๆ — โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`), interceptor (`src/app/core/api-origin.interceptor.ts`) และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
+- ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `[project-name]` (แก้ `name` ใน package.json และ angular.json, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:[project-name]` และ path `dist/[project-name]/...`, และ `project_id` ใน `supabase/config.toml`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ของโปรเจกต์นี้; `npx supabase login` แล้ว `npm run db:link -- --project-ref <ref>` (<ref> จาก URL ของ dashboard); หน้า `/` แสดงชื่อระบบเฉยๆ — โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`), interceptor (`src/app/core/api-origin.interceptor.ts`) และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
 - ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นชื่อระบบ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน (ยังตรวจ `.env` ไม่ได้ที่ Task นี้ — ไม่มีจุดใดเรียก Supabase จริงจนกว่าจะถึง Task 2)
 - ผล: —
 

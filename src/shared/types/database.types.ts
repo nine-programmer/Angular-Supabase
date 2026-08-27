@@ -1,5 +1,5 @@
-// Placeholder until the first migration exists. Replace by running:
-//   supabase gen types typescript --local > src/shared/types/database.types.ts
+// Placeholder until the first migration is pushed. Regenerate from the linked
+// Supabase cloud project with `npm run db:types` (never hand-edit this file).
 export type Database = {
   public: {
     Tables: Record<string, never>;

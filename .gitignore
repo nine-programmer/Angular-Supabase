@@ -44,6 +44,9 @@ __screenshots__/
 .env.*
 !.env.example
 
+# Partial output of `npm run db:types` (left behind only when the CLI fails)
+src/shared/types/database.types.tmp
+
 # System files
 .DS_Store
 Thumbs.db

@@ -61,12 +61,14 @@ src/
 ├── styles.css                             Tailwind: @import, @theme, @source not
 └── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ
 
+supabase/config.toml                       มากับ template (ไม่ต้องรัน `supabase init`); `.temp/` = ข้อมูล link ของเครื่องนี้
 supabase/migrations/<timestamp>_description.sql   1 ไฟล์ต่อ 1 การเปลี่ยน schema (CLI ตั้งชื่อให้ ห้ามเปลี่ยน)
 docs/                                      เอกสารของโปรเจกต์ (ดูข้อ 7)
 .sessions/YYYY-MM-DD-HHmm-<task-slug>.md   บันทึกงานเมื่อ Task ผ่าน (agent ถามผู้ใช้ก่อนทุกครั้ง) — ความจำร่วมให้ AI เจ้าอื่นทำต่อได้ (ดูข้อ 7)
 public/                                    static assets
 .env.example                               ชื่อตัวแปร (อยู่ใน template) · .env ค่าจริง (เครื่องนี้เท่านั้น ห้ามส่งต่อ)
 AGENTS.md · CLAUDE.md                      กติกาโค้ด
+.claude/skills/ · .agents/skills/          skill ของ AI agent (สองโฟลเดอร์ต้องเหมือนกันทุกไฟล์) — ถ้าขัดกับ AGENTS.md ให้ยึด AGENTS.md
 ```
 
 ## 4. ทิศทาง import (ทางเดียว)

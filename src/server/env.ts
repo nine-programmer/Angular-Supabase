@@ -1,7 +1,8 @@
 import 'dotenv/config';
 
-// Fails fast at boot (not on first request) so a missing secret is caught
-// immediately instead of surfacing as a confusing Supabase error later.
+// Throws with the variable NAME so a missing secret is reported clearly instead
+// of surfacing as a confusing Supabase error later. It runs when supabase.ts is
+// first imported (i.e. as soon as any route needs Supabase), not on every request.
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
