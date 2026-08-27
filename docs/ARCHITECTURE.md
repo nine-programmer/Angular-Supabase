@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.2 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.4 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -117,16 +117,12 @@ docs/
 └── features/<name>/           เฉพาะเมื่อมีรอบถัดไป / ฟีเจอร์ใหม่
     ├── SPEC.md                spec ระดับ feature — อ้างตารางใน SYSTEM_SPEC เพิ่มเฉพาะส่วนใหม่
     └── TASKS.md               ความคืบหน้าของ feature นั้น
+.sessions/*.md                 บันทึกงานหลัง Task ผ่าน (เฉพาะเมื่อผู้ใช้ตอบว่าให้บันทึก)
 ```
 
-| ไฟล์                       | ใครเขียน                    | เปลี่ยนเมื่อ                                                                                                                                                |
-| -------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AGENTS.md, ARCHITECTURE.md | template                    | แทบไม่เปลี่ยน                                                                                                                                               |
-| SYSTEM_SPEC.md, SPEC.md    | skill `system-spec-builder` | เฉพาะเมื่อ bump เวอร์ชัน (แก้เอกสารก่อนแก้โค้ดเสมอ)                                                                                                         |
-| TASKS.md                   | agent ที่ทำงาน              | ทุกครั้งที่ Task ผ่าน: ติ๊ก `[x]` + วันที่ (+ ชื่อไฟล์ `.sessions/` ถ้าบันทึก) + header                                                                     |
-| `.sessions/*.md`           | agent ที่ทำงาน              | เมื่อ Task ผ่านและผู้ใช้ตอบว่าให้บันทึก: ทำอะไร ไฟล์ไหน ตัดสินใจอะไรเพราะอะไร ทดสอบอย่างไร Task ถัดไป — agent **ไม่เริ่ม Task ถัดไปเอง** จนกว่าผู้ใช้จะสั่ง |
-
 รอบแรกใช้แบบ flat (`docs/SYSTEM_SPEC.md` + `docs/TASKS.md`) ไม่สร้าง `features/` เผื่อ เมื่อมีรอบถัดไปค่อยสร้าง และเพิ่มตาราง index ใน SYSTEM_SPEC ชี้ไปแต่ละ feature; ถ้า feature ใหม่แก้ตารางเดิม ต้อง bump เวอร์ชัน SYSTEM_SPEC ด้วย
+
+ใครแก้ไฟล์ไหนเมื่อไหร่ (LOCKED, การติ๊ก TASKS, การถามก่อนเขียน `.sessions/`, การหยุดรอหลัง Task ผ่าน) กำหนดไว้ที่เดียวใน `AGENTS.md` → Project Structure & Docs + Working Rules และ SYSTEM_SPEC Section 0 — ไฟล์นี้ไม่ทวนซ้ำ
 
 ## 8. ตัวแปร .env และคำสั่ง
 
@@ -137,19 +133,7 @@ PORT=4000
 NG_ALLOWED_HOSTS=localhost      # โดเมนที่ SSR ยอมเรนเดอร์ให้ (คั่นด้วย , ) ตั้งเป็นโดเมนจริงก่อน deploy มิฉะนั้นทุกหน้าจะได้ 400
 ```
 
-```
-npm install
-npm start                              # dev server (SSR) http://localhost:4200
-npm test                               # Vitest
-npm run build
-npm run serve:ssr:<project-name>       # รัน build จริง http://localhost:4000 (ชื่อตาม angular.json)
-npm run format                         # Prettier (format:check สำหรับ CI)
-npx supabase login                     # ครั้งเดียวต่อเครื่อง (เปิด browser)
-npm run db:link -- --project-ref <ref> # ครั้งเดียวต่อโปรเจกต์ (<ref> จาก URL dashboard: supabase.com/dashboard/project/<ref>)
-npm run db:migration -- <description>  # สร้างไฟล์ migration ใน supabase/migrations/
-npm run db:push                        # apply migration ที่ยังไม่ได้รันขึ้นโปรเจกต์ cloud
-npm run db:types                       # gen src/shared/types/database.types.ts จากโปรเจกต์ cloud (Supabase CLI อยู่ใน devDependencies)
-```
+คำสั่งทั้งหมดเป็น npm script ใน `package.json` (รายการพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` แล้ว `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ Supabase `db:migration` → `db:push` → `db:types` (ข้อ 6)
 
 ## 9. เมื่อระบบใหญ่ขึ้น
 
@@ -157,14 +141,10 @@ npm run db:types                       # gen src/shared/types/database.types.ts 
 - ต้องมี login → เพิ่ม middleware ใน `src/server/` และ `src/app/core/` (guard) — ยังคงไม่ให้ browser แตะ Supabase
 - Feature ใหม่ → `docs/features/<name>/` ตามข้อ 7 และ `src/app/features/<name>/` ตามข้อ 3
 
-## 10. ขอบเขตของ template — ระบบแบบไหนสร้างบนนี้ได้
+## 10. ขอบเขตของ template
 
-Template นี้ออกแบบสำหรับ **mini app ต่อลูกค้า 1 repo** ที่เป็น "กรอกข้อมูล → เก็บ → ดู → เปลี่ยนสถานะ" โดยทุกอย่างผ่าน API ที่ server ตัวเดียว
+Template นี้ออกแบบสำหรับ **mini app ต่อลูกค้า 1 repo** แบบ "กรอกข้อมูล → เก็บ → ดู → เปลี่ยนสถานะ" ที่ทุกอย่างผ่าน API ของ server ตัวเดียว
 
-| ระดับ                                                    | ตัวอย่าง                                                                                                                                                                                                                                                                                                                                   | ทำอย่างไร                                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| **พอดี** — ไม่ต้องคิดเพิ่ม                               | ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, ทะเบียน/รายการ, ใบขอ-อนุมัติ, แจ้งซ่อม, จองห้อง, บันทึกเข้างาน                                                                                                                                                                                                                                          | ใช้ pattern ใน skill (P1–P6) หรือ pattern ที่ใกล้เคียงที่สุดได้เลย                        |
-| **พอดี แต่ต้องตัดสินใจใน SYSTEM_SPEC 2.4**               | login/หลายบทบาท (middleware ใน `src/server/`) · resource > 5 (`src/server/features/`) · อัปโหลดไฟล์ (server → Supabase Storage) · ส่ง LINE/อีเมล (server เรียก API ภายนอก) · งานตามเวลา (`pg_cron` หรือ endpoint ให้ cron เรียก) · รายงาน/CSV (server สร้างไฟล์) · หน้าจออัปเดตเอง (polling; ถ้าต้องเร็วกว่า 5 วินาที ใช้ SSE จาก Express) | เขียนวิธีที่เลือกไว้ใน SPEC 2.4 — ยังไม่ให้ browser แตะ Supabase                          |
-| **ไม่พอดี** — ต้องอัปเกรด template หรือใช้ template อื่น | realtime หนัก (แชท, ติดตามตำแหน่งสด) · mobile native / offline-first · SaaS หลายลูกค้าใน DB เดียว (multi-tenant) · เปิด API ให้บุคคลที่สามเป็นหลัก · traffic สูงจน SSR + API ใน Node ตัวเดียวไม่พอ                                                                                                                                         | **ห้าม** ฝืนยัดลง SPEC 2.4 — เป็นการตัดสินใจระดับ template ให้คุยกับเจ้าของ template ก่อน |
+เกณฑ์ตัดสินเร็ว: ถ้าวิธีที่ "เป็นธรรมชาติ" ของความต้องการนั้นคือให้ browser คุยกับ Supabase โดยตรง (Realtime, Auth ฝั่ง client, Storage ตรง) แปลว่าอยู่นอกกรอบของ template นี้ — **ห้าม** ฝืนยัดลง SPEC 2.4 ให้คุยกับเจ้าของ template ก่อน
 
-เกณฑ์ตัดสินเร็ว: ถ้าวิธีที่ "เป็นธรรมชาติ" ของความต้องการนั้นคือให้ browser คุยกับ Supabase โดยตรง (Realtime, Auth ฝั่ง client, Storage ตรง) แปลว่าอยู่นอกกรอบของ template นี้
+ตารางเต็ม (ระดับ พอดี / พอดีแต่ต้องตัดสินใจใน SPEC 2.4 / ไม่พอดี พร้อมตัวอย่าง) อยู่ที่ `.claude/skills/system-spec-builder/references/template-scope.md` — skill `system-spec-builder` ใช้ตรวจขอบเขตทุกครั้งที่เขียน spec

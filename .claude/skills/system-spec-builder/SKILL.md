@@ -33,7 +33,7 @@ If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the
 
 ### 1. Check the idea fits the template, then load a pattern
 
-Read `docs/ARCHITECTURE.md` section 10 (template scope) and place the idea in one of its three levels:
+Read `references/template-scope.md` (the template's scope table — the single source for it; `docs/ARCHITECTURE.md` section 10 only keeps the one-line criterion) and place the idea in one of its three levels:
 
 - **พอดี** → continue.
 - **พอดี แต่ต้องตัดสินใจ** (login, uploads, notifications, scheduled jobs, reports, faster refresh) → continue; record the chosen approach in SYSTEM_SPEC 2.4 and in 1.9 if it is a guess.
@@ -114,18 +114,18 @@ Save with status `ร่าง (รอ review)` and the TASKS header at `ผ่�
 - [ ] Every table and every field appears in a feature, flow, rule, or task; every feature has a row in 2.3
 - [ ] TASKS: round 1 = 6–12 tasks with Task 1 cloning the template; feature round = 2–6 tasks with Task 1 = migration; every task has `ทดสอบ:` and `ผล: —`; header counts match
 - [ ] Nothing copied from ARCHITECTURE.md / AGENTS.md; Section 2 only holds project-specific items
-- [ ] Nothing requires the browser to talk to Supabase directly or falls in ARCHITECTURE.md section 10 "ไม่พอดี"
+- [ ] Nothing requires the browser to talk to Supabase directly or falls in `references/template-scope.md` "ไม่พอดี"
 
 ### 6. Independent review, then deliver
 
 The writer is bad at spotting its own contradictions, so both files are reviewed by a **separate** reader with no memory of the interview:
 
-- In Claude Code: spawn a subagent (or ask the user to open a fresh session) with only `docs/SYSTEM_SPEC.md`, `docs/TASKS.md`, `docs/ARCHITECTURE.md`, and `AGENTS.md`.
-- In a web chat: tell the user to paste those four files into a new chat.
+- In Claude Code: spawn a subagent (or ask the user to open a fresh session) with only `docs/SYSTEM_SPEC.md`, `docs/TASKS.md`, `docs/ARCHITECTURE.md`, `AGENTS.md`, and this skill's `references/template-scope.md`.
+- In a web chat: tell the user to paste those five files into a new chat.
 
 Give the reviewer this brief (Thai):
 
-> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะข้อ 10 ขอบเขตของ template (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
+> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะขอบเขตของ template ใน template-scope.md (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
 
 Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0".
 
@@ -139,6 +139,7 @@ Plain Thai, no jargon without a short explanation. The user should feel like the
 - `templates/TASKS.md` — task + progress skeleton, used for every round.
 - `templates/FEATURE_SPEC.md` — later-round feature spec skeleton (`docs/features/<name>/SPEC.md`).
 - `references/interview-guide.md` — question bank, probing techniques, and a sample interview. Read before step 2.
+- `references/template-scope.md` — what the template can and cannot build (three levels + examples). Read in step 1, every round.
 - `references/patterns.md` — ready-made tables/features/rules/flows and "ที่มักพลาด" for common small systems. Read in step 1.
 - `references/default-stack.md` — how to fill Section 2 without duplicating the template docs.
 - `examples/queue-booking/` — one finished SYSTEM_SPEC.md + TASKS.md pair. Read if unsure about depth or tone.
