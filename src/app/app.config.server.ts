@@ -1,3 +1,4 @@
+// Server-side application config: adds SSR rendering and the /api origin interceptor.
 import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
 import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';

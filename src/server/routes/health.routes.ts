@@ -1,3 +1,4 @@
+// GET /api/health — liveness check used by Task 1 (and DB-connectivity check from Task 2 on).
 import { Router } from 'express';
 
 export const healthRoutes = Router();

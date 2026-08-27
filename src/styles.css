@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tailwind entry point: @import, @theme design tokens, and @source exclusions live here. */
 
 @import 'tailwindcss';
 

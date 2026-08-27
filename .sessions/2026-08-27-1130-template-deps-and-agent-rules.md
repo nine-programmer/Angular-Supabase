@@ -47,7 +47,7 @@ Commit rule was made flexible via a `การ commit:` line in SYSTEM_SPEC Sect
 
 ## Update 12:40 — consistency audit applied
 
-- ALL git/commit instructions removed from agent-facing docs (AGENTS.md, ARCHITECTURE §7, README, SYSTEM_SPEC Section 0, SKILL.md): the user is assumed to be a non-programmer who may not have git. End-of-task = tick TASKS → ask about `.sessions/` log → closing question → wait.
+- ALL git/commit instructions removed from agent-facing docs (AGENTS.md, ARCHITECTURE §7, SYSTEM_SPEC Section 0, SKILL.md; README deliberately keeps one human-facing `git clone ถ้ามี git` option — it is not an agent instruction): the user is assumed to be a non-programmer who may not have git. End-of-task = tick TASKS → ask about `.sessions/` log → closing question → wait.
 - Supabase workflow is cloud-only (no Docker): `npx supabase login` + `npm run db:link -- --project-ref <ref>` once, then `db:migration` → `db:push` → `db:types` (`--linked`). `supabase/config.toml` now ships with the template (ran `npx supabase init` once) so customer projects never run `supabase init`.
 - Migration file names are whatever the CLI generates (`<timestamp>_description.sql`); docs no longer say `NNN_`.
 - `NG_ALLOWED_HOSTS` added to the skill (default-stack 2.5, closing task README line, example deploy line).
@@ -71,9 +71,21 @@ Re-checked this log against AGENTS.md, ARCHITECTURE.md, README, the `system-spec
 
 Deleted `.claude/skills/supabase/` + `.agents/skills/supabase/` and its `skills-lock.json` entry. Reason: its content is client-side Auth/Realtime/Storage/Edge Functions and a local-first migration workflow (`db query` → `db pull --local`) — none of which this template uses — and its "ANY Supabase task" trigger kept pulling agents toward local Docker. Kept `supabase-postgres-best-practices` (constraints, data types, FK indexes, advisory locks, upsert — all directly used by the template's DB-enforced rules). The only useful bit of the removed skill (no `SECURITY DEFINER` as a permission workaround; set `search_path` if one is ever needed) is now a line in AGENTS.md → Supabase. README notes the removal so nobody reinstalls it.
 
+## Update 13:20 — third consistency pass (rules ↔ template code ↔ third-party skills)
+
+Re-checked the log against every doc, both skill copies, all tool configs, and `src/`; also verified AGENTS.md's Angular v22 claims against `node_modules` (`@Service` decorator, OnPush default, `@angular/forms/signals` all exist in 22.1.3). Fixed:
+
+- Every file under `src/` now starts with the one-line header comment that AGENTS.md requires (the rule was added at 13:00 but the template's own files did not follow it).
+- `server.ts` no longer reads `process.env` itself: uses `env.port` and a new `env.isPm2` from `env.ts`. AGENTS.md now names `api-origin.interceptor.ts` as the one allowed exception (it cannot import from `src/server/`).
+- ARCHITECTURE §5 contradicted itself (`<feature>.routes.ts` exists on both sides): the "names must differ" sentence now applies to services only. §6 states that primary keys stay `uuid` (never `bigint identity` as the Postgres skill suggests) and that `uuidv7()` may replace `gen_random_uuid()` on Postgres 18+. Version 1.1 → 1.2; the queue-booking example pins 1.2.
+- AGENTS.md → Testing: `vi.mock('../supabase')` (specs live in `src/server/services/`).
+- AGENTS.md → Project Structure: third-party skills lose to AGENTS.md/ARCHITECTURE with the known differences listed; `ng generate` only with `--skip-tests` + rename to ARCHITECTURE §5 names (the `angular-developer` skill's "Intent over Role" naming and spec-per-file scaffolding conflict with the template).
+- This log's 12:40 entry wrongly listed README among the files stripped of git mentions; README keeps its human-facing `git clone ถ้ามี git` option on purpose.
+
 ## Final state (what is true now)
 
 - Git is never used or mentioned by the agent. End of task = tick TASKS.md → ask about `.sessions/` log → closing question (feature round: prompt from that feature's SPEC.md) → wait.
 - Supabase is cloud-only: `npx supabase login` + `npm run db:link -- --project-ref <ref>` once; then `db:migration` → `db:push` → `db:types` (`--linked`, via tmp file). `supabase/config.toml` ships with the template.
 - `.claude/skills/` and `.agents/skills/` are identical copies; third-party skills (`supabase-postgres-best-practices`, `angular-developer`, `angular-new-app`, `tailwind-css-patterns`) are reference only and AGENTS.md wins. The `supabase` skill was removed on purpose.
 - Prettier is the only formatter (no ESLint); `npm run format` then `npm test` before reporting a task done; 300-line limit counted after formatting.
+- Every source file starts with a one-line header comment; only `src/server/env.ts` reads `process.env` (exception: the SSR interceptor's `PORT` fallback). Primary keys are always `uuid` (`uuidv7()` allowed on Postgres 18+). `ng generate` only with `--skip-tests` and renamed to ARCHITECTURE §5 names. ARCHITECTURE is at version 1.2.

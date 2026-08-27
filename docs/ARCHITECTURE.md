@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.1 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.2 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -95,11 +95,11 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 | spec                 | ชื่อเดิม + `.spec.ts` วางข้างกัน            | `bookings-server.service.spec.ts` |
 | migration            | `<timestamp>_description.sql` (CLI ตั้งให้) | `20260827120000_init.sql`         |
 
-ชื่อไฟล์ browser กับ server ของ feature เดียวกันต้องไม่ซ้ำกัน (จึงมี `-client` / `-server`)
+service ฝั่ง browser กับ server ของ feature เดียวกันต้องชื่อไม่ซ้ำกัน (จึงมี `-client` / `-server`) ส่วน `<feature>.routes.ts` ใช้ชื่อเดียวกันได้ทั้งสองฝั่ง เพราะอยู่คนละโฟลเดอร์ (`src/app/features/<feature>/` กับ `src/server/routes/`)
 
 ## 6. ฐานข้อมูลและสิทธิ์
 
-- ทุกตารางมี `id uuid default gen_random_uuid() primary key` และ `created_at timestamptz default now()`
+- ทุกตารางมี `id uuid default gen_random_uuid() primary key` และ `created_at timestamptz default now()` — primary key เป็น `uuid` เสมอ ไม่ใช้ `bigint identity` ตามที่ skill Postgres แนะนำ; ถ้าโปรเจกต์ Supabase อยู่บน Postgres 18+ ใช้ `uuidv7()` (เรียงตามเวลา) แทน `gen_random_uuid()` ได้
 - ทุกตาราง **เปิด RLS โดยไม่มี policy** ให้ `anon` / `authenticated` (ปิดตาย) — เข้าถึงได้ทาง `service_role` ของ server เท่านั้น
 - ค่าสถานะใน DB บังคับด้วย `CHECK (status IN (...))` และค่าเดียวกันประกาศใน `shared/enums/` เป็น `as const` object + union type (ไม่ใช้ TS `enum`)
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรันต่อเนื่อง, เปลี่ยนสถานะ) อยู่ใน Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint — ไม่ทำแบบอ่านแล้วค่อยเขียนใน API

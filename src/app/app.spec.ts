@@ -1,3 +1,4 @@
+// Smoke test for the root component (template placeholder — replace with the real title check).
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 

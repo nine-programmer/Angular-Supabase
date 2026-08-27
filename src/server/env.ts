@@ -1,3 +1,4 @@
+// Loads .env and exposes validated config — the ONE place process.env is read on the server.
 import 'dotenv/config';
 
 // Throws with the variable NAME so a missing secret is reported clearly instead
@@ -35,4 +36,7 @@ export const env = {
     return required('SUPABASE_SERVICE_ROLE_KEY');
   },
   port: Number(process.env['PORT']) || 4000,
+  // PM2 sets pm_id on every process it manages; server.ts uses this to decide
+  // whether to call app.listen() when it is not the main module.
+  isPm2: Boolean(process.env['pm_id']),
 };

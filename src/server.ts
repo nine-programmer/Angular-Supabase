@@ -1,7 +1,8 @@
-// Must run first: loads .env and sets the NG_ALLOWED_HOSTS default before
-// AngularNodeAppEngine is constructed below, since it reads that var at
-// construction time to build its SSRF host allowlist.
-import './server/env';
+// Express host only: mounts /api, serves static files, hands everything else to Angular SSR.
+// The env import must run first: it loads .env and sets the NG_ALLOWED_HOSTS
+// default before AngularNodeAppEngine is constructed below, since it reads that
+// var at construction time to build its SSRF host allowlist.
+import { env } from './server/env';
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
@@ -47,14 +48,13 @@ app.use((req, res, next) => {
  * Start the server if this module is the main entry point, or it is ran via PM2.
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
-if (isMainModule(import.meta.url) || process.env['pm_id']) {
-  const port = process.env['PORT'] || 4000;
-  app.listen(port, (error) => {
+if (isMainModule(import.meta.url) || env.isPm2) {
+  app.listen(env.port, (error) => {
     if (error) {
       throw error;
     }
 
-    console.log(`Node Express server listening on http://localhost:${port}`);
+    console.log(`Node Express server listening on http://localhost:${env.port}`);
   });
 }
 

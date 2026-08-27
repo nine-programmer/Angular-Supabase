@@ -1,3 +1,4 @@
+// The single Supabase client (service_role) shared by every server-side service.
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../shared/types/database.types';
 import { env } from './env';

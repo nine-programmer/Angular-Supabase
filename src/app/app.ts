@@ -1,3 +1,4 @@
+// Root component: layout shell that hosts the router outlet.
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 

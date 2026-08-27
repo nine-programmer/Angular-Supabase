@@ -1,7 +1,7 @@
+// Root /api router: mounts every feature router. server.ts imports only this file.
 import { Router } from 'express';
 import { healthRoutes } from './routes/health.routes';
 
-// Mount every feature router here. server.ts imports only this file.
 export const apiRouter = Router();
 
 apiRouter.use(healthRoutes);

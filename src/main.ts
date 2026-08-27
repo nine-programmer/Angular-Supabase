@@ -1,3 +1,4 @@
+// Browser entry point: bootstraps the app with the browser config.
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
