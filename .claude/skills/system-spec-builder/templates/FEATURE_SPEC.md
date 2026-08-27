@@ -31,7 +31,7 @@
 ### 1.7 กติกาธุรกิจ [LOCKED]
 | # | กติกา | บังคับที่ |
 |---|---|---|
-| R[n] | [ ] | [DB constraint / Postgres function / API] |
+| R[n] | [ ] | [DB constraint / Postgres function / conditional update / API — ตัวเลือกเดียวกับ SYSTEM_SPEC 1.7] |
 
 ### 1.8 เงื่อนไขว่า "ใช้ได้แล้ว"
 - [ ]

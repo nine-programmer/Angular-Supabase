@@ -179,8 +179,8 @@ service, and an anti-flash script.
 @custom-variant dark (&:where(.dark, .dark *));
 ```
 
-**2. A signal-based, SSR-safe service.** This app prerenders, so `document`, `window`, and
-`localStorage` do not exist during the build. Apply the theme from `afterRenderEffect()`, which
+**2. A signal-based, SSR-safe service.** This app renders on the server (and may prerender static
+routes), so `document`, `window`, and `localStorage` do not exist there. Apply the theme from `afterRenderEffect()`, which
 never runs on the server; keep the platform check only for the value that must be read at
 construction, before the first render.
 
@@ -235,8 +235,8 @@ export class ThemeService {
 }
 ```
 
-**3. Prevent the flash of the wrong theme.** Prerendered HTML ships without the `dark` class, so the
-page would paint light before Angular boots. Apply the class before first paint with an inline
+**3. Prevent the flash of the wrong theme.** Server-rendered HTML ships without the `dark` class, so
+the page would paint light before Angular boots. Apply the class before first paint with an inline
 script in `src/index.html`:
 
 ```html

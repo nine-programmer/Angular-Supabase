@@ -11,7 +11,7 @@
 ---
 
 ### [x] Task 1: ตั้งชื่อโปรเจกต์ + หน้าแรก
-- ทำ: ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`); หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts` และข้อความใน `src/app/app.html`) — Supabase เชื่อมไว้แล้วตอน clone template (README ข้อ 2); โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
+- ทำ: ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`); หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` และ `<title>` ใน `src/index.html`) — Supabase เชื่อมไว้แล้วตอน clone template (README ข้อ 2); โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
 - ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นข้อความ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1540-task-1-setup.md`
 

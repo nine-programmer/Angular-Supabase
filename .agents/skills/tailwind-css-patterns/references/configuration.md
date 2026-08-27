@@ -107,10 +107,14 @@ Use `static` to emit every variable even when unused (handy when reading tokens 
 
 The `@theme` block holds **placeholder values — replace them per project.** The `@layer base` block
 is the part worth keeping as-is: it repairs two Preflight behaviors that surprise people in every
-project.
+project. Keep the first two lines exactly as they are in the project's `src/styles.css` — the
+`source(none)` + `@source '../src'` allowlist is what keeps docs and skill folders out of the bundle
+(see "Keep documentation and agent-skill folders out of the bundle" below); do not replace it with a
+bare `@import 'tailwindcss';`.
 
 ```css
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
+@source '../src';
 
 @theme {
   /* PLACEHOLDER — swap in the real brand palette.

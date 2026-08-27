@@ -27,7 +27,7 @@ are true:
 | Piece | Location | Expected content |
 | --- | --- | --- |
 | PostCSS plugin | `.postcssrc.json` | `{ "plugins": { "@tailwindcss/postcss": {} } }` |
-| Stylesheet entry | `src/styles.css` | `@import 'tailwindcss';` |
+| Stylesheet entry | `src/styles.css` | `@import 'tailwindcss';` — in this template it is `@import 'tailwindcss' source(none);` + `@source '../src';` (an allowlist; keep both lines) |
 | Registered in build | `angular.json` → `styles` | `src/styles.css` |
 
 If all three are present, **do not re-run setup or add config files** — go straight to the patterns
@@ -259,7 +259,8 @@ scan that and nothing else — an allowlist, rather than chasing each new doc fo
 (`prefers-color-scheme: dark`). Change the OS/browser theme to test. A manual toggle requires
 `@custom-variant` — see `references/responsive-design.md`.
 
-**`document is not defined` during build or `ng serve`** — this app uses SSR with prerendering. Any
+**`document is not defined` during build or `ng serve`** — this app uses SSR (and may prerender
+static routes). Any
 DOM access belongs inside `afterNextRender()` / `afterRenderEffect()`; reach for
 `isPlatformBrowser(inject(PLATFORM_ID))` only when the branch has to happen at injection time.
 
