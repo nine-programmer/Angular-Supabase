@@ -289,7 +289,7 @@ code. It skips:
 @source '../src/app';
 ```
 
-### Exclude documentation and agent-skill folders
+### Keep documentation and agent-skill folders out of the bundle
 
 Markdown files are scanned like everything else, and fenced code blocks are just text to the
 scanner. Any project that keeps agent skills, a design system doc, or a component gallery in-repo
@@ -298,13 +298,16 @@ will compile **those examples' classes into the production bundle**.
 This is not hypothetical: leaving this very skill's `references/*.md` unexcluded added ~37 kB of
 dead CSS to a 45 kB bundle — 82% of the output, none of it reachable from the app.
 
-```css
-@import 'tailwindcss';
+Prefer an allowlist over a list of exclusions: in an Angular app every template lives under `src/`,
+and an allowlist stays correct when the next doc or tool folder appears (including root-level files
+like `AGENTS.md` and `README.md`, which no `@source not '../<folder>'` line covers).
 
-@source not '../.claude';
-@source not '../.agents';
-@source not '../docs';
+```css
+@import 'tailwindcss' source(none);
+@source '../src';
 ```
+
+Use `@source not '../<folder>'` only when the scan root must stay wide for another reason.
 
 Verify with a production build. If a utility you never used in `src/` appears in
 `dist/**/styles-*.css`, some scanned file mentions it:

@@ -135,7 +135,7 @@ waiting → called → done
 โครงสร้าง โฟลเดอร์ ชื่อไฟล์ และกติกาโค้ดใช้ตาม `docs/ARCHITECTURE.md` และ `AGENTS.md` ทุกข้อ ส่วนนี้มีแค่สิ่งที่ต่างกันต่อโปรเจกต์
 
 ### 2.1 Stack และ deploy
-- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.6
+- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.7
 - Deploy: Render (Node web service) ตั้ง env ใน dashboard รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render
 
 ### 2.2 API ที่ต้องมี [LOCKED]

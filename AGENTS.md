@@ -103,7 +103,7 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - Define colors, fonts, spacing, and breakpoints as CSS variables inside `@theme`, not in JavaScript.
 - Apply utility classes directly in templates. Use `@apply` sparingly and only inside component stylesheets for repeated patterns that cannot be expressed as a component.
 - Use `class` bindings (`[class.active]="isActive()"`) or `computed()` signals to toggle utility classes. Do NOT concatenate class strings in templates.
-- Keep the `@source not` exclusions in `src/styles.css` (agent skill folders, editor/tool config, `.sessions/`, `docs/`) so markdown that quotes class names is not scanned into the production bundle. Angular templates only live under `src/`, so add a new exclusion whenever a documentation or tool folder is added.
+- Keep `src/styles.css` scanning `src/` only (`@import 'tailwindcss' source(none);` + `@source '../src';`). Tailwind reads every non-ignored file as plain text, so markdown that quotes class names (`AGENTS.md`, `README.md`, agent skills, `.sessions/`, `docs/`) would otherwise compile its examples into the production bundle. Templates only live under `src/`, so this allowlist needs no maintenance — do NOT go back to listing `@source not` exclusions, and add a second `@source` line only for a real template/class source outside `src/`.
 - Use `dark:` variants with `prefers-color-scheme`, and container queries (`@container`, `@md:`) for component-level responsiveness.
 - All color pairings MUST meet WCAG AA contrast (see Accessibility Requirements).
 

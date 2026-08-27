@@ -1,16 +1,9 @@
-/* Tailwind entry point: @import, @theme design tokens, and @source exclusions live here. */
+/* Tailwind entry point: @import, @theme design tokens, and the scanned source root live here. */
 
-@import 'tailwindcss';
-
-/* Tailwind scans every non-ignored file as plain text, so markdown that quotes class
-   names (agent skills, editor/tool config, session logs, project docs) would otherwise
-   compile its examples into the production bundle (~37 kB of dead CSS). Templates only
-   ever live under src/, so excluding these directories is safe. */
-@source not '../.claude';
-@source not '../.agents';
-@source not '../.cursor';
-@source not '../.codex';
-@source not '../.gemini';
-@source not '../.vscode';
-@source not '../.sessions';
-@source not '../docs';
+/* Tailwind scans every non-ignored file as plain text, so any markdown that quotes class names
+   (AGENTS.md, README.md, agent skills, session logs, project docs) would compile its examples
+   into the production bundle. Angular templates only ever live under src/, so detection is turned
+   off and src/ is opted in explicitly — an allowlist that never drifts when a doc or tool folder
+   is added, unlike a list of @source not exclusions. */
+@import 'tailwindcss' source(none);
+@source '../src';

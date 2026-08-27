@@ -3,6 +3,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    /* "node" is required even though no spec uses it today: any spec for src/server/
+       transitively imports env.ts, which touches `process`, and fails to compile without it. */
     "types": ["vitest/globals", "node"]
   },
   "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]

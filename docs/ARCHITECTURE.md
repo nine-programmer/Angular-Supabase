@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.6 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.7 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -58,7 +58,7 @@ src/
 │
 ├── server.ts                              Express host เท่านั้น: mount /api แล้วส่งที่เหลือให้ Angular
 ├── main.ts · main.server.ts · index.html
-├── styles.css                             Tailwind: @import, @theme, @source not
+├── styles.css                             Tailwind: @import ... source(none) + @source '../src' (สแกนเฉพาะ src/), @theme
 └── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ (`environment.ts` + `environment.development.ts` สลับด้วย fileReplacements ใน angular.json)
 
 supabase/config.toml                       มากับ template (ไม่ต้องรัน `supabase init`); `.temp/` = ข้อมูล link ของเครื่องนี้
@@ -75,6 +75,8 @@ skills-lock.json                           บันทึกเวอร์ช�
 ```
 
 โฟลเดอร์ระดับบนสุดมีเท่าที่อยู่ในผังนี้ ถ้าจะเพิ่มใหม่ต้องถามผู้ใช้ก่อน (AGENTS.md → Project Structure & Docs)
+
+โฟลเดอร์ที่ template เตรียมไว้แต่ยังไม่มีไฟล์ (`src/app/ui/`, `src/app/features/`, `src/shared/dto/`, `src/shared/enums/`, `.sessions/`) มีไฟล์ `.gitkeep` ว่างไว้ตัวเดียวเพื่อให้โฟลเดอร์ติดไปกับ repo — ลบ `.gitkeep` ได้เมื่อโฟลเดอร์นั้นมีไฟล์จริงแล้ว และห้ามใช้เป็นที่เก็บอะไรอย่างอื่น
 
 ## 4. ทิศทาง import (ทางเดียว)
 

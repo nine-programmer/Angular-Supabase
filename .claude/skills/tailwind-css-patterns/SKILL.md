@@ -242,13 +242,15 @@ export class ItemCard {
 4. Genuinely need a runtime-computed name? Safelist it: `@source inline("bg-red-500");`.
 
 **The CSS bundle is far larger than the app's actual class usage** — something in the repo mentions
-classes the app never renders. Markdown is scanned like any other file, so in-repo docs, component
-galleries, and agent-skill folders (including this one) compile their examples into the bundle.
-Exclude them in `styles.css`:
+classes the app never renders. Markdown is scanned like any other file, so in-repo docs, root
+`AGENTS.md` / `README.md`, component galleries, and agent-skill folders (including this one)
+compile their examples into the bundle. In an Angular app every template lives under `src/`, so
+scan that and nothing else — an allowlist, rather than chasing each new doc folder with
+`@source not`:
 
 ```css
-@source not '../.claude';
-@source not '../.agents';
+@import 'tailwindcss' source(none);
+@source '../src';
 ```
 
 **`border` shows no color / `ring` looks thin** — v4 defaults (`currentColor`, 1px). Be explicit.
