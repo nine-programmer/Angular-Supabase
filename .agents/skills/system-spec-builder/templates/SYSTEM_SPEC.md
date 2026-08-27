@@ -83,7 +83,7 @@
 | R1 | [เช่น ยืมของที่ `available_qty` = 0 ไม่ได้] | [DB constraint `CHECK (available_qty >= 0)` + Postgres function] |
 | R2 | [เช่น เปลี่ยนสถานะได้ตามแผนผังใน 1.5 เท่านั้น] | [Postgres function] |
 
-ตัวเลือก "บังคับที่": `DB constraint` / `Postgres function` (งานที่ต้องอยู่ใน transaction เดียว) / `API` (ตรวจ input, สิทธิ์) — ห้ามบังคับที่ browser อย่างเดียว
+ตัวเลือก "บังคับที่": `DB constraint` / `Postgres function` (งานที่ต้องอยู่ใน transaction เดียว หรือเปลี่ยนสถานะที่มีผลข้างเคียง) / `conditional update` (เปลี่ยนสถานะแถวเดียวไม่มีผลข้างเคียง — ระบุสถานะเดิมที่ยอมรับ) / `API` (ตรวจ input, สิทธิ์) — ห้ามบังคับที่ browser อย่างเดียว
 
 ### 1.8 เงื่อนไขว่า "ใช้ได้แล้ว"
 - [ ] [เช่น เพิ่ม/แก้/ลบรายการได้ครบ]

@@ -17,13 +17,13 @@ Section 2 ของ SYSTEM_SPEC จึงมีแค่ *สิ่งที่�
 
 - Browser เรียก `/api/*` เท่านั้น → server (`src/server/services/`) เรียก Supabase ด้วย `service_role` — ไม่มี anon key ฝั่ง browser
 - ทุกตารางเปิด RLS ไม่มี policy (ปิดตาย) สิทธิ์ตัดสินที่ API
-- กติกาที่ต้อง atomic (นับสต็อก, เลขรัน, เปลี่ยนสถานะ) → Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint; เขียนชื่อ function ไว้ในคอลัมน์ "บังคับที่" ของ 1.7 เลย
+- กติกาที่ต้อง atomic (นับสต็อก, เลขรัน, เปลี่ยนสถานะที่มีผลข้างเคียง เช่น จด log / ตั้งเวลา) → Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint; เขียนชื่อ function ไว้ในคอลัมน์ "บังคับที่" ของ 1.7 เลย — เฉพาะการเปลี่ยนสถานะแถวเดียวที่ไม่มีผลข้างเคียง ใช้ `conditional update` ใน service แทนได้ (ดู AGENTS.md → API Layer)
 - ค่าสถานะ = `CHECK` ใน DB + `shared/enums/<feature>.enums.ts` ค่าเดียวกัน
 - ทุก request body ตรวจด้วย zod schema ใน `shared/dto/<feature>.dto.ts` (type ได้จาก `z.infer`) → 1.5/1.7 ต้องบอกพอที่จะเขียน schema ได้: ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า รูปแบบ
 - ฐานข้อมูลอยู่บน Supabase cloud เท่านั้น ไม่มี local/Docker: migration ใช้ `npm run db:migration` → `npm run db:push`, types ใช้ `npm run db:types` (ชื่อไฟล์ migration CLI ตั้งให้เป็น `<timestamp>_name.sql`)
 - 1 feature = 1 โฟลเดอร์ใน `src/app/features/` + 1 คู่ `routes/services` ใน `src/server/` + 1 `dto`
 - ทุกตารางมี `id uuid` + `created_at timestamptz` อัตโนมัติ ไม่ต้องเขียนใน spec ซ้ำทุกครั้ง แต่ template 1.5 แสดงไว้ให้เห็น
-- ระบบเล็ก: `src/server/routes/` + `services/` แบบ flat; ถ้า spec มี > 5 resource ให้ระบุใน 2.4 ว่าใช้ `src/server/features/<feature>/` (ARCHITECTURE.md ข้อ 9)
+- ระบบเล็ก: `src/server/routes/` + `services/` แบบ flat; ARCHITECTURE.md ข้อ 9 ให้ตัดสินตอนเขียน SYSTEM_SPEC ว่าจะจัดกลุ่มเป็น `src/server/features/<feature>/` หรือไม่ — เกณฑ์ของ skill นี้คือ resource > 5 ให้ระบุใน 2.4
 
 ## เมื่อผู้ใช้เลือก stack อื่น
 
