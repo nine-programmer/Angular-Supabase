@@ -27,7 +27,7 @@ Round 1 is always flat. Create `docs/features/<name>/` only when a SYSTEM_SPEC a
 
 SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks and updates the header line; after each passed task it offers to write a `.sessions/` log (only on the user's yes) and asks whether to continue in this session or a new one — it never starts the next task unprompted.
 
-If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and note in Task 1 that the files move into the cloned repo.
+If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and remind them that the files move into the cloned repo and that the template's README setup (clone, `npm install`, `.env`, Supabase login/link/`db:push`) must be done before Task 1.
 
 ## Workflow
 
@@ -97,7 +97,7 @@ Rules that make the documents buildable by any agent:
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.
 - **Every task has a test line** with behaviour the user can see. Add a "spec ... ผ่าน `npm test`" clause ONLY when a file in that task has calculations, complex logic, or code that will change often (see AGENTS.md → Testing); name the file and what it verifies (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). Plain CRUD / pass-through tasks get no spec clause.
 - **Task size is fixed**: 1 task = 1 screen, or 1 API resource together with the screen that uses it (list + create + edit of one resource is one task). Round 1 has 6–12 tasks; if more, merge or move features to "รอบถัดไป"; if fewer than 6, split.
-- **Tasks are ordered**: clone template + connect Supabase → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 always clones the template and sets up `.env` — the server skeleton (`src/server/`, the SSR interceptor, `provideHttpClient`) already ships with the template, so it is not a task.
+- **Tasks are ordered**: name the project + first page → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 only renames the project and puts the system name on `/`. Connecting Supabase (`.env`, login, link, pushing the template's `*_health.sql` migration) is part of the template's README setup done BEFORE any spec, and the server skeleton (`src/server/` incl. `/api/health`, the SSR interceptor, `provideHttpClient`) ships with the template — none of that is a task.
 - **Every table is used by at least one feature.**
 - **Field names in English (snake_case), labels in Thai.**
 - **Keep it small.** SYSTEM_SPEC 100–180 lines, TASKS 40–80 lines. If longer, trim into "รอบถัดไป".
@@ -112,7 +112,7 @@ Save with status `ร่าง (รอ review)` and the TASKS header at `ผ่�
 - [ ] Every rule in 1.7 has a "บังคับที่" that is not "browser" and names the constraint/function
 - [ ] Every API path in 2.2 cites a rule or "—" and appears in a task
 - [ ] Every table and every field appears in a feature, flow, rule, or task; every feature has a row in 2.3
-- [ ] TASKS: round 1 = 6–12 tasks with Task 1 cloning the template; feature round = 2–6 tasks with Task 1 = migration; every task has `ทดสอบ:` and `ผล: —`; header counts match
+- [ ] TASKS: round 1 = 6–12 tasks with Task 1 = project name + first page (no Supabase setup — that is README setup); feature round = 2–6 tasks with Task 1 = migration; every task has `ทดสอบ:` and `ผล: —`; header counts match
 - [ ] Nothing copied from ARCHITECTURE.md / AGENTS.md; Section 2 only holds project-specific items
 - [ ] Nothing requires the browser to talk to Supabase directly or falls in `references/template-scope.md` "ไม่พอดี"
 

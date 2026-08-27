@@ -2,7 +2,7 @@
 import 'dotenv/config';
 
 // Throws with the variable NAME so a missing secret is reported clearly, not as
-// a confusing Supabase error later. Runs when supabase.ts is first imported.
+// a confusing Supabase error later. Runs when getSupabase() is first called.
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -20,7 +20,7 @@ if (!process.env['NG_ALLOWED_HOSTS']) {
 }
 
 // supabaseUrl/supabaseServiceRoleKey are lazy getters: they throw only when read
-// (by supabase.ts), not merely by importing this module.
+// (by getSupabase() in supabase.ts), not merely by importing this module.
 export const env = {
   get supabaseUrl() {
     return required('SUPABASE_URL');

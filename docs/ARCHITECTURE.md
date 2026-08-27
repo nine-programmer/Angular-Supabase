@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.5 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.6 | อัปเดต: 2026-08-27
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -46,10 +46,10 @@ src/
 │
 ├── server/                                API layer — รันบน Node เท่านั้น
 │   ├── env.ts                             อ่าน + ตรวจ process.env ที่เดียว
-│   ├── supabase.ts                        createClient<Database>() ตัวเดียวของทั้งระบบ
+│   ├── supabase.ts                        createClient<Database>() ตัวเดียวของทั้งระบบ — lazy singleton ผ่าน getSupabase()
 │   ├── api.ts                             รวม router ทุก feature ไว้ใต้ /api (server.ts import ตัวนี้ตัวเดียว)
-│   ├── routes/<feature>.routes.ts         1 ไฟล์ = 1 resource → express.Router
-│   └── services/<feature>-server.service.ts   business logic; ที่เดียวที่เรียก Supabase
+│   ├── routes/<feature>.routes.ts         1 ไฟล์ = 1 resource → express.Router (มากับ template: health.routes.ts)
+│   └── services/<feature>-server.service.ts   business logic; ที่เดียวที่เรียก Supabase — รับ client เป็น parameter สุดท้าย `db = getSupabase()` (มากับ template: health-server.service.ts)
 │
 ├── shared/                                ใช้ร่วมทั้ง app/ และ server/ — TypeScript ล้วน ไม่มี Node/browser global
 │   ├── types/database.types.ts            สร้างจาก `npm run db:types` ห้ามเขียนมือ
@@ -62,11 +62,11 @@ src/
 └── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ (`environment.ts` + `environment.development.ts` สลับด้วย fileReplacements ใน angular.json)
 
 supabase/config.toml                       มากับ template (ไม่ต้องรัน `supabase init`); `.temp/` = ข้อมูล link ของเครื่องนี้
-supabase/migrations/<timestamp>_description.sql   1 ไฟล์ต่อ 1 การเปลี่ยน schema (CLI ตั้งชื่อให้ ห้ามเปลี่ยน)
+supabase/migrations/<timestamp>_description.sql   1 ไฟล์ต่อ 1 การเปลี่ยน schema (CLI ตั้งชื่อให้ ห้ามเปลี่ยน) — มากับ template 1 ไฟล์: `*_health.sql` สร้าง function `health()` ให้ `/api/health` ใช้ตรวจการเชื่อมต่อ (ห้ามลบ)
 docs/                                      เอกสารของโปรเจกต์ (ดูข้อ 7)
 .sessions/YYYY-MM-DD-HHmm-<task-slug>.md   บันทึกงานเมื่อ Task ผ่าน (agent ถามผู้ใช้ก่อนทุกครั้ง) — ความจำร่วมให้ AI เจ้าอื่นทำต่อได้ (ดูข้อ 7)
 public/                                    static assets
-.env.example                               ชื่อตัวแปร (อยู่ใน template) · .env ค่าจริง (เครื่องนี้เท่านั้น ห้ามส่งต่อ)
+.env.example                               ชื่อตัวแปร + comment อธิบายทุกตัว (อยู่ใน template — ไฟล์เดียวที่ agent อ่านได้) · .env ค่าจริง (เครื่องนี้เท่านั้น ห้ามส่งต่อ ห้าม agent อ่าน)
 AGENTS.md · CLAUDE.md                      กติกาโค้ด
 .claude/skills/ · .agents/skills/          skill ของ AI agent (สองโฟลเดอร์ต้องเหมือนกันทุกไฟล์) — ถ้าขัดกับ AGENTS.md ให้ยึด AGENTS.md
 skills-lock.json                           บันทึกเวอร์ชันของ skill ที่ดึงมาจากภายนอก (skill ที่ดูแลเองไม่อยู่ในนี้)
@@ -108,7 +108,7 @@ service ฝั่ง browser กับ server ของ feature เดียว�
 - ทุกตาราง **เปิด RLS โดยไม่มี policy** ให้ `anon` / `authenticated` (ปิดตาย) — เข้าถึงได้ทาง `service_role` ของ server เท่านั้น
 - ค่าสถานะใน DB บังคับด้วย `CHECK (status IN (...))` และค่าเดียวกันประกาศใน `shared/enums/` เป็น `as const` object + union type (ไม่ใช้ TS `enum`)
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรันต่อเนื่อง, เปลี่ยนสถานะ) อยู่ใน Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint — ไม่ทำแบบอ่านแล้วค่อยเขียนใน API
-- ฐานข้อมูลอยู่บน Supabase cloud เท่านั้น (ไม่ใช้ local/Docker) — เชื่อม CLI ครั้งเดียวด้วย `npx supabase login` + `npm run db:link -- --project-ref <ref>`
+- ฐานข้อมูลอยู่บน Supabase cloud เท่านั้น (ไม่ใช้ local/Docker) — ตั้งค่าครั้งเดียวตอน clone template ก่อนเขียน spec (ตาม README): `.env` → `npx supabase login` → `npm run db:link -- --project-ref <ref>` → `npm run db:push` (push migration `*_health.sql` ที่มากับ template) → `npm run db:types` → เปิด `/api/health` ต้องได้ `{ ok: true }` — ถ้าไม่ได้ ข้อความ error จะบอกว่าต้องแก้ตรงไหน (URL / key / ยังไม่ push)
 - เปลี่ยน schema = เพิ่มไฟล์ migration เท่านั้น (`npm run db:migration -- <description>`) → `npm run db:push` ขึ้น cloud → `npm run db:types` ใหม่
 
 ## 7. เอกสารและบันทึกของโปรเจกต์
@@ -137,6 +137,8 @@ SUPABASE_SERVICE_ROLE_KEY=      # server เท่านั้น ห้าม�
 PORT=4000
 NG_ALLOWED_HOSTS=localhost      # โดเมนที่ SSR ยอมเรนเดอร์ให้ (คั่นด้วย , ) ตั้งเป็นโดเมนจริงก่อน deploy มิฉะนั้นทุกหน้าจะได้ 400
 ```
+
+คำอธิบายเต็มของแต่ละตัว (คืออะไร เอามาจากไหน ใครใช้) อยู่ใน `.env.example` — agent อ่านไฟล์นั้นแทน `.env` เสมอ และตัวแปรใหม่ของโปรเจกต์ต้องเพิ่มที่นั่นพร้อม comment (AGENTS.md → Supabase)
 
 คำสั่งทั้งหมดเป็น npm script ใน `package.json` (รายการพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` แล้ว `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ Supabase `db:migration` → `db:push` → `db:types` (ข้อ 6)
 

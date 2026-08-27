@@ -10,14 +10,14 @@
 
 ---
 
-### [x] Task 1: ตั้งโปรเจกต์ + เชื่อม Supabase
-- ทำ: clone template `Angular-Supabase` → ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`) → `npm install`; สร้าง `.env` จาก `.env.example` ใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`; `npx supabase login` แล้ว `npm run db:link -- --project-ref <ref>` (<ref> จาก URL ของ dashboard); หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts` และข้อความใน `src/app/app.html`) — โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
-- ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นข้อความ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน (ยังตรวจ `.env` ไม่ได้ที่ Task นี้ — ไม่มีจุดใดเรียก Supabase จริงจนกว่าจะถึง Task 2)
+### [x] Task 1: ตั้งชื่อโปรเจกต์ + หน้าแรก
+- ทำ: ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`); หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts` และข้อความใน `src/app/app.html`) — Supabase เชื่อมไว้แล้วตอน clone template (README ข้อ 2); โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
+- ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นข้อความ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1540-task-1-setup.md`
 
 ### [x] Task 2: ฐานข้อมูล
-- ทำ: `npm run db:migration -- init` → ไฟล์ใน `supabase/migrations/` ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `npm run db:push` → `npm run db:types`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เปลี่ยนเป็นตอบ `{ ok: true, count: 3 }`
-- ทดสอบ: `npm run db:push` สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; ลบ `.env` แล้วเปิด `/api/health` ต้อง error บอกชื่อตัวแปรที่ขาด; เรียก `create_booking()` 3 ครั้งได้ 1,2,3; `set_booking_status` จาก done → waiting ต้อง error
+- ทำ: `npm run db:migration -- init` → ไฟล์ใน `supabase/migrations/` (ต่อจาก `*_health.sql` ของ template) ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `npm run db:push` → `npm run db:types`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เพิ่ม `count` ของ `services` → ตอบ `{ ok: true, count: 3 }`
+- ทดสอบ: `npm run db:push` สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; เรียก `create_booking()` 3 ครั้งได้ 1,2,3; `set_booking_status` จาก done → waiting ต้อง error
 - ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-2-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
 
 ### [~] Task 3: F1 จัดการบริการ

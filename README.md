@@ -13,7 +13,26 @@ cd <ชื่อโปรเจกต์ลูกค้า>
 npm install
 ```
 
-### 2. เขียน spec ด้วย skill `system-spec-builder`
+### 2. ตั้งค่า Supabase (ทำได้ทันที ไม่ต้องรอ spec)
+
+สร้างโปรเจกต์ใหม่ที่ [supabase.com](https://supabase.com) แล้วคัดลอก `.env.example` เป็น `.env`:
+
+```bash
+cp .env.example .env
+```
+
+ใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ตามคำอธิบายในไฟล์ (ไฟล์ `.env` อยู่เครื่องนี้เท่านั้น ห้ามส่งต่อ อัปโหลด หรือให้ AI agent อ่าน — agent อ่าน `.env.example` แทน) แล้วเชื่อม Supabase CLI กับโปรเจกต์ครั้งเดียว — ไม่ต้องมี Docker:
+
+```bash
+npx supabase login                       # เปิด browser ให้ล็อกอิน
+npm run db:link -- --project-ref <ref>   # <ref> คือรหัสใน URL: supabase.com/dashboard/project/<ref> (ถ้าถามรหัสผ่านฐานข้อมูล ใส่รหัสที่ตั้งตอนสร้างโปรเจกต์)
+npm run db:push                          # ส่ง migration ที่มากับ template (function health()) ขึ้นโปรเจกต์
+npm run db:types                         # สร้าง type จากโปรเจกต์ที่ link ไว้
+```
+
+ตรวจว่าเชื่อมได้จริง: `npm start` แล้วเปิด http://localhost:4200/api/health ต้องได้ `{"ok":true}` — ถ้าไม่ได้ ข้อความ `error` จะบอกว่าต้องแก้ตรงไหน (URL ผิด / key ผิดหรือเป็น anon key / ยังไม่ได้ `db:push`) ถึงตรงนี้โปรเจกต์พร้อมรับ migration ของระบบจริงแล้ว
+
+### 3. เขียน spec ด้วย skill `system-spec-builder`
 
 เปิดโปรเจกต์ด้วย Claude Code (หรือ AI agent ที่รองรับ skill นี้) แล้วพิมพ์ไอเดียของระบบเป็นประโยคเดียว เช่น "อยากได้ระบบยืมคืนอุปกรณ์ในออฟฟิศ" — skill จะ:
 
@@ -23,21 +42,6 @@ npm install
 4. สรุปให้ยืนยันก่อนเขียนไฟล์
 5. เขียน `docs/SYSTEM_SPEC.md` (สิ่งที่ต้องสร้าง — locked หลัง review) และ `docs/TASKS.md` (ลำดับงาน + ความคืบหน้า)
 6. ส่งให้ agent อีกตัวตรวจแบบ "Tech Lead ขี้บ่น" ก่อนเปลี่ยนสถานะเป็น "พร้อมสร้าง"
-
-### 3. ตั้งค่า Supabase
-
-สร้างโปรเจกต์ใหม่ที่ [supabase.com](https://supabase.com) แล้วคัดลอก `.env.example` เป็น `.env`:
-
-```bash
-cp .env.example .env
-```
-
-ใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ให้ครบ (ไฟล์ `.env` อยู่เครื่องนี้เท่านั้น ห้ามส่งต่อหรืออัปโหลด) แล้วเชื่อม Supabase CLI กับโปรเจกต์ครั้งเดียว — ไม่ต้องมี Docker:
-
-```bash
-npx supabase login                       # เปิด browser ให้ล็อกอิน
-npm run db:link -- --project-ref <ref>   # <ref> คือรหัสใน URL: supabase.com/dashboard/project/<ref> (ถ้าถามรหัสผ่านฐานข้อมูล ใส่รหัสที่ตั้งตอนสร้างโปรเจกต์)
-```
 
 ### 4. สั่งให้ agent เริ่มสร้างทีละ Task
 
@@ -69,6 +73,8 @@ npm run db:types                       # สร้าง src/shared/types/databa
 ```
 
 Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่ต้องติดตั้ง global — เรียกผ่าน `npx supabase <cmd>` หรือ script ด้านบนได้เลย
+
+Template มี migration มาให้ 1 ไฟล์ (`supabase/migrations/*_health.sql` → function `health()` ที่เรียกได้เฉพาะ `service_role`) ซึ่ง `GET /api/health` ใช้ตรวจว่า `.env` และ `db:push` ใช้ได้ — ห้ามลบหรือเปลี่ยนชื่อ migration ของระบบจริงจะต่อจากไฟล์นี้ไป
 
 ## เอกสารของ template
 
