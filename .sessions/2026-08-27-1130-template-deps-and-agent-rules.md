@@ -67,9 +67,13 @@ Re-checked this log against AGENTS.md, ARCHITECTURE.md, README, the `system-spec
 - `db:types` writes to `database.types.tmp` then renames, so a failed CLI call (not logged in / not linked) no longer truncates the real file; `.gitignore` ignores the `.tmp`.
 - TASKS template + example Task 1: also rename `project_id` in `supabase/config.toml`.
 
+## Update 13:15 — removed the `supabase` skill
+
+Deleted `.claude/skills/supabase/` + `.agents/skills/supabase/` and its `skills-lock.json` entry. Reason: its content is client-side Auth/Realtime/Storage/Edge Functions and a local-first migration workflow (`db query` → `db pull --local`) — none of which this template uses — and its "ANY Supabase task" trigger kept pulling agents toward local Docker. Kept `supabase-postgres-best-practices` (constraints, data types, FK indexes, advisory locks, upsert — all directly used by the template's DB-enforced rules). The only useful bit of the removed skill (no `SECURITY DEFINER` as a permission workaround; set `search_path` if one is ever needed) is now a line in AGENTS.md → Supabase. README notes the removal so nobody reinstalls it.
+
 ## Final state (what is true now)
 
 - Git is never used or mentioned by the agent. End of task = tick TASKS.md → ask about `.sessions/` log → closing question (feature round: prompt from that feature's SPEC.md) → wait.
 - Supabase is cloud-only: `npx supabase login` + `npm run db:link -- --project-ref <ref>` once; then `db:migration` → `db:push` → `db:types` (`--linked`, via tmp file). `supabase/config.toml` ships with the template.
-- `.claude/skills/` and `.agents/skills/` are identical copies; third-party skills are reference only and AGENTS.md wins.
+- `.claude/skills/` and `.agents/skills/` are identical copies; third-party skills (`supabase-postgres-best-practices`, `angular-developer`, `angular-new-app`, `tailwind-css-patterns`) are reference only and AGENTS.md wins. The `supabase` skill was removed on purpose.
 - Prettier is the only formatter (no ESLint); `npm run format` then `npm test` before reporting a task done; 300-line limit counted after formatting.

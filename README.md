@@ -79,4 +79,4 @@ Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่�
 | `.claude/skills/system-spec-builder/`        | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                                                                        |
 | `.agents/skills/`                            | สำเนาของ `.claude/skills/` สำหรับ AI agent เจ้าอื่น — ต้องเหมือนกันทุกไฟล์ ถ้าแก้ฝั่งหนึ่งให้คัดลอกทับอีกฝั่งเสมอ |
 
-Skill ภายนอก (`supabase`, `supabase-postgres-best-practices`, `angular-developer`, `tailwind-css-patterns`) เป็นความรู้ทั่วไป ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy)
+Skill ภายนอก (`supabase-postgres-best-practices`, `angular-developer`, `angular-new-app`, `tailwind-css-patterns`) เป็นความรู้ทั่วไป ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy) — skill `supabase` ของ Supabase ถูกเอาออกโดยตั้งใจ เพราะเนื้อหาส่วนใหญ่เป็น Auth/Realtime/Storage ฝั่ง client และ workflow แบบ local ที่ template นี้ไม่ใช้ ไม่ต้องติดตั้งกลับ
