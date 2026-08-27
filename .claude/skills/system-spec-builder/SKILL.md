@@ -95,7 +95,7 @@ Rules that make the documents buildable by any agent:
 - **Every business rule (1.7) names where it is enforced** — DB constraint, Postgres function, or API — and names the function or constraint. A rule enforced only in the browser is not a rule. Atomic rules (counters, sequential numbers, status transitions) go in a Postgres function or constraint.
 - **Every field in 1.5 is used** by a feature, a flow step, or a rule. A field nobody reads is scope creep.
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.
-- **Every task has a test line** with behaviour the user can see, plus "spec ผ่าน `npm test`" for any task that adds a service.
+- **Every task has a test line** with behaviour the user can see. Add a "spec ... ผ่าน `npm test`" clause ONLY when a file in that task has calculations, complex logic, or code that will change often (see AGENTS.md → Testing); name the file and what it verifies (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). Plain CRUD / pass-through tasks get no spec clause.
 - **Task size is fixed**: 1 task = 1 screen, or 1 API resource together with the screen that uses it (list + create + edit of one resource is one task). Round 1 has 6–12 tasks; if more, merge or move features to "รอบถัดไป"; if fewer than 6, split.
 - **Tasks are ordered**: clone template + connect Supabase → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 always clones the template and sets up `.env` — the server skeleton (`src/server/`, the SSR interceptor, `provideHttpClient`) already ships with the template, so it is not a task.
 - **Every table is used by at least one feature.**

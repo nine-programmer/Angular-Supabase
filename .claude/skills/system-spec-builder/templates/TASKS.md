@@ -4,7 +4,7 @@
 
 สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
 
-กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรก 6–12 Task; รอบ feature 2–6 Task ไม่มี Task 1–2 ด้านล่าง เริ่มที่ migration `NNN_<name>.sql` + gen types + enums; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; ทุก Task ที่เพิ่ม service ต้องมี spec ผ่าน `npm test`
+กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรก 6–12 Task; รอบ feature 2–6 Task ไม่มี Task 1–2 ด้านล่าง เริ่มที่ migration `NNN_<name>.sql` + gen types + enums; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
 
 ---
 
@@ -20,7 +20,7 @@
 
 ### [ ] Task 3: F1 [ชื่อฟีเจอร์]
 - ทำ: API [ ] (`src/server/routes/[name].routes.ts` + `src/server/services/[name]-server.service.ts`, dto ใน `src/shared/dto/[name].dto.ts`); หน้า `[path]` ใน `src/app/features/[name]/` + `[name]-client.service.ts`; route lazy-load ใน `app.routes.ts` และ RenderMode ใน `app.routes.server.ts`
-- ทดสอบ: [พฤติกรรมที่ผู้ใช้เห็น]; spec ทั้งสองฝั่งผ่าน `npm test`
+- ทดสอบ: [พฤติกรรมที่ผู้ใช้เห็น][; spec `[file].spec.ts`: [สิ่งที่ตรวจ เช่น การคำนวณ X] ผ่าน `npm test` — ใส่เฉพาะเมื่อ Task นี้มีไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย]
 - ผล: —
 
 [ต่อไปจนครบทุกฟีเจอร์ใน SPEC 1.3]

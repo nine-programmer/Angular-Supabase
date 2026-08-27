@@ -108,7 +108,8 @@ The same Angular SSR process serves BOTH the frontend and the backend API. The b
 - Use `TestBed` for component and service tests. Because the app is zoneless, use `await fixture.whenStable()` instead of `fixture.detectChanges()` to flush signal updates before asserting on the DOM.
 - Browser-side services: mock HTTP with `provideHttpClient()` + `provideHttpClientTesting()` and assert on the `/api/*` calls. Server-side services under `src/server/`: mock the Supabase client module with `vi.mock('./supabase')`. Never hit a real Supabase project from unit tests.
 - Co-locate spec files with the code under test (`foo.ts` → `foo.spec.ts`).
-- Every new service and non-trivial component MUST ship with a spec.
+- Do NOT write a spec for every file. Write unit tests ONLY for code that meets at least one of these: (1) it performs calculations or non-trivial data transformation (totals, date/queue arithmetic, sorting/grouping rules, status-transition logic); (2) it is expected to change frequently; (3) it is complex enough that a test is needed to verify or safely modify it. Plain CRUD routes, pass-through services that only forward to Supabase/`.rpc()`, simple display components, DTOs, and enums do NOT need a spec.
+- When a task does need tests, the TASKS.md test line must say which file/function is tested and why (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). If no file in the task meets the criteria, do not add a spec line.
 
 ## Project Structure & Docs
 
@@ -124,6 +125,6 @@ This repository is a template: each customer mini app is cloned from it into its
 - Always communicate with the user in Thai. Code, comments, identifiers, and commit messages stay in English.
 - Do NOT guess. If any part of a request is unclear or you are not confident, ask the user clarifying questions first and wait for answers before proceeding.
 - Keep every file under 300 lines unless truly unavoidable. If a file grows beyond that, split it into smaller components, services, or modules and import them.
-- Write unit tests for any code that is complex or expected to change frequently.
+- Write unit tests only for code that has calculations, is complex, or is expected to change frequently — see the Testing section for the exact criteria. Do not add specs to simple CRUD or pass-through code.
 - Any variable, constant, or function used more than once MUST be extracted into the project's designated shared location and imported, never duplicated.
 - Comment every function, component, variable, or block that is important or non-obvious: the single Supabase client, environment validation, HTTP interceptors, provider/registration order that matters (e.g. why a server-only provider is registered after the shared one so it overrides it), business-rule enforcement (Postgres functions/constraints), workarounds, and anything a future reader could misuse without the reasoning. One short line explaining *why* is enough — do not restate *what* the code already says, and do not comment routine CRUD or self-explanatory code.
