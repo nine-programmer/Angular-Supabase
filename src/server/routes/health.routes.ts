@@ -4,7 +4,7 @@ import { checkDatabase } from '../services/health-server.service';
 
 export const healthRoutes = Router();
 
-// Template placeholder: TASKS.md Task 2 (database) extends the response with
+// Template placeholder: the database task in TASKS.md extends the response with
 // `count` of the main table once that table exists.
 healthRoutes.get('/health', async (_req, res) => {
   try {

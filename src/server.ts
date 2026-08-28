@@ -18,7 +18,10 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-app.use(express.json());
+// Hosts such as Render sit behind a proxy: trust its X-Forwarded-* headers so req.secure is
+// true on https and secure cookies work in production.
+app.set('trust proxy', 1);
+
 // Must be mounted before the Angular catch-all below, or every /api/* request
 // would be swallowed by angularApp.handle() instead of reaching apiRouter.
 app.use('/api', apiRouter);

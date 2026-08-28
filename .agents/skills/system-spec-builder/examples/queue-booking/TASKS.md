@@ -23,22 +23,22 @@
 
 ### [x] Task 3: ฐานข้อมูล
 - ทำ: `npm run db:migration -- init` → ไฟล์ใน `supabase/migrations/` (ต่อจาก `*_health.sql` ของ template) ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `npm run db:push` → `npm run db:types`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เพิ่ม `count` ของ `services` → ตอบ `{ ok: true, count: 3 }`
-- ทดสอบ: `npm run db:push` สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; เรียก `create_booking()` 3 ครั้งได้ 1,2,3; `set_booking_status` จาก done → waiting ต้อง error
-- ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-2-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
+- ทดสอบ: `npm run db:push` สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; agent ให้ SQL block วางใน Supabase SQL Editor: `create_booking()` 3 ครั้งได้ 1,2,3 และ `set_booking_status` จาก done → waiting ขึ้น error ภาษาไทย (block rollback ตัวเอง)
+- ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-3-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
 
 ### [~] Task 4: F1 จัดการบริการ
 - ทำ: API GET/POST/PUT `/api/services` (`src/server/routes/services.routes.ts` + `services/services-server.service.ts`, dto ใน `src/shared/dto/services.dto.ts`); หน้า `/staff/services` ใน `src/app/features/services/` (`pages/service-manager.page.ts`, `services-client.service.ts`): ตารางบริการ + ฟอร์มเพิ่ม/แก้ + สวิตช์เปิด/ปิดใช้ ตาม pattern ใน `docs/DESIGN.md`; route lazy-load + `RenderMode.Server`
-- ทดสอบ: เพิ่มบริการใหม่ → รีเฟรช → ยังอยู่; ปิดใช้ → `GET /api/services?active=true` ไม่มีรายการนั้น (CRUD ธรรมดา — ไม่ต้องมี spec)
+- ทดสอบ: เพิ่มบริการใหม่ → รีเฟรช → ยังอยู่; ปิดใช้ → สวิตช์เปลี่ยนและรีเฟรชแล้วยังปิดอยู่ (CRUD ธรรมดา — ไม่ต้องมี spec)
 - ผล: —
 
 ### [ ] Task 5: F2 รับคิว (ฝั่งลูกค้า)
 - ทำ: API `POST /api/bookings` (ตรวจ R3 → `create_booking()`), `GET /api/bookings/:id` (+ `service_name`, `ahead` ตามนิยามใน 2.2) ใน `bookings.routes.ts` + `bookings-server.service.ts`, dto ใน `bookings.dto.ts`; หน้า `/` (`pages/booking-form.page.ts`): รายการบริการที่เปิด → ฟอร์มชื่อ/เบอร์ → "รับคิว" → ไป `/ticket/:id`; หน้า `/ticket/:id` (`pages/ticket.page.ts`): เลขคิว, บริการ, "อีก N คิวถึงคุณ", polling 10 วินาที; `bookings-client.service.ts`
-- ทดสอบ: รับคิว 3 ครั้งได้เลข 1,2,3; เปิด ticket ของคิว 3 เห็น "อีก 2 คิว"; รับคิวบริการที่ปิดอยู่ได้ error ภาษาไทย (400); spec `bookings-server.service.spec.ts`: คำนวณ `ahead` (นับเฉพาะ waiting/called ที่ `queue_no` น้อยกว่า) ผ่าน `npm test`
+- ทดสอบ: รับคิว 3 ครั้งได้เลข 1,2,3; เปิด ticket ของคิว 3 เห็น "อีก 2 คิว"; บริการที่ปิดใช้ใน Task 4 ไม่แสดงบนหน้า `/`; เปิดฟอร์มค้างไว้แล้วให้ช่างปิดบริการนั้นในอีกแท็บ กดรับคิว → error ภาษาไทย (400); spec `bookings-server.service.spec.ts`: คำนวณ `ahead` (นับเฉพาะ waiting/called ที่ `queue_no` น้อยกว่า) ผ่าน `npm test`
 - ผล: —
 
 ### [ ] Task 6: F3 จัดการคิว (ฝั่งช่าง)
 - ทำ: API `GET /api/bookings/today` (+ `service_name`), `PATCH /api/bookings/:id/status` → `set_booking_status()`; หน้า `/staff` (`pages/queue-board.page.ts`): 3 กลุ่มตาม 1.6 ข้อ 4; ปุ่ม เรียก/เสร็จ/ยกเลิก; polling 10 วินาที; ลำดับ route ตาม 2.3
-- ทดสอบ: กดเรียกคิว 1 → status = called, called_at มีค่า; กดเสร็จ → done; PATCH done → waiting ได้ 400; ticket ของคิว 3 ตอนคิว 1 เป็น called ยังเห็น "อีก 2 คิว" และหลัง done เห็น "อีก 1 คิว" (route ส่งต่อไป `set_booking_status()` อย่างเดียว — logic อยู่ใน DB function ตาม Task 3 ไม่ต้องมี spec)
+- ทดสอบ: กดเรียกคิว 1 → คิว 1 ย้ายไปกลุ่ม "กำลังเรียก" และแสดงเวลาที่เรียก; กดเสร็จ → ย้ายไปกลุ่ม "เสร็จแล้ว"; ไม่มีปุ่มย้อนสถานะบนหน้าจอ (การบังคับอยู่ใน `set_booking_status()` → `P0409` ทดสอบแล้วใน Task 3); ticket ของคิว 3 ตอนคิว 1 เป็น called ยังเห็น "อีก 2 คิว" และหลัง done เห็น "อีก 1 คิว" (route ส่งต่อไป `set_booking_status()` อย่างเดียว — logic อยู่ใน DB function ตาม Task 3 ไม่ต้องมี spec)
 - ผล: —
 
 ### [ ] Task 7: F4 จอแสดงคิว
@@ -47,6 +47,6 @@
 - ผล: —
 
 ### [ ] Task 8: ปิดงาน
-- ทำ: ยืนยันว่า `queue_no` เริ่ม 1 ใหม่เมื่อ `queue_date` เปลี่ยน (แก้วันที่ในฐานข้อมูลเพื่อทดสอบ); ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; ทุกหน้าใช้ token/pattern ตาม `docs/DESIGN.md`; error ทุกจุดแสดงข้อความไทย; เขียน README.md (วิธีตั้ง Supabase, วิธีรัน, วิธี deploy ขึ้น Render, รายการ env รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render)
+- ทำ: ยืนยันว่า `queue_no` เริ่ม 1 ใหม่เมื่อ `queue_date` เปลี่ยน (agent ให้ SQL block แก้ `queue_date` ของแถวทดสอบเป็นเมื่อวาน แล้วผู้ใช้กดรับคิวใหม่ในเบราว์เซอร์ต้องได้เลข 1); ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; ทุกหน้าใช้ token/pattern ตาม `docs/DESIGN.md`; error ทุกจุดแสดงข้อความไทย; เขียน README.md (วิธีตั้ง Supabase, วิธีรัน, วิธี deploy ขึ้น Render (build `npm run build`, start `npm run serve:ssr:barber-queue`, Node ตาม `engines` ใน package.json), รายการ env รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render)
 - ทดสอบ: คนอื่นอ่าน README แล้วรันได้โดยไม่ต้องถาม
 - ผล: —
