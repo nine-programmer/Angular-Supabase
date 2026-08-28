@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.7 | อัปเดต: 2026-08-27
+> เวอร์ชัน template: 1.8 | อัปเดต: 2026-08-28
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -121,7 +121,9 @@ docs/
 ├── ARCHITECTURE.md            ไฟล์นี้ — โครงสร้าง (template, ที่เดียว, ไม่แก้ในโปรเจกต์ลูกค้า)
 ├── SYSTEM_SPEC.md             ภาพรวมระบบ + รอบแรก: ผู้ใช้ ฟีเจอร์ ตาราง กติกา API [LOCKED หลัง review]
 ├── TASKS.md                   ความคืบหน้ารอบแรก (ไฟล์ที่มีชีวิต อัปเดตทุกครั้งที่ Task ผ่าน)
-└── features/<name>/           เฉพาะเมื่อมีรอบถัดไป / ฟีเจอร์ใหม่
+├── DESIGN.md                  ระบบออกแบบกลาง: โทน, @theme token, component pattern — สร้างใน Task "Design UX/UI" [LOCKED หลัง Task นั้นผ่าน] ทุก Task ที่มีหน้าจอต้องทำตาม
+├── design/mockup.html         mockup ที่ผู้ใช้เคาะแล้วใน Task เดียวกัน (Tailwind Play CDN เปิดดูในเบราว์เซอร์ได้เลย ไม่เข้า build — ห้ามเพิ่มเข้า @source)
+└── features/<name>/           เฉพาะเมื่อมีรอบถัดไป / ฟีเจอร์ใหม่ (หน้าจอใหม่ใช้ DESIGN.md เดิม)
     ├── SPEC.md                spec ระดับ feature — อ้างตารางใน SYSTEM_SPEC เพิ่มเฉพาะส่วนใหม่
     └── TASKS.md               ความคืบหน้าของ feature นั้น
 .sessions/*.md                 บันทึกงานหลัง Task ผ่าน (เฉพาะเมื่อผู้ใช้ตอบว่าให้บันทึก)
@@ -144,11 +146,23 @@ NG_ALLOWED_HOSTS=localhost      # โดเมนที่ SSR ยอมเร�
 
 คำสั่งทั้งหมดเป็น npm script ใน `package.json` (รายการพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` แล้ว `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ Supabase `db:migration` → `db:push` → `db:types` (ข้อ 6)
 
-## 9. เมื่อระบบใหญ่ขึ้น
+## 9. จุดขยาย (extension points) — เมื่อระบบต้องการมากกว่า CRUD
 
-- `src/server/routes/` + `services/` เริ่มแน่น → จัดกลุ่มเป็น `src/server/features/<feature>/{routes,service}.ts` ตัดสินตอนเขียน SYSTEM_SPEC ไม่ใช่กลางทาง
-- ต้องมี login → เพิ่ม middleware ใน `src/server/` และ `src/app/core/` (guard) — ยังคงไม่ให้ browser แตะ Supabase
-- Feature ใหม่ → `docs/features/<name>/` ตามข้อ 7 และ `src/app/features/<name>/` ตามข้อ 3
+ความต้องการที่ template-scope จัดเป็น "พอดี แต่ต้องตัดสินใจ" มีที่วางไฟล์กำหนดไว้แล้ว — โฟลเดอร์/ชื่อไฟล์ในตารางนี้ถือว่าอยู่ในผังข้อ 3 แล้ว **ไม่ต้องถามผู้ใช้ก่อนสร้าง** แค่ระบุใน SYSTEM_SPEC 2.3/2.4 ว่าใช้ตัวไหน และยังคงกติกาเดิม: browser ไม่แตะ Supabase, ทุกอย่างผ่าน `/api/*`
+
+| ความต้องการ            | วางที่                                                                                                                        | หมายเหตุ                                                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| login / หลายบทบาท      | `src/server/auth.middleware.ts` (`requireAuth`, `requireRole`) + `src/app/core/auth.guard.ts`                                 | guard ฝั่ง Angular เป็นแค่ UX สิทธิ์จริงตัดสินที่ middleware; วิธีเก็บ session (cookie/JWT) ระบุใน SPEC 2.4                 |
+| อัปโหลดไฟล์ / รูป      | `src/server/services/storage-server.service.ts`                                                                               | browser ส่งไฟล์มาที่ `/api/*` แล้ว server เก็บใน Supabase Storage ด้วย `service_role`; ส่ง signed URL กลับให้ browser ดูได้ |
+| ส่ง LINE / อีเมล / SMS | `src/server/integrations/<provider>.ts`                                                                                       | client บางๆ ต่อ 1 ผู้ให้บริการ อ่าน key จาก `env.ts`; service เป็นคนเรียก ไม่ใช่ route                                      |
+| งานตามเวลา             | ใน DB ล้วน → `pg_cron` ใน migration; ต้องใช้โค้ด → `src/server/jobs/<name>.job.ts` + `POST /api/jobs/<name>`                  | endpoint ป้องกันด้วย secret header (`JOB_SECRET` ใน `.env.example`) ให้ cron ของ host เรียก                                 |
+| รายงาน / CSV / PDF     | `src/server/services/<feature>-report.service.ts`                                                                             | server สร้างไฟล์ route ตั้ง `Content-Disposition`; ไม่สร้างไฟล์ฝั่ง browser                                                 |
+| หน้าจออัปเดตเอง        | polling ใน `<feature>-client.service.ts` (5–10 วินาที); เร็วกว่านั้น → SSE ที่ `src/server/routes/<feature>-events.routes.ts` | ไม่ใช้ Supabase Realtime (browser ต้องแตะ Supabase)                                                                         |
+| resource มากกว่า 5 ตัว | `src/server/features/<feature>/{routes,service}.ts` แทน `routes/` + `services/` แบบ flat                                      | ตัดสินตอนเขียน SYSTEM_SPEC ไม่ใช่กลางทาง                                                                                    |
+| UI ใช้ซ้ำข้าม feature  | `src/app/ui/`                                                                                                                 | component / pipe / directive ที่ 2+ feature ใช้ (pattern จาก `docs/DESIGN.md`)                                              |
+| feature รอบถัดไป       | `docs/features/<name>/` (ข้อ 7) + `src/app/features/<name>/` (ข้อ 3)                                                          | หน้าจอใหม่ใช้ `docs/DESIGN.md` เดิม                                                                                         |
+
+ตัวแปร `.env` ใหม่ที่จุดขยายต้องใช้ (key ของผู้ให้บริการ, `JOB_SECRET`) เพิ่มใน `.env.example` พร้อม comment และอ่านผ่าน `src/server/env.ts` เท่านั้น (ข้อ 8)
 
 ## 10. ขอบเขตของ template
 
@@ -156,4 +170,6 @@ Template นี้ออกแบบสำหรับ **mini app ต่อล�
 
 เกณฑ์ตัดสินเร็ว: ถ้าวิธีที่ "เป็นธรรมชาติ" ของความต้องการนั้นคือให้ browser คุยกับ Supabase โดยตรง (Realtime, Auth ฝั่ง client, Storage ตรง) แปลว่าอยู่นอกกรอบของ template นี้ — **ห้าม** ฝืนยัดลง SPEC 2.4 ให้คุยกับเจ้าของ template ก่อน
 
-ตารางเต็ม (ระดับ พอดี / พอดีแต่ต้องตัดสินใจใน SPEC 2.4 / ไม่พอดี พร้อมตัวอย่าง) อยู่ที่ `.claude/skills/system-spec-builder/references/template-scope.md` — skill `system-spec-builder` ใช้ตรวจขอบเขตทุกครั้งที่เขียน spec
+ตารางเต็ม (ระดับ พอดี / พอดีแต่ต้องตัดสินใจใน SPEC 2.4 / ไม่พอดี พร้อมตัวอย่าง) อยู่ที่ `.claude/skills/system-spec-builder/references/template-scope.md` — skill `system-spec-builder` ใช้ตรวจขอบเขตทุกครั้งที่เขียน spec; ระดับ "พอดีแต่ต้องตัดสินใจ" มีที่วางไฟล์ในข้อ 9 แล้ว
+
+เส้นทางอัปเกรดเมื่อต้องการสิ่งที่ "ไม่พอดี": ทำเป็นรอบ feature ของ **template เอง** (เช่น `docs/features/realtime/` ใน repo template ที่เพิ่มโฟลเดอร์/กติกาที่ต้องใช้ แล้ว bump เวอร์ชัน template) จากนั้นค่อยนำ template รุ่นใหม่ไปใช้กับโปรเจกต์ลูกค้า — ไม่ทำเฉพาะในโปรเจกต์ใดโปรเจกต์หนึ่ง เพื่อให้ทุกโปรเจกต์ถัดไปได้ใช้ด้วย

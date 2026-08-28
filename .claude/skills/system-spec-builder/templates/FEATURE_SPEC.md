@@ -2,6 +2,7 @@
 
 > ไฟล์: `docs/features/[name]/SPEC.md` | ทำงานตาม `docs/features/[name]/TASKS.md`
 > ต่อยอดจาก `docs/SYSTEM_SPEC.md` v[X.Y] — Section 0 (คำสั่งสำหรับ AI) ใช้ของ SYSTEM_SPEC ทุกข้อ **โดยแทน `docs/TASKS.md` ด้วย `docs/features/[name]/TASKS.md`** และแทน prompt ปิดท้ายด้วย `อ่าน docs/features/[name]/SPEC.md แล้วเริ่มตาม Section 0 ของ docs/SYSTEM_SPEC.md` (เลข section ที่ LOCKED — 1.5, 1.7, 2.2 — ตรงกับ SYSTEM_SPEC)
+> หน้าจอใหม่ทุกหน้าใช้ token/pattern จาก `docs/DESIGN.md` เดิมของระบบ — ถ้าฟีเจอร์นี้ต้องมี pattern ใหม่ ให้เพิ่มใน `docs/DESIGN.md` พร้อม bump เวอร์ชันของไฟล์นั้น ใน Task ที่ใช้ pattern นั้นครั้งแรก
 > เวอร์ชัน: 1.0 | วันที่: [YYYY-MM-DD] | สถานะ: [ร่าง (รอ review) / พร้อมสร้าง]
 
 ## 1. ฟีเจอร์นี้ทำอะไร
