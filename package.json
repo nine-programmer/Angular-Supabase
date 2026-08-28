@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
     "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -16,6 +17,9 @@
     "db:types": "supabase gen types typescript --linked > src/shared/types/database.types.tmp && node -e \"require('fs').renameSync('src/shared/types/database.types.tmp','src/shared/types/database.types.ts')\""
   },
   "private": true,
+  "engines": {
+    "node": ">=22.12"
+  },
   "packageManager": "npm@11.19.0",
   "dependencies": {
     "@angular/common": "^22.1.0",

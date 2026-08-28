@@ -18,6 +18,9 @@ docs/
 ├── ARCHITECTURE.md            from the template — NEVER written or edited by this skill
 ├── SYSTEM_SPEC.md             round 1 / system overview  ← you write this (templates/SYSTEM_SPEC.md)
 ├── TASKS.md                   round 1 progress           ← you write this (templates/TASKS.md)
+├── DESIGN.md                  design system — written by the BUILD agent in the "Design UX/UI"
+│                              task (structure: templates/DESIGN.md), NOT by this skill
+├── design/mockup.html         the mockup the user approved in that task
 └── features/<name>/           later rounds only
     ├── SPEC.md                ← templates/FEATURE_SPEC.md
     └── TASKS.md               ← templates/TASKS.md
@@ -72,6 +75,7 @@ Read `references/interview-guide.md` for the question bank and techniques. The r
 | M11 | Done criteria: what the user will click to say "ใช้ได้แล้ว" | default: CRUD works, data persists, 375px |
 | M12 | Existing data to import; expected volume (rough) | default: none, small |
 | M13 | Deploy target | default: Render |
+| M14 | Look & feel: the tone/colors the user wants, or an app whose look they like | default: clean, minimal, blue-grey, internal-tool style — record in 1.9; the build agent turns it into a mockup for approval in the Design UX/UI task |
 
 **Contradiction check.** After each turn, compare the new answer with the pattern and earlier answers. If they conflict ("ยืมได้ทีละชิ้น" but later "ยืมทีละหลายอย่าง"), ask which is right before moving on. Never resolve a conflict silently.
 
@@ -79,7 +83,7 @@ Read `references/interview-guide.md` for the question bank and techniques. The r
 
 **Budget.** A small system typically needs 6–12 questions over 3–5 turns. The number is a guide, not a cap: stop as soon as the gate is satisfied, and keep going while a ✗ item is open. If the user explicitly says "พอแล้ว เขียนเลย" while a ✗ item is open: for M1/M4/M7 explain in one line why you cannot write yet and ask that single question; for any other ✗ item write the spec with it as an explicit assumption in 1.9 and tell them which one.
 
-**Feature round.** Ask only: what the feature adds (M3), which existing tables it touches and what changes (M4), new statuses or transitions (M6), new rules and their interaction with existing ones (M8), and whether existing data needs migrating. Everything else inherits from SYSTEM_SPEC. Feature-round TASKS have 2–6 tasks, no clone task: Task 1 = migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums; the TASKS header cites `docs/features/<name>/SPEC.md`.
+**Feature round.** Ask only: what the feature adds (M3), which existing tables it touches and what changes (M4), new statuses or transitions (M6), new rules and their interaction with existing ones (M8), and whether existing data needs migrating. Everything else inherits from SYSTEM_SPEC. Feature-round TASKS have 2–6 tasks, no clone task and no design task (new screens follow the existing `docs/DESIGN.md`; a feature that needs a new pattern adds it to DESIGN.md with a version bump inside the task that introduces it): Task 1 = migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums; the TASKS header cites `docs/features/<name>/SPEC.md`.
 
 ### 3. Confirm before writing
 
@@ -95,24 +99,25 @@ Rules that make the documents buildable by any agent:
 - **Every business rule (1.7) names where it is enforced** — DB constraint, Postgres function, or API — and names the function or constraint. A rule enforced only in the browser is not a rule. Atomic rules (counters, sequential numbers, status transitions) go in a Postgres function or constraint.
 - **Every field in 1.5 is used** by a feature, a flow step, or a rule. A field nobody reads is scope creep.
 - **Every API row (2.2) cites the rules it enforces** and appears in at least one task.
-- **Every task has a test line** with behaviour the user can see. Add a "spec ... ผ่าน `npm test`" clause ONLY when a file in that task has calculations, complex logic, or code that will change often (see AGENTS.md → Testing); name the file and what it verifies (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). Plain CRUD / pass-through tasks get no spec clause.
-- **Task size is fixed**: 1 task = 1 screen, or 1 API resource together with the screen that uses it (list + create + edit of one resource is one task). Round 1 has 6–12 tasks; if more, merge or move features to "รอบถัดไป"; if fewer than 6, split.
-- **Tasks are ordered**: name the project + first page → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Task 1 only renames the project and puts the system name on `/`. Connecting Supabase (`.env`, login, link, pushing the template's `*_health.sql` migration) is part of the template's README setup done BEFORE any spec, and the server skeleton (`src/server/` incl. `/api/health`, the SSR interceptor, `provideHttpClient`) ships with the template — none of that is a task.
+- **Every task has a test line the user can actually run.** Only two kinds of test exist: (a) something the user does in the browser and sees (open a page, click, read a message), and (b) a spec the agent runs with `npm test`. Never write curl, SQL, or dashboard steps as the user's test — the user is not a programmer. Permission rules (who may trigger which transition) are written as a pure function — e.g. `canChangeStatus(role, isOwner, from, to)` in `<feature>-server.service.ts` — and proven by a spec table, never by asking the user to call the API as the wrong role. A rule that lives in a Postgres function is normally tested through the screen task that uses it; when it must be verified earlier (the database task), the test line says the agent writes a ready-to-paste SQL block (creates its own test rows, rolls itself back) for the user to run in Supabase Dashboard → SQL Editor and states the exact Thai error text they must see. Add a "spec ... ผ่าน `npm test`" clause ONLY when a file in that task has calculations, complex logic, or code that will change often (see AGENTS.md → Testing); name the file and what it verifies (e.g. "spec `bookings-server.service.spec.ts`: คำนวณ `ahead`"). Plain CRUD / pass-through tasks get no spec clause.
+- **Task size is fixed**: 1 task = 1 screen, or 1 API resource together with the screen that uses it (list + create + edit of one resource is one task). A group of small related forms sharing one client service (login / register / change-password) counts as one screen task; an API-only task is allowed only when the screen that consumes it is the very next task and the API task carries a spec. Round 1 usually lands at 7–13 tasks — a tiny system may have fewer (the fixed tasks 1–3 plus close are the floor); above ~15, propose moving features to "รอบถัดไป" and let the user decide rather than squeezing tasks together.
+- **Tasks are ordered** (default): name the project + first page → **Design UX/UI** → database + types + enums → resource 1 → resource 2 → status flow → extras → close. Reorder when this system has a reason (e.g. a screen that other screens embed must come first) and say why in one line under the TASKS header. Task 1 only renames the project and puts the system name on `/`. Connecting Supabase (`.env`, login, link, pushing the template's `*_health.sql` migration) is part of the template's README setup done BEFORE any spec, and the server skeleton (`src/server/` incl. `/api/health`, the SSR interceptors, `provideHttpClient`) ships with the template — none of that is a task.
+- **Task 2 is Design UX/UI by default** (round 1 only; feature rounds reuse the existing `docs/DESIGN.md`). For a system with at most 2 screens the task may say the agent proposes `docs/DESIGN.md` directly and offers to skip the mockup — the user decides. Its ทำ line follows templates/TASKS.md: mockup of the 3–5 main screens — name them explicitly from 2.3 — as one HTML file `docs/design/mockup.html` (mobile 375px, Tailwind Play CDN), offering 2–3 Thai-capable Google Fonts from templates/DESIGN.md for the user to pick and using real Material Symbols icons (never emoji as icons/decoration), iterate until the user approves, then write `docs/DESIGN.md` from templates/DESIGN.md and put the tokens into `@theme` in `src/styles.css`. Its test line is the user's approval plus AA-checked color pairs; once passed, DESIGN.md is LOCKED and every screen task must follow it. Design comes before the database on purpose: the mockup is the cheapest place to discover a missing field or feature.
 - **Every table is used by at least one feature.**
 - **Field names in English (snake_case), labels in Thai.**
-- **Keep it small.** SYSTEM_SPEC 100–180 lines, TASKS 40–80 lines. If longer, trim into "รอบถัดไป".
+- **Keep it as small as the system allows.** A simple CRUD system lands around 150–250 lines of SYSTEM_SPEC and 60–100 of TASKS; login, roles, or a status flow legitimately add more. Length itself is not a defect — repetition is. If the SPEC passes ~350 lines or the round passes ~15 tasks, propose moving features into "รอบถัดไป" and let the user choose.
 
 Save with status `ร่าง (รอ review)` and the TASKS header at `ผ่านแล้ว 0/N | Task ปัจจุบัน: 1`.
 
 ### 5. Self-check
 
-- [ ] Every must-know item M1–M13 is answered, pattern-covered, or listed in 1.9
+- [ ] Every must-know item M1–M14 is answered, pattern-covered, or listed in 1.9
 - [ ] SYSTEM_SPEC sections 0, 1.1–1.9, 2.1–2.5 present and non-empty
 - [ ] 3–5 MVP features, each traceable to at least one task
 - [ ] Every rule in 1.7 has a "บังคับที่" that is not "browser" and names the constraint/function
 - [ ] Every API path in 2.2 cites a rule or "—" and appears in a task
 - [ ] Every table and every field appears in a feature, flow, rule, or task; every feature has a row in 2.3
-- [ ] TASKS: round 1 = 6–12 tasks with Task 1 = project name + first page (no Supabase setup — that is README setup); feature round = 2–6 tasks with Task 1 = migration; every task has `ทดสอบ:` and `ผล: —`; header counts match
+- [ ] TASKS: round 1 (usually 7–13 tasks) has Task 1 = project name + first page (no Supabase setup — that is README setup) and Task 2 = Design UX/UI naming the 3–5 mockup screens (or the ≤ 2-screen shortcut); feature round = 2–6 tasks with Task 1 = migration and no design task; every task has `ทดสอบ:` and `ผล: —`; header counts match
 - [ ] Nothing copied from ARCHITECTURE.md / AGENTS.md; Section 2 only holds project-specific items
 - [ ] Nothing requires the browser to talk to Supabase directly or falls in `references/template-scope.md` "ไม่พอดี"
 
@@ -125,7 +130,7 @@ The writer is bad at spotting its own contradictions, so both files are reviewed
 
 Give the reviewer this brief (Thai):
 
-> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะขอบเขตของ template ใน template-scope.md (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
+> นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task และรอบแรกต้องมี Task 2 = Design UX/UI (mockup + docs/DESIGN.md) ก่อน Task หน้าจอทั้งหมด โดยระบุชื่อหน้าที่จะ mockup ชัดเจน; test line ที่ให้ผู้ใช้ใช้ curl / ยิง API / เขียน SQL / สร้างข้อมูลที่ DB เอง = blocker (ยกเว้น SQL block ที่ agent เขียนให้วางใน SQL Editor); กติกาสิทธิ์ (ใครเปลี่ยนสถานะไหนได้) ต้องทดสอบด้วย spec ของ pure function ไม่ใช่ให้ผู้ใช้ลองยิง (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะขอบเขตของ template ใน template-scope.md (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
 
 Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0".
 
@@ -137,6 +142,7 @@ Plain Thai, no jargon without a short explanation. The user should feel like the
 
 - `templates/SYSTEM_SPEC.md` — round-1 / system-level spec skeleton. Always use it.
 - `templates/TASKS.md` — task + progress skeleton, used for every round.
+- `templates/DESIGN.md` — skeleton for `docs/DESIGN.md`. Not filled by this skill: the build agent fills it during the Design UX/UI task; this skill only makes sure that task points to it.
 - `templates/FEATURE_SPEC.md` — later-round feature spec skeleton (`docs/features/<name>/SPEC.md`).
 - `references/interview-guide.md` — question bank, probing techniques, and a sample interview. Read before step 2.
 - `references/template-scope.md` — what the template can and cannot build (three levels + examples). Read in step 1, every round.

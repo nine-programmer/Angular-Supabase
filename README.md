@@ -51,7 +51,9 @@ npm run db:types                         # สร้าง type จากโป�
 อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
 ```
 
-Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น รอให้คุณทดสอบแล้วบอก "ผ่าน" จากนั้น agent จะถามว่าจะบันทึกงานลง `.sessions/` ไหม และถามว่าจะทำ Task ถัดไปใน session นี้หรือเปิดใหม่ (agent ไม่เริ่ม Task ถัดไปเอง) — ความคืบหน้าทั้งหมดถูกบันทึกไว้ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/DESIGN.md` (เมื่อมีแล้ว) → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น ทุก Task จะบอกวิธีทดสอบที่คุณทำได้เองในเบราว์เซอร์ (ไม่ต้องใช้ curl หรือเขียน SQL เอง — ถ้าต้องตรวจฐานข้อมูล agent จะเขียน SQL ให้คุณวางใน Supabase SQL Editor) เมื่อคุณบอก "ผ่าน" agent จะถามคำถามเดียว: บันทึกงานลง `.sessions/` ไหม และจะทำ Task ถัดไปที่นี่หรือเปิดแชทใหม่ (ตอบสั้นๆ เช่น "บันทึก, ต่อเลย" — agent ไม่เริ่ม Task ถัดไปเอง) Task 2 คือการออกแบบหน้าตา: คุณจะได้ `docs/design/mockup.html` เปิดดูในเบราว์เซอร์แล้วติชมจนพอใจก่อนที่จะมีการสร้างหน้าจอจริง — ความคืบหน้าทั้งหมดอยู่ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+
+ใช้ได้กับ agent ที่แก้ไฟล์ใน repo และรันคำสั่งได้ (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot agent) — เว็บแชทที่ไม่เห็นไฟล์ใช้ช่วยเขียน/ตรวจ spec ได้ แต่ไม่ใช้สร้างระบบ
 
 ### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
 
@@ -75,6 +77,10 @@ npm run db:types                       # สร้าง src/shared/types/databa
 Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่ต้องติดตั้ง global — เรียกผ่าน `npx supabase <cmd>` หรือ script ด้านบนได้เลย
 
 Template มี migration มาให้ 1 ไฟล์ (`supabase/migrations/*_health.sql` → function `health()` ที่เรียกได้เฉพาะ `service_role`) ซึ่ง `GET /api/health` ใช้ตรวจว่า `.env` และ `db:push` ใช้ได้ — ห้ามลบหรือเปลี่ยนชื่อ migration ของระบบจริงจะต่อจากไฟล์นี้ไป
+
+## Deploy
+
+Render (หรือ host Node ใดๆ): Build command `npm ci && npm run build` · Start command `node dist/<project-name>/server/server.mjs` · Node ตาม `engines` ใน `package.json` · ตั้ง env `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NG_ALLOWED_HOSTS=<โดเมนจริง>` ใน dashboard ของ host (`PORT` host ตั้งให้เอง) · ห้ามตั้ง CDN cache หน้า HTML — รายละเอียดใน [ARCHITECTURE.md ข้อ 8](docs/ARCHITECTURE.md)
 
 ## เอกสารของ template
 
