@@ -6,10 +6,11 @@ Template ตั้งต้นสำหรับสร้าง mini app ต่�
 
 ### 1. Clone template ไปเป็นโปรเจกต์ของลูกค้า
 
-คัดลอก template ไปเป็นโฟลเดอร์ใหม่ (ดาวน์โหลด ZIP แล้วแตกไฟล์ หรือ `git clone` ถ้ามี git) แล้วติดตั้ง:
+คัดลอก template ไปเป็นโฟลเดอร์ใหม่ (ดาวน์โหลด ZIP แล้วแตกไฟล์ หรือ `git clone` ถ้ามี git) เช็คเวอร์ชัน Node ก่อน (`node -v` ต้องเข้าเงื่อนไข `engines` ใน `package.json` — Angular CLI 22 ปฏิเสธเวอร์ชันที่ต่ำกว่านั้นตอนรัน ถ้าไม่ผ่านให้สลับด้วย nvm เช่น `nvm install 26 && nvm use 26`) แล้วติดตั้ง:
 
 ```bash
 cd <ชื่อโปรเจกต์ลูกค้า>
+node -v        # ต้องเข้าเงื่อนไข engines ใน package.json
 npm install
 ```
 
@@ -30,7 +31,7 @@ npm run db:push                          # ส่ง migration ที่มา�
 npm run db:types                         # สร้าง type จากโปรเจกต์ที่ link ไว้
 ```
 
-ตรวจว่าเชื่อมได้จริง: `npm start` แล้วเปิด http://localhost:4200/api/health ต้องได้ `{"ok":true}` — ถ้าไม่ได้ ข้อความ `error` จะบอกว่าต้องแก้ตรงไหน (URL ผิด / key ผิดหรือเป็น anon key / ยังไม่ได้ `db:push`) ถึงตรงนี้โปรเจกต์พร้อมรับ migration ของระบบจริงแล้ว
+ตรวจว่าเชื่อมได้จริง: `npm start` แล้วเปิด http://localhost:4200/api/health ต้องได้ `{"ok":true}` — ถ้าไม่ได้ ข้อความ `error` จะบอกว่าต้องแก้ตรงไหน (URL ผิด / key ผิดหรือเป็น anon key / ยังไม่ได้ `db:push`) และดูวิธีแก้ทีละอาการที่หัวข้อ "ปัญหาที่พบบ่อยตอนตั้งค่า" ด้านล่าง ถึงตรงนี้โปรเจกต์พร้อมรับ migration ของระบบจริงแล้ว
 
 ### 3. เขียน spec ด้วย skill `system-spec-builder`
 
@@ -58,6 +59,19 @@ Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM
 ### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
 
 เรียก skill `system-spec-builder` อีกครั้งพร้อมบอกฟีเจอร์ที่ต้องการ — จะได้ `docs/features/<name>/SPEC.md` + `TASKS.md` แยกต่างหาก โดยอ้างอิงตารางเดิมจาก `docs/SYSTEM_SPEC.md`
+
+## ปัญหาที่พบบ่อยตอนตั้งค่า
+
+เจอจริงจากการใช้งาน — ไล่เช็คตามนี้ก่อนถามใคร (ทุกข้อจบแล้วเปิด http://localhost:4200/api/health ต้องได้ `{"ok":true}`):
+
+| อาการ                                                           | สาเหตุ                                                                   | วิธีแก้                                                                                                                                                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Missing required environment variable: SUPABASE_URL`           | ยังไม่มีไฟล์ `.env` หรือยังไม่ได้ใส่ค่า                                  | `cp .env.example .env` แล้วใส่ค่า `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ตาม comment ในไฟล์                                                                                                 |
+| Supabase CLI: `Access token not provided`                       | ยังไม่ได้ล็อกอิน CLI ก่อน link/push                                      | รัน `npx supabase login` ให้เสร็จก่อน แล้วค่อย `npm run db:link -- --project-ref <ref>` และ `npm run db:push`                                                                                    |
+| `/api/health` บอกว่า key ไม่ถูกต้อง หรือเป็น anon key           | คัดลอก key ผิดตัว — เอา public `anon` key มาใส่แทน `service_role` secret | Dashboard → `https://supabase.com/dashboard/project/<ref>/settings/api-keys/legacy` → แท็บ **Legacy anon, service_role API keys** → กด **Reveal** ที่ `service_role` secret แล้วคัดลอกใส่ `.env` |
+| Angular CLI ปฏิเสธเวอร์ชัน Node (`does not support Node.js vX`) | Node บนเครื่องต่ำกว่าที่ Angular CLI 22 ต้องการ                          | สลับเวอร์ชันด้วย nvm ให้เข้าเงื่อนไข `engines` ใน `package.json` เช่น `nvm install 26 && nvm use 26` แล้ว `npm install` ใหม่                                                                     |
+
+หมายเหตุ: หน้า Dashboard ของ Supabase เปลี่ยน UI ได้เรื่อยๆ — ถ้าเมนูไม่ตรงกับข้างบน ให้หาคำว่า "API keys" ใน Project Settings แล้วมองหา key ที่ระบุว่า `service_role` / `secret`
 
 ## คำสั่งที่ใช้บ่อย
 

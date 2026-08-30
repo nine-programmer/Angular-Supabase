@@ -30,7 +30,7 @@ Round 1 is always flat. Create `docs/features/<name>/` only when a SYSTEM_SPEC a
 
 SPEC files are LOCKED after review and change only with a version bump. TASKS files are living: the building agent ticks tasks and updates the header line; after each passed task it offers to write a `.sessions/` log (only on the user's yes) and asks whether to continue in this session or a new one — it never starts the next task unprompted.
 
-If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and remind them that the files move into the cloned repo and that the template's README setup (clone, `npm install`, `.env`, Supabase login/link/`db:push`) must be done before Task 1.
+If the current folder has no `docs/ARCHITECTURE.md`, the user has not cloned the template yet. Say so, offer to write into `./docs/` anyway, and remind them that the files move into the cloned repo and that the template's README setup (a Node version matching `engines` in `package.json`, clone, `npm install`, `.env`, Supabase login/link/`db:push`) must be done before Task 1.
 
 ## Workflow
 
@@ -132,7 +132,7 @@ Give the reviewer this brief (Thai):
 
 > นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task และรอบแรกต้องมี Task 2 = Design UX/UI (mockup + docs/DESIGN.md) ก่อน Task หน้าจอทั้งหมด โดยระบุชื่อหน้าที่จะ mockup ชัดเจน; test line ที่ให้ผู้ใช้ใช้ curl / ยิง API / เขียน SQL / สร้างข้อมูลที่ DB เอง = blocker (ยกเว้น SQL block ที่ agent เขียนให้วางใน SQL Editor); กติกาสิทธิ์ (ใครเปลี่ยนสถานะไหนได้) ต้องทดสอบด้วย spec ของ pure function ไม่ใช่ให้ผู้ใช้ลองยิง (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะขอบเขตของ template ใน template-scope.md (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
 
-Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0".
+Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0" — plus one preflight reminder: "ก่อนเริ่ม Task 1 เปิด http://localhost:4200/api/health ต้องได้ `{ok: true}` ก่อน ถ้ายังไม่ได้ ทำ README ข้อ 2 ให้จบก่อน (ติดตรงไหนดู README → ปัญหาที่พบบ่อยตอนตั้งค่า)".
 
 ## Tone
 
@@ -144,6 +144,7 @@ Plain Thai, no jargon without a short explanation. The user should feel like the
 - `templates/TASKS.md` — task + progress skeleton, used for every round.
 - `templates/DESIGN.md` — skeleton for `docs/DESIGN.md`. Not filled by this skill: the build agent fills it during the Design UX/UI task; this skill only makes sure that task points to it.
 - `templates/FEATURE_SPEC.md` — later-round feature spec skeleton (`docs/features/<name>/SPEC.md`).
+- `templates/SESSION_LOG.md` — skeleton for `.sessions/` logs. Not filled by this skill: the build agent uses it after each passed task (SYSTEM_SPEC Section 0 points to it); this skill only makes sure Section 0 keeps that pointer.
 - `references/interview-guide.md` — question bank, probing techniques, and a sample interview. Read before step 2.
 - `references/template-scope.md` — what the template can and cannot build (three levels + examples). Read in step 1, every round.
 - `references/patterns.md` — ready-made tables/features/rules/flows and "ที่มักพลาด" for common small systems. Read in step 1.
