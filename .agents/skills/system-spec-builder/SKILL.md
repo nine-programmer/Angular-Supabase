@@ -44,7 +44,10 @@ Read `references/template-scope.md` (the template's scope table — the single s
 
 Then read `references/patterns.md`. If the idea matches a pattern, start from its tables, features, rules, statuses, and "ที่มักพลาด" list. Propose, do not ask from scratch. If nothing matches, proceed without a pattern and, after finishing, offer to add the new pattern.
 
-If `docs/SYSTEM_SPEC.md` already exists, this is a feature round: read it first, reuse its tables and rules, and interview only about what is new (see "Feature round" below).
+If `docs/SYSTEM_SPEC.md` already exists, look at the `สถานะ` in its header first:
+
+- `ร่าง (รอ review)` → an unfinished round 1 (or a feature SPEC in the same state under `docs/features/<name>/`). Skip steps 1–5 and resume at step 6: if the user pasted a reviewer's result, apply it; otherwise ask how they want the review done. Do not re-interview.
+- `พร้อมสร้าง` → this is a feature round: read it first, reuse its tables and rules, and interview only about what is new (see "Feature round" below).
 
 ### 2. Interview — adaptive, until the must-know list is complete
 
@@ -123,16 +126,36 @@ Save with status `ร่าง (รอ review)` and the TASKS header at `ผ่�
 
 ### 6. Independent review, then deliver
 
-The writer is bad at spotting its own contradictions, so both files are reviewed by a **separate** reader with no memory of the interview:
+The writer is bad at spotting its own contradictions, so both files are reviewed by a **separate** reader with no memory of the interview. **Who that reader is, is the user's choice** — they may want a different model, a fresh session, or another AI tool entirely — so once the self-check passes, **STOP and ask before starting any review**. Never spawn the reviewer on your own, and never continue from step 5 into step 6 in the same breath.
 
-- In Claude Code: spawn a subagent (or ask the user to open a fresh session) with only `docs/SYSTEM_SPEC.md`, `docs/TASKS.md`, `docs/ARCHITECTURE.md`, `AGENTS.md`, and this skill's `references/template-scope.md`.
-- In a web chat: tell the user to paste those five files into a new chat.
+Tell the user both files are saved with status `ร่าง (รอ review)` and ask in one short Thai message which way to review, e.g. "spec ร่างเสร็จแล้ว จะให้ review แบบไหน — (1) ให้ผมเปิด subagent ใน session นี้เลย (2) คุณเอาไป review เอง (สลับ model / เปิด session ใหม่ / ใช้ AI ตัวอื่น) แล้วเอาผลกลับมาให้ผมแก้" — then wait for the answer.
+
+- **(1) Subagent here:** spawn a subagent that sees only `docs/SYSTEM_SPEC.md`, `docs/TASKS.md`, `docs/ARCHITECTURE.md`, `AGENTS.md`, and this skill's `references/template-scope.md`, with the brief below (feature round: the same six-file list as in option 2).
+- **(2) The user reviews elsewhere:** print two ready-to-copy blocks (each in its own fenced code block so it copies cleanly) and then wait. In a feature round the reviewer reads six files: keep `docs/SYSTEM_SPEC.md` (the reviewer needs the existing tables and rules), replace `docs/TASKS.md` with `docs/features/<name>/TASKS.md`, and add `docs/features/<name>/SPEC.md`; Block B names the two feature files.
+
+  **Block A — give this to the reviewer** (a new Claude Code session in this repo, Codex, Gemini CLI, Cursor, or any tool that can read the repo). Fill `<brief>` with the full brief below, verbatim:
+
+  ```
+  คุณคือผู้ review spec ห้ามแก้ไฟล์ใดๆ อ่านไฟล์ 5 ไฟล์นี้ก่อน (ห้ามอ่านไฟล์อื่น): docs/SYSTEM_SPEC.md, docs/TASKS.md, docs/ARCHITECTURE.md, AGENTS.md, .claude/skills/system-spec-builder/references/template-scope.md แล้วทำตามนี้:
+  <brief>
+  ```
+
+  Add one line under it: if the reviewer is a web chat that cannot open files, paste the same text and attach (or paste the contents of) those five files after it.
+
+  **Block B — bring the result back** (paste into this session, or into a new session in this repo — the skill resumes at step 6 from the `ร่าง (รอ review)` status line, so no re-interview):
+
+  ```
+  ผล review ของ docs/SYSTEM_SPEC.md และ docs/TASKS.md มาแล้ว ให้แก้ตามผลนี้แล้วถามผมก่อน review รอบถัดไป:
+  <วางผลจาก reviewer ตรงนี้>
+  ```
+
+  When the result comes back, treat it exactly like a subagent's report. If the user prefers to have the other tool fix the files too, this skill is done for now; the next session picks up from the status line in the SPEC header.
 
 Give the reviewer this brief (Thai):
 
 > นายคือ Tech Lead ขี้บ่น ห้ามแก้ไฟล์ อ่าน SYSTEM_SPEC.md กับ TASKS.md แล้วหาให้เจอ: (1) Section 1 กับ Section 2 ขัดกันตรงไหน (2) ตารางใน 1.5 พอสำหรับทุกฟีเจอร์ใน 1.3 และทุกขั้นตอนใน 1.6 ไหม มีฟิลด์ที่ไม่มีใครใช้ หรือฟิลด์ที่ไม่ได้ระบุว่าบังคับ/ห้ามซ้ำไหม (3) กติกาใน 1.7 บังคับได้จริงตามที่เขียนไหม มีกติกาที่ควรมีแต่ไม่ได้เขียนไหม โดยเฉพาะกรณีกดพร้อมกัน ข้อมูลซ้ำ และการลบข้อมูลที่ถูกอ้างอยู่ (4) API ใน 2.2 ครบทุกขั้นตอนใน 1.6 ไหม request body และรูปแบบตอบกลับชัดพอให้เขียน zod schema/dto ได้ไหม (ฟิลด์ไหนบังคับ ห้ามซ้ำ ช่วงค่า) (5) ชื่อไฟล์ใน 2.3 ตรงกับ ARCHITECTURE.md ข้อ 5 ไหม (6) ใน TASKS.md มี Task ไหนใหญ่เกิน 1 หน้าจอ/1 resource, ไม่มีวิธีทดสอบ, อ้าง API/ตารางที่ไม่มีใน SPEC, หรือ header นับไม่ตรงกับจำนวน Task และรอบแรกต้องมี Task 2 = Design UX/UI (mockup + docs/DESIGN.md) ก่อน Task หน้าจอทั้งหมด โดยระบุชื่อหน้าที่จะ mockup ชัดเจน; test line ที่ให้ผู้ใช้ใช้ curl / ยิง API / เขียน SQL / สร้างข้อมูลที่ DB เอง = blocker (ยกเว้น SQL block ที่ agent เขียนให้วางใน SQL Editor); กติกาสิทธิ์ (ใครเปลี่ยนสถานะไหนได้) ต้องทดสอบด้วย spec ของ pure function ไม่ใช่ให้ผู้ใช้ลองยิง (7) ขัดกับ ARCHITECTURE.md หรือ AGENTS.md ตรงไหน โดยเฉพาะขอบเขตของ template ใน template-scope.md (8) สมมติฐานใน 1.9 ข้อไหนเสี่ยงพอที่ควรกลับไปถามผู้ใช้ก่อนสร้าง แยกผลเป็น 3 ระดับ: blocker (สร้างแล้วพังหรือต้องเดา) / ควรแก้ / เล็กน้อย ตอบเป็นรายการสั้นๆ ถ้าไม่มี blocker ให้พิมพ์ APPROVED ต่อท้าย (แม้จะมีข้อควรแก้ก็ตาม)
 
-Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set SYSTEM_SPEC status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0" — plus one preflight reminder: "ก่อนเริ่ม Task 1 เปิด http://localhost:4200/api/health ต้องได้ `{ok: true}` ก่อน ถ้ายังไม่ได้ ทำ README ข้อ 2 ให้จบก่อน (ติดตรงไหนดู README → ปัญหาที่พบบ่อยตอนตั้งค่า)".
+Fix every blocker and every ควรแก้ that can be fixed without asking the user (still v1.0). If the reviewer flags an assumption as risky, ask the user that one question before re-reviewing. Before each re-review, ask again the same way (the user may keep the same reviewer or switch); repeat until the reviewer prints APPROVED; at most 3 rounds — if still not approved, show the user the remaining items and let them decide. Then set the SPEC's status to `พร้อมสร้าง` and present both files. Tell the user in one line how to use them: "เปิด repo ที่ clone จาก template แล้วสั่ง agent ว่า อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0" — in a feature round the prompt is the one at the top of that feature's SPEC instead: "สั่ง agent ว่า อ่าน docs/features/<name>/SPEC.md แล้วเริ่มตาม Section 0 ของ docs/SYSTEM_SPEC.md" — plus one preflight reminder: "ก่อนเริ่ม Task 1 เปิด http://localhost:4200/api/health ต้องได้ `{ok: true}` ก่อน ถ้ายังไม่ได้ ทำ README ข้อ 2 ให้จบก่อน (ติดตรงไหนดู README → ปัญหาที่พบบ่อยตอนตั้งค่า)".
 
 ## Tone
 
