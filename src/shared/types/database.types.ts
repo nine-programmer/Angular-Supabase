@@ -1,5 +1,5 @@
-// Placeholder until `npm run db:types` regenerates it from the linked Supabase cloud
-// project (never hand-edit this file). Only the template's health() function is known.
+// Placeholder until `npm run db:types` (or `db:types:url` for a self-hosted database) regenerates
+// it from the real schema (never hand-edit this file). Only the template's health() function is known.
 export type Database = {
   public: {
     Tables: Record<string, never>;

@@ -22,7 +22,7 @@
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1730-task-2-design.md` — ผู้ใช้ขอเลขคิวใหญ่ขึ้นบนหน้า ticket (แก้ใน mockup รอบ 2 แล้วจดเป็น pattern "เลขคิว display" ใน DESIGN.md ข้อ 3)
 
 ### [x] Task 3: ฐานข้อมูล
-- ทำ: `npm run db:migration -- init` → ไฟล์ใน `supabase/migrations/` (ต่อจาก `*_health.sql` ของ template) ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `npm run db:push` → `npm run db:types`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เพิ่ม `count` ของ `services` → ตอบ `{ ok: true, count: 3 }`
+- ทำ: `npm run db:migration -- init` → ไฟล์ใน `supabase/migrations/` (ต่อจาก `*_roles.sql` + `*_health.sql` ของ template) ตาราง `services`, `bookings` ตาม SPEC 1.5 (FK `ON DELETE RESTRICT`) + `UNIQUE (queue_date, queue_no)` + `CHECK` status + function `create_booking()` และ `set_booking_status()` ตาม R1, R2 + เปิด RLS ทั้งสองตาราง; seed บริการ 3 รายการตาม 1.9; `npm run db:push` → `npm run db:types`; `shared/enums/bookings.enums.ts` มี `BOOKING_STATUS` 4 ค่า; `/api/health` เพิ่ม `count` ของ `services` → ตอบ `{ ok: true, count: 3 }`
 - ทดสอบ: `npm run db:push` สำเร็จ; `/api/health` เห็น `{ ok: true, count: 3 }`; agent ให้ SQL block วางใน Supabase SQL Editor: `create_booking()` 3 ครั้งได้ 1,2,3 และ `set_booking_status` จาก done → waiting ขึ้น error ภาษาไทย (block rollback ตัวเอง)
 - ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-3-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
 

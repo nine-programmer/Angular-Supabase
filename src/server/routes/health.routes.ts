@@ -1,4 +1,4 @@
-// GET /api/health — proves the server can reach Supabase (used right after setup, before any spec).
+// GET /api/health — proves the server can reach the database through PostgREST (used right after setup, before any spec).
 import { Router } from 'express';
 import { checkDatabase } from '../services/health-server.service';
 
