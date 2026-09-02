@@ -1,4 +1,4 @@
-// Supabase connectivity check behind GET /api/health: calls the template's health() function.
+// Database connectivity check behind GET /api/health (Supabase cloud or self-hosted PostgREST): calls the template's health() function.
 import { getSupabase, type SupabaseDb } from '../supabase';
 
 export type HealthResult = { ok: true } | { ok: false; error: string };
@@ -9,11 +9,11 @@ export function describeFailure(status: number, code: string | undefined): strin
     return 'เชื่อมต่อ SUPABASE_URL ไม่ได้ — ตรวจค่าใน .env และการเชื่อมต่ออินเทอร์เน็ต';
   }
   if (status === 401 || status === 403) {
-    return 'SUPABASE_SERVICE_ROLE_KEY ไม่ถูกต้อง หรือเป็น anon key — ต้องใช้ service_role key';
+    return 'SUPABASE_SERVICE_ROLE_KEY ไม่ถูกต้อง หรือเป็น anon key — ต้องใช้ service_role key (บน server ของตัวเอง: JWT ต้องเซ็นด้วย jwt-secret เดียวกับ PostgREST และมี role: service_role)';
   }
   // PGRST202 = function not in the schema cache, i.e. the template migration was never pushed.
   if (code === 'PGRST202' || status === 404) {
-    return 'ยังไม่มี function health() ในฐานข้อมูล — รัน `npm run db:push` ก่อน';
+    return 'ยังไม่มี function health() ในฐานข้อมูล — รัน `npm run db:push` ก่อน (หรือ `db:push:url` ถ้าฐานข้อมูลอยู่บน server ของตัวเอง)';
   }
   return 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ — ดูรายละเอียดใน log ของ server';
 }
