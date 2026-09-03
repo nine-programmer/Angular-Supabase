@@ -5,8 +5,8 @@ export type HealthResult = { ok: true } | { ok: false; error: string };
 
 // Maps the failure to the setup step that fixes it; the raw Supabase error never leaves the server.
 export function describeFailure(status: number, code: string | undefined): string {
-  if (status === 0) {
-    return 'เชื่อมต่อ SUPABASE_URL ไม่ได้ — ตรวจค่าใน .env และการเชื่อมต่ออินเทอร์เน็ต';
+  if (status === 0 || status === 502 || status === 503) {
+    return 'เชื่อมต่อ SUPABASE_URL ไม่ได้ — ตรวจค่าใน .env และการเชื่อมต่ออินเทอร์เน็ต (บน server ของตัวเอง: ตรวจสอบว่า reverse proxy และ PostgREST กำลังทำงานอยู่)';
   }
   if (status === 401 || status === 403) {
     return 'SUPABASE_SERVICE_ROLE_KEY ไม่ถูกต้อง หรือเป็น anon key — ต้องใช้ service_role key (บน server ของตัวเอง: JWT ต้องเซ็นด้วย jwt-secret เดียวกับ PostgREST และมี role: service_role)';

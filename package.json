@@ -1,6 +1,6 @@
 {
   "name": "angular-supabase",
-  "version": "1.0.1",
+  "version": "1.10.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -15,8 +15,8 @@
     "db:migration": "supabase migration new",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked > src/shared/types/database.types.tmp && node -e \"require('fs').renameSync('src/shared/types/database.types.tmp','src/shared/types/database.types.ts')\"",
-    "db:push:url": "node --env-file-if-exists=.env -e \"const u=process.env.DATABASE_URL;if(!u)throw new Error('DATABASE_URL is not set in .env');const cp=require('child_process');const cli=require.resolve('supabase/dist/supabase.js');cp.execFileSync(process.execPath,[cli,'db','push','--db-url',u,...process.argv.slice(1)],{stdio:'inherit'})\"",
-    "db:types:url": "node --env-file-if-exists=.env -e \"const u=process.env.DATABASE_URL;if(!u)throw new Error('DATABASE_URL is not set in .env');const cp=require('child_process');const cli=require.resolve('supabase/dist/supabase.js');const out=cp.execFileSync(process.execPath,[cli,'gen','types','typescript','--db-url',u,...process.argv.slice(1)],{stdio:['inherit','pipe','inherit']});require('fs').writeFileSync('src/shared/types/database.types.ts',out)\""
+    "db:push:url": "node --env-file-if-exists=.env -e \"const u=process.env.DATABASE_URL;if(!u)throw new Error('DATABASE_URL is not set in .env');const cp=require('child_process');const cli=require.resolve('supabase/dist/supabase.js');cp.execFileSync(process.execPath,[cli,'db','push','--db-url',u,...process.argv.slice(1)],{stdio:'inherit'})\" --",
+    "db:types:url": "node --env-file-if-exists=.env -e \"const u=process.env.DATABASE_URL;if(!u)throw new Error('DATABASE_URL is not set in .env');const cp=require('child_process');const cli=require.resolve('supabase/dist/supabase.js');const out=cp.execFileSync(process.execPath,[cli,'gen','types','typescript','--db-url',u,...process.argv.slice(1)],{stdio:['inherit','pipe','inherit']});require('fs').writeFileSync('src/shared/types/database.types.ts',out)\" --"
   },
   "private": true,
   "engines": {
