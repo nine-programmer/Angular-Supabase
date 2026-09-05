@@ -56,9 +56,12 @@ Read `references/interview-guide.md` for the question bank and techniques. The r
 **How to ask**
 - Thai, plain words. Say "ข้อมูลที่ต้องจดต่อ 1 รายการ" not "table", "ห้ามทำอะไร" not "constraint".
 - At most 3 questions per turn, numbered, each answerable in one line (the walk-through question below is the one exception — it is meant to get a story). Every question carries a proposed default: "ถ้าไม่บอก ผมจะถือว่า ___". The user can answer "ตามนั้น".
+- Pick those 3 from the questions that can be answered *now*. A question whose answer depends on another question still open waits for a later turn; never ask "ใครกดเปลี่ยนสถานะ" before the statuses themselves are settled.
+- **Facts are your job; decisions are the user's.** Anything that already exists in a file you read yourself and never ask: an existing `docs/SYSTEM_SPEC.md`, `src/shared/dto/`, `src/shared/enums/`, migrations — never `.env` (AGENTS.md forbids it). Business behaviour (who may do what, what a status means, how a number is computed) is always asked, never inferred from code.
+- **Ask for the real thing early.** In the first turn invite the user to paste or attach what they use today — the Excel sheet, a photo of the notebook or paper form, a LINE message — and pull fields, fixed lists, unique values, and statuses from it yourself before asking any field-by-field question. A real file answers M4 and M12 better than any question; a non-programmer hands over a file far more easily than they list "fields".
 - **Propose, then ask what differs.** Start from the pattern: "ระบบยืม-คืนปกติมีของ / ผู้ยืม / รายการยืม — ของคุณต่างจากนี้ไหม?"
 - **Walk one real case end to end** early ("ยกตัวอย่างครั้งล่าสุดที่มีคนมายืมของ เล่าตั้งแต่ต้นจนจบ"). This single question surfaces most fields, statuses, and rules; use its answers instead of asking field by field.
-- Adapt: pick the next question from what the last answer left unclear, not from a fixed script. Skip anything the pattern or a previous answer already settled.
+- Adapt: pick the next question from what the last answer left unclear, not from a fixed script. Skip anything the pattern, a previous answer, or a file the user gave already settled.
 - Reflect back what you understood in one line before the next question when an answer was long or surprising.
 
 **Must-know list — the gate before writing.** Each item is either answered, or covered by the pattern, or defaulted *and written into 1.9 สมมติฐาน*. Items marked ✗ cannot be defaulted. M1, M4, and M7 can never be skipped — nothing can be written without them (M1 may be inferred from the idea sentence plus the walk-through, then reflected back for confirmation in step 3). Other ✗ items may be overridden only by an explicit user command (see Budget).
@@ -90,7 +93,7 @@ Read `references/interview-guide.md` for the question bank and techniques. The r
 
 ### 3. Confirm before writing
 
-Summarize in 5–10 bullet points: problem, users, features, entities with key fields, statuses, rules, exclusions, and — separately labelled — every default you chose. Ask "ถูกต้องไหม แก้ตรงไหน?" and wait. Only write after a confirmation.
+Play the system back as **one short story of a real day**, in the user's own words, not as a list of entities: who opens the first screen and what they see first, what they type, what they click, what the system refuses and with what message, how the case ends, and what the person who comes in next sees. Every feature, every status, every rule, and every exclusion must appear in that story — a non-programmer cannot check a bullet that says "entity: booking (status: waiting/called/done)", but will immediately correct a story that gets their day wrong. Then, **separately labelled**, list every default you chose ("ค่าที่ผมเลือกให้ ถ้าไม่ทักถือว่าตกลง") — that list is what becomes 1.9. Ask "ถูกต้องไหม แก้ตรงไหน?" and wait. Only write after a confirmation.
 
 ### 4. Write SYSTEM_SPEC.md and TASKS.md
 
