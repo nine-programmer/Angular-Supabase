@@ -9,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly title = signal('angular-supabase');
+  protected readonly title = signal('ระบบจองคิวตัดผมออนไลน์');
 }

@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "angular-supabase": {
+    "barber-appointment": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -68,10 +68,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-supabase:build:production"
+              "buildTarget": "barber-appointment:build:production"
             },
             "development": {
-              "buildTarget": "angular-supabase:build:development"
+              "buildTarget": "barber-appointment:build:development"
             }
           },
           "defaultConfiguration": "development"

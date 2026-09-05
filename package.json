@@ -1,5 +1,5 @@
 {
-  "name": "angular-supabase",
+  "name": "barber-appointment",
   "version": "1.10.0",
   "scripts": {
     "ng": "ng",
@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs",
+    "serve:ssr:barber-appointment": "node dist/barber-appointment/server/server.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:link": "supabase link",

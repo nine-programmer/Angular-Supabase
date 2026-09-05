@@ -1,6 +1,6 @@
 # TASKS — ระบบจองคิวตัดผมออนไลน์
 
-> จาก `docs/SYSTEM_SPEC.md` v1.1 | ผ่านแล้ว 0/8 | Task ปัจจุบัน: 1 | อัปเดต: 2026-09-05
+> จาก `docs/SYSTEM_SPEC.md` v1.1 | ผ่านแล้ว 1/8 | Task ปัจจุบัน: 2 | อัปเดต: 2026-09-05
 
 สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน (บรรทัด "ผล:" ตาม Section 0 ข้อ 5) · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
 
@@ -8,11 +8,11 @@
 
 ---
 
-### [ ] Task 1: ตั้งชื่อโปรเจกต์ + หน้าแรก
+### [x] Task 1: ตั้งชื่อโปรเจกต์ + หน้าแรก
 
 - ทำ: **ตรวจความพร้อมก่อนเริ่ม** — (1) `node -v` ต้องเข้าเงื่อนไข `engines` ใน `package.json` ถ้าไม่ผ่านให้บอกผู้ใช้สลับเวอร์ชัน (เช่น `nvm use <version>`) ก่อน (2) `npm start` แล้วเปิด `/api/health` ต้องได้ `{ ok: true }` ถ้าไม่ได้ ให้ agent อ่านข้อความ error แล้ว**พาผู้ใช้แก้ทีละขั้น**ตาม README → "ปัญหาที่พบบ่อยตอนตั้งค่า" (ยังไม่มี `.env` / ยังไม่ `npx supabase login` / ใส่ anon key แทน service_role / ยังไม่ `db:push` — ถ้าฐานข้อมูลอยู่บน server ของตัวเอง ข้ามเรื่อง login/link แล้วใช้ `db:push:url` ตาม README → "Deploy บน VPS ของตัวเอง") จนได้ `{ ok: true }` ก่อนจึงเริ่มงานของ Task; จากนั้นตั้งชื่อ `barber-appointment` (แก้ `name` ใน package.json, เปลี่ยน **key ของ project** ใน angular.json จาก `angular-supabase` เป็น `barber-appointment` เพราะ `outputPath` อิงชื่อนั้น, เปลี่ยน script `serve:ssr:angular-supabase` เป็น `serve:ssr:barber-appointment` และ path `dist/barber-appointment/...`, และ `project_id` ใน `supabase/config.toml`); หน้า `/` แสดงชื่อระบบ "ระบบจองคิวตัดผมออนไลน์" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` ซึ่งเป็น placeholder ของ template และ `<title>` ใน `src/index.html`) — การเชื่อมฐานข้อมูล (`.env`, login, link, `db:push` migration `roles` + `health` — หรือ `db:push:url` เมื่ออยู่บน server ของตัวเอง) ทำไปแล้วตอน clone template ตาม README ไม่ใช่งานของ Task นี้; โครง server (`src/server/env.ts`, `supabase.ts`, `api.ts`, `routes/health.routes.ts`, `services/health-server.service.ts`), interceptor ตอน SSR ทั้ง 2 ตัว (`src/app/core/api-origin.interceptor.ts`, `ssr-cookie.interceptor.ts`), `api-error.ts`, `thai-date.ts` และ `provideHttpClient` ทั้งสองฝั่งมากับ template แล้ว ไม่ต้องสร้างใหม่
 - ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นชื่อระบบ "ระบบจองคิวตัดผมออนไลน์"; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน
-- ผล: —
+- ผล: ผ่าน 2026-09-05 — preflight `node -v` ได้ `v26.7.0`, `npm start` ทำงานได้เมื่อต้องรันนอก sandbox, หน้า `/` แสดงชื่อระบบ และ `/api/health` ตอบ `{"ok":true}`; `npm run format`, `npm test` (ผ่าน 4 ไฟล์ / 13 tests) และ `npm run build` ผ่านแล้ว; log: `.sessions/2026-09-05-1855-task-1-project-name.md`
 
 ### [ ] Task 2: Design UX/UI
 
