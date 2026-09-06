@@ -14,9 +14,43 @@ node -v        # ต้องเข้าเงื่อนไข engines ใน
 npm install
 ```
 
-### 2. ตั้งค่า Supabase (ทำได้ทันที ไม่ต้องรอ spec)
+### 2. เขียน spec ด้วย skill `system-spec-builder`
 
-สร้างโปรเจกต์ใหม่ที่ [supabase.com](https://supabase.com) แล้วคัดลอก `.env.example` เป็น `.env`:
+เปิดโปรเจกต์ด้วย Claude Code (หรือ AI agent ที่รองรับ skill นี้) แล้วพิมพ์ไอเดียของระบบเป็นประโยคเดียว เช่น "อยากได้ระบบยืมคืนอุปกรณ์ในออฟฟิศ" — skill จะ:
+
+1. เช็คว่าไอเดียอยู่ในขอบเขตของ template ไหม (ตาราง 3 ระดับอยู่ใน `.claude/skills/system-spec-builder/references/template-scope.md`; [ARCHITECTURE.md ข้อ 10](docs/ARCHITECTURE.md) มีเกณฑ์ตัดสินเร็ว)
+2. เทียบกับ pattern สำเร็จรูป (ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, คำขอ/ใบแจ้ง, รายการทั่วไป) ถ้าตรง
+3. สัมภาษณ์เป็นรอบสั้นๆ จนข้อมูลครบพอจะสร้างระบบได้จริง (ไม่ถามซ้ำสิ่งที่รู้แล้ว)
+4. ถามคำถามสุดท้ายเสมอว่าฐานข้อมูลจะอยู่บน **Supabase cloud** หรือ **PostgreSQL + PostgREST บน VPS ของตัวเอง** และเสนอชื่อโปรเจกต์ (slug ภาษาอังกฤษ เช่น `barber-queue`) ให้คุณเคาะ — ทั้งสองอย่างบันทึกใน SPEC 2.1 เพื่อให้ Task 1 รู้ว่าต้องตั้งค่าแบบไหนและตั้งชื่ออะไร
+5. สรุปให้ยืนยันก่อนเขียนไฟล์
+6. เขียน `docs/SYSTEM_SPEC.md` (สิ่งที่ต้องสร้าง — locked หลัง review) และ `docs/TASKS.md` (ลำดับงาน + ความคืบหน้า)
+7. หยุดถามคุณว่าจะให้ใครตรวจแบบ "Tech Lead ขี้บ่น": ให้ skill เปิด subagent ตรวจใน session นี้เลย หรือคุณเอาไปตรวจเอง (สลับ model / เปิด session ใหม่ / ใช้ AI ตัวอื่น) — แบบหลัง skill จะพิมพ์ข้อความสำเร็จรูปให้ 2 ก้อน คือก้อนที่ส่งให้ตัวตรวจ และก้อนที่วางผลกลับมาให้แก้ (วางใน session ใหม่ก็ได้ skill จะอ่านสถานะ "ร่าง (รอ review)" ในหัว SPEC แล้วทำต่อโดยไม่สัมภาษณ์ซ้ำ) แก้จนตัวตรวจตอบ APPROVED แล้วจึงเปลี่ยนสถานะเป็น "พร้อมสร้าง"
+
+### 3. สั่งให้ agent เริ่มสร้างทีละ Task
+
+เปิดแชทใหม่กับ agent แล้วพิมพ์:
+
+```
+อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
+```
+
+Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/DESIGN.md` (เมื่อมีแล้ว) → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น ทุก Task จะบอกวิธีทดสอบที่คุณทำได้เองในเบราว์เซอร์ (ไม่ต้องใช้ curl หรือเขียน SQL เอง — ถ้าต้องตรวจฐานข้อมูล agent จะเขียน SQL ให้คุณวางใน Supabase SQL Editor หรือรันด้วย `psql` เมื่อฐานข้อมูลอยู่บน server ของตัวเอง) เมื่อคุณบอก "ผ่าน" agent จะถามคำถามเดียว: บันทึกงานลง `.sessions/` ไหม และจะทำ Task ถัดไปที่นี่หรือเปิดแชทใหม่ (ตอบสั้นๆ เช่น "บันทึก, ต่อเลย" — agent ไม่เริ่ม Task ถัดไปเอง) Task 2 คือการออกแบบหน้าตา: คุณจะได้ `docs/design/mockup.html` เปิดดูในเบราว์เซอร์แล้วติชมจนพอใจก่อนที่จะมีการสร้างหน้าจอจริง — ความคืบหน้าทั้งหมดอยู่ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
+
+Task 1 คือ **ตั้งค่าฐานข้อมูล + ตั้งชื่อโปรเจกต์ + หน้าแรก**: agent จะพาคุณทำตามหัวข้อ "ตั้งค่าฐานข้อมูล" ด้านล่างทีละขั้น (แบบ A หรือแบบ B ตามที่เลือกไว้ใน SPEC 2.1) โดยคุณเป็นคนสร้างโปรเจกต์/เซิร์ฟเวอร์และใส่ค่าลับใน `.env` เอง ส่วนคำสั่ง `npm run db:*` agent รันให้ได้ จนเปิด http://localhost:4200/api/health ได้ `{"ok":true}` แล้วจึงตั้งชื่อโปรเจกต์และหน้าแรก
+
+ใช้ได้กับ agent ที่แก้ไฟล์ใน repo และรันคำสั่งได้ (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot agent) — เว็บแชทที่ไม่เห็นไฟล์ใช้ช่วยเขียน/ตรวจ spec ได้ แต่ไม่ใช้สร้างระบบ
+
+### 4. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
+
+เรียก skill `system-spec-builder` อีกครั้งพร้อมบอกฟีเจอร์ที่ต้องการ — จะได้ `docs/features/<name>/SPEC.md` + `TASKS.md` แยกต่างหาก โดยอ้างอิงตารางเดิมจาก `docs/SYSTEM_SPEC.md`
+
+## ตั้งค่าฐานข้อมูล (งานของ Task 1 — agent พาทำ คุณเป็นคนใส่ค่าลับ)
+
+ทำหลังจากมี `docs/SYSTEM_SPEC.md` แล้ว เลือกแบบตามที่ระบุไว้ใน SPEC 2.1 — ทั้งสองแบบจบเมื่อ `npm start` แล้วเปิด http://localhost:4200/api/health ได้ `{"ok":true}` (ติดตรงไหนดู "ปัญหาที่พบบ่อยตอนตั้งค่า" ด้านล่าง) ไฟล์ `.env` อยู่เครื่องนี้เท่านั้น ห้ามส่งต่อ อัปโหลด หรือให้ AI agent อ่าน — agent อ่าน `.env.example` แทน และต้องยกขั้นตอนจากหัวข้อนี้ไปพาคุณทำ ไม่คิดขั้นตอนเอง
+
+### แบบ A: Supabase cloud
+
+สร้างโปรเจกต์ใหม่ที่ [supabase.com](https://supabase.com) — ตั้งชื่อโปรเจกต์ตาม slug ใน SPEC 2.1 (เช่น `barber-queue`) และจดรหัสผ่านฐานข้อมูลที่ตั้งตอนสร้างไว้ (ขั้น `db:link` ด้านล่างจะถาม) — แล้วคัดลอก `.env.example` เป็น `.env`:
 
 ```bash
 cp .env.example .env
@@ -33,34 +67,33 @@ npm run db:types                         # สร้าง type จากโป�
 
 ตรวจว่าเชื่อมได้จริง: `npm start` แล้วเปิด http://localhost:4200/api/health ต้องได้ `{"ok":true}` — ถ้าไม่ได้ ข้อความ `error` จะบอกว่าต้องแก้ตรงไหน (URL ผิด / key ผิดหรือเป็น anon key / ยังไม่ได้ `db:push`) และดูวิธีแก้ทีละอาการที่หัวข้อ "ปัญหาที่พบบ่อยตอนตั้งค่า" ด้านล่าง ถึงตรงนี้โปรเจกต์พร้อมรับ migration ของระบบจริงแล้ว
 
-ไม่อยากใช้ Supabase cloud? Template ย้ายไป PostgreSQL + PostgREST บน server ของตัวเองได้โดยไม่แก้โค้ด — ดูหัวข้อ "Deploy บน VPS ของตัวเอง" ด้านล่าง (ขั้น login/link/push ข้างบนเปลี่ยนเป็น `npm run db:push:url` และ `npm run db:types:url`)
+### แบบ B: PostgreSQL + PostgREST บน VPS ของตัวเอง
 
-### 3. เขียน spec ด้วย skill `system-spec-builder`
+Template ไม่ได้ผูกกับ Supabase cloud: server คุยกับฐานข้อมูลผ่าน [PostgREST](https://postgrest.org) เท่านั้น (โปรแกรมตัวเดียวกับที่ Supabase รันให้อยู่เบื้องหลัง — ทดสอบผ่านจริงแล้วกับ Node v26.7.0, PostgreSQL 16.15, PostgREST 16.2 และ Caddy 2) จึงย้ายไป VPS ที่ติดตั้ง PostgreSQL + PostgREST เองได้โดยเปลี่ยนแค่ค่าใน `.env` — ติดตั้ง PostgreSQL เปล่าๆ อย่างเดียว**ไม่พอ** ต้องมี PostgREST ด้วย (VPS RAM 1 GB พอสำหรับแอป + PostgreSQL + PostgREST; ไม่ต้องติดตั้ง Supabase self-hosted ทั้งชุด)
 
-เปิดโปรเจกต์ด้วย Claude Code (หรือ AI agent ที่รองรับ skill นี้) แล้วพิมพ์ไอเดียของระบบเป็นประโยคเดียว เช่น "อยากได้ระบบยืมคืนอุปกรณ์ในออฟฟิศ" — skill จะ:
+ชื่อฐานข้อมูล `<db>` ในทุกขั้นด้านล่างใช้ slug จาก SPEC 2.1 แบบ snake_case (เช่น `barber_queue`) — สร้างด้วย `createdb <db>` หรือ `create database <db>;` ใน `psql`
 
-1. เช็คว่าไอเดียอยู่ในขอบเขตของ template ไหม (ตาราง 3 ระดับอยู่ใน `.claude/skills/system-spec-builder/references/template-scope.md`; [ARCHITECTURE.md ข้อ 10](docs/ARCHITECTURE.md) มีเกณฑ์ตัดสินเร็ว)
-2. เทียบกับ pattern สำเร็จรูป (ยืม-คืน, จองคิว, ลงทะเบียน, สต็อก, คำขอ/ใบแจ้ง, รายการทั่วไป) ถ้าตรง
-3. สัมภาษณ์เป็นรอบสั้นๆ จนข้อมูลครบพอจะสร้างระบบได้จริง (ไม่ถามซ้ำสิ่งที่รู้แล้ว)
-4. สรุปให้ยืนยันก่อนเขียนไฟล์
-5. เขียน `docs/SYSTEM_SPEC.md` (สิ่งที่ต้องสร้าง — locked หลัง review) และ `docs/TASKS.md` (ลำดับงาน + ความคืบหน้า)
-6. หยุดถามคุณว่าจะให้ใครตรวจแบบ "Tech Lead ขี้บ่น": ให้ skill เปิด subagent ตรวจใน session นี้เลย หรือคุณเอาไปตรวจเอง (สลับ model / เปิด session ใหม่ / ใช้ AI ตัวอื่น) — แบบหลัง skill จะพิมพ์ข้อความสำเร็จรูปให้ 2 ก้อน คือก้อนที่ส่งให้ตัวตรวจ และก้อนที่วางผลกลับมาให้แก้ (วางใน session ใหม่ก็ได้ skill จะอ่านสถานะ "ร่าง (รอ review)" ในหัว SPEC แล้วทำต่อโดยไม่สัมภาษณ์ซ้ำ) แก้จนตัวตรวจตอบ APPROVED แล้วจึงเปลี่ยนสถานะเป็น "พร้อมสร้าง"
+1. **PostgreSQL** — ติดตั้ง สร้างฐานข้อมูล แล้วใส่ connection string ของ superuser (`postgres`) ลง `.env` เป็น `DATABASE_URL` เช่น `postgres://postgres:<รหัส>@<ip>:5432/<db>?sslmode=disable` (ต่อท้าย `?sslmode=disable` หาก PostgreSQL ไม่ได้ตั้งค่า SSL/TLS; migration `*_roles.sql` ต้องเป็น superuser จึงสร้าง role และ event trigger ได้; ถ้ารหัสผ่านมีอักขระพิเศษต้อง percent-encode เช่น `@` → `%40`; ใช้ `DATABASE_URL` ตัวเดิมกับทุก migration ต่อจากนี้ เพราะ default privileges ผูกกับ role ที่รัน migration) เปิด port 5432 ให้เฉพาะเครื่องที่รัน migration
+2. **Migration และ type** — `npm run db:push:url` แทน `db:link` + `db:push` (ไม่ต้อง `supabase login`) แล้ว `npm run db:types:url` — migration `*_roles.sql` สร้าง role `anon` / `authenticated` / `service_role` / `authenticator` ตั้ง default privileges ให้ตารางที่สร้างทีหลังมองเห็นได้ และตั้ง event trigger ให้ PostgREST reload schema เองหลังทุก migration จากนั้นตั้งรหัสผ่านให้ role ที่ PostgREST ใช้ login ด้วย `psql`:
+   ```sql
+   alter role authenticator password '<รหัส-authenticator>';
+   ```
+3. **PostgREST** — ดาวน์โหลด binary จาก [GitHub releases](https://github.com/PostgREST/postgrest/releases) แล้วรันด้วยไฟล์ config (ทำเป็น systemd service ให้รันตลอด):
+   ```
+   db-uri = "postgres://authenticator:<รหัส-authenticator>@localhost:5432/<db>"
+   db-schemas = "public"
+   db-anon-role = "anon"
+   jwt-secret = "<ข้อความสุ่มยาวอย่างน้อย 32 ตัวอักษร>"
+   server-port = 3000
+   db-pool = 10
+   ```
+4. **Key ของ server** — `SUPABASE_SERVICE_ROLE_KEY` ของจริงคือ JWT ที่มี claim `role: service_role` เซ็นด้วย `jwt-secret` ข้างบน สร้างเองได้ด้วย Node (อายุ 10 ปี):
+   ```bash
+   node -e "const c=require('crypto');const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const h=b({alg:'HS256',typ:'JWT'});const p=b({role:'service_role',iss:'postgrest',exp:Math.floor(Date.now()/1000)+315360000});console.log(h+'.'+p+'.'+c.createHmac('sha256',process.argv[1]).update(h+'.'+p).digest('base64url'))" '<jwt-secret>'
+   ```
+5. **Reverse proxy** — supabase-js ต่อ `/rest/v1` ท้าย `SUPABASE_URL` เสมอ จึงต้องให้ `https://<โดเมน>/rest/v1/` ส่งต่อไป PostgREST โดยตัด prefix ออก — Caddy: `handle_path /rest/v1/* { reverse_proxy 127.0.0.1:3000 }` · nginx: `location /rest/v1/ { proxy_pass http://127.0.0.1:3000/; }` (เครื่องหมาย `/` ท้าย `proxy_pass` คือตัวตัด prefix) แล้วตั้ง `.env` ของแอป: `SUPABASE_URL=https://<โดเมน>` กับ `SUPABASE_SERVICE_ROLE_KEY` จากข้อ 4 — เปิด `/api/health` ต้องได้ `{"ok":true}` (ถ้าแอปกับ PostgREST อยู่เครื่องเดียวกัน ใช้ `SUPABASE_URL=http://127.0.0.1:<port ของ proxy>` เพื่อไม่วิ่งออกอินเทอร์เน็ต)
 
-### 4. สั่งให้ agent เริ่มสร้างทีละ Task
-
-เปิดแชทใหม่กับ agent แล้วพิมพ์:
-
-```
-อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0
-```
-
-Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM_SPEC.md` → `docs/DESIGN.md` (เมื่อมีแล้ว) → `docs/TASKS.md` แล้วทำทีละ Task เท่านั้น ทุก Task จะบอกวิธีทดสอบที่คุณทำได้เองในเบราว์เซอร์ (ไม่ต้องใช้ curl หรือเขียน SQL เอง — ถ้าต้องตรวจฐานข้อมูล agent จะเขียน SQL ให้คุณวางใน Supabase SQL Editor หรือรันด้วย `psql` เมื่อฐานข้อมูลอยู่บน server ของตัวเอง) เมื่อคุณบอก "ผ่าน" agent จะถามคำถามเดียว: บันทึกงานลง `.sessions/` ไหม และจะทำ Task ถัดไปที่นี่หรือเปิดแชทใหม่ (ตอบสั้นๆ เช่น "บันทึก, ต่อเลย" — agent ไม่เริ่ม Task ถัดไปเอง) Task 2 คือการออกแบบหน้าตา: คุณจะได้ `docs/design/mockup.html` เปิดดูในเบราว์เซอร์แล้วติชมจนพอใจก่อนที่จะมีการสร้างหน้าจอจริง — ความคืบหน้าทั้งหมดอยู่ใน `docs/TASKS.md` เปิดแชทใหม่กี่ครั้งก็ทำต่อจากเดิมได้
-
-ใช้ได้กับ agent ที่แก้ไฟล์ใน repo และรันคำสั่งได้ (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot agent) — เว็บแชทที่ไม่เห็นไฟล์ใช้ช่วยเขียน/ตรวจ spec ได้ แต่ไม่ใช้สร้างระบบ
-
-### 5. เมื่อมีฟีเจอร์ใหม่ในรอบถัดไป
-
-เรียก skill `system-spec-builder` อีกครั้งพร้อมบอกฟีเจอร์ที่ต้องการ — จะได้ `docs/features/<name>/SPEC.md` + `TASKS.md` แยกต่างหาก โดยอ้างอิงตารางเดิมจาก `docs/SYSTEM_SPEC.md`
+จบแบบ B แล้ว ตอนนำแอปขึ้น server ดูหัวข้อ "Deploy" → "แอปบน VPS ของตัวเอง"
 
 ## ปัญหาที่พบบ่อยตอนตั้งค่า
 
@@ -76,7 +109,7 @@ Agent จะอ่าน `AGENTS.md` → `docs/ARCHITECTURE.md` → `docs/SYSTEM
 
 หมายเหตุ: หน้า Dashboard ของ Supabase เปลี่ยน UI ได้เรื่อยๆ — ถ้าเมนูไม่ตรงกับข้างบน ให้หาคำว่า "API keys" ใน Project Settings แล้วมองหา key ที่ระบุว่า `service_role` / `secret`
 
-บน server ของตัวเอง (PostgreSQL + PostgREST): แถวที่เกี่ยวกับ login และ Dashboard ไม่เกี่ยว — key คือ JWT ที่สร้างเองในข้อ 4 ของ "Deploy บน VPS ของตัวเอง" ถ้า `/api/health` บอกว่า key ไม่ถูกต้อง ให้ตรวจว่า `jwt-secret` ใน config ของ PostgREST ตรงกับที่ใช้เซ็น และถ้าบอกว่ายังไม่มี function `health()` ให้รัน `npm run db:push:url`
+บน server ของตัวเอง (PostgreSQL + PostgREST): แถวที่เกี่ยวกับ login และ Dashboard ไม่เกี่ยว — key คือ JWT ที่สร้างเองในข้อ 4 ของ "ตั้งค่าฐานข้อมูล" แบบ B ถ้า `/api/health` บอกว่า key ไม่ถูกต้อง ให้ตรวจว่า `jwt-secret` ใน config ของ PostgREST ตรงกับที่ใช้เซ็น และถ้าบอกว่ายังไม่มี function `health()` ให้รัน `npm run db:push:url`
 
 ## คำสั่งที่ใช้บ่อย
 
@@ -102,42 +135,22 @@ Template มี migration มาให้ 2 ไฟล์ — `supabase/migration
 
 ## Deploy
 
-Render (หรือ host Node ใดๆ): Build command `npm ci && npm run build` · Start command `node dist/<project-name>/server/server.mjs` · Node ตาม `engines` ใน `package.json` · ตั้ง env `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NG_ALLOWED_HOSTS=<โดเมนจริง>` ใน dashboard ของ host (`PORT` host ตั้งให้เอง) · ห้ามตั้ง CDN cache หน้า HTML — รายละเอียดใน [ARCHITECTURE.md ข้อ 8](docs/ARCHITECTURE.md)
+Render (หรือ host Node ใดๆ): Build command `npm ci && npm run build` · Start command `node dist/<project-name>/server/server.mjs` (= script `serve:ssr:<project-name>`) · Node ตาม `engines` ใน `package.json` · ตั้ง env 3 ตัว `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NG_ALLOWED_HOSTS=<โดเมนจริง>` ใน dashboard ของ host (`PORT` host มักตั้งให้เอง ส่วน `DATABASE_URL` ไม่ต้องตั้งบน host เพราะแอปไม่อ่าน) · ห้ามตั้ง CDN/proxy cache หน้า HTML เพราะเป็นข้อมูลต่อผู้ใช้ — README ปิดงานของโปรเจกต์คัดลอกย่อหน้านี้ไปใส่ชื่อจริง
 
-### Deploy บน VPS ของตัวเอง (PostgreSQL + PostgREST)
+### แอปบน VPS ของตัวเอง
 
-Template ไม่ได้ผูกกับ Supabase cloud: server คุยกับฐานข้อมูลผ่าน [PostgREST](https://postgrest.org) เท่านั้น (โปรแกรมตัวเดียวกับที่ Supabase รันให้อยู่เบื้องหลัง — ทดสอบผ่านจริงแล้วกับ Node v26.7.0, PostgreSQL 16.15, PostgREST 16.2 และ Caddy 2) จึงย้ายไป VPS ที่ติดตั้ง PostgreSQL + PostgREST เองได้โดยเปลี่ยนแค่ค่าใน `.env` — ติดตั้ง PostgreSQL เปล่าๆ อย่างเดียว**ไม่พอ** ต้องมี PostgREST ด้วย (VPS RAM 1 GB พอสำหรับแอป + PostgreSQL + PostgREST; ไม่ต้องติดตั้ง Supabase self-hosted ทั้งชุด)
-
-1. **PostgreSQL** — ติดตั้ง สร้างฐานข้อมูล แล้วใส่ connection string ของ superuser (`postgres`) ลง `.env` เป็น `DATABASE_URL` เช่น `postgres://postgres:<รหัส>@<ip>:5432/<db>?sslmode=disable` (ต่อท้าย `?sslmode=disable` หาก PostgreSQL ไม่ได้ตั้งค่า SSL/TLS; migration `*_roles.sql` ต้องเป็น superuser จึงสร้าง role และ event trigger ได้; ถ้ารหัสผ่านมีอักขระพิเศษต้อง percent-encode เช่น `@` → `%40`; ใช้ `DATABASE_URL` ตัวเดิมกับทุก migration ต่อจากนี้ เพราะ default privileges ผูกกับ role ที่รัน migration) เปิด port 5432 ให้เฉพาะเครื่องที่รัน migration
-2. **Migration และ type** — `npm run db:push:url` แทน `db:link` + `db:push` (ไม่ต้อง `supabase login`) แล้ว `npm run db:types:url` — migration `*_roles.sql` สร้าง role `anon` / `authenticated` / `service_role` / `authenticator` ตั้ง default privileges ให้ตารางที่สร้างทีหลังมองเห็นได้ และตั้ง event trigger ให้ PostgREST reload schema เองหลังทุก migration จากนั้นตั้งรหัสผ่านให้ role ที่ PostgREST ใช้ login ด้วย `psql`:
-   ```sql
-   alter role authenticator password '<รหัส-authenticator>';
-   ```
-3. **PostgREST** — ดาวน์โหลด binary จาก [GitHub releases](https://github.com/PostgREST/postgrest/releases) แล้วรันด้วยไฟล์ config (ทำเป็น systemd service ให้รันตลอด):
-   ```
-   db-uri = "postgres://authenticator:<รหัส-authenticator>@localhost:5432/<db>"
-   db-schemas = "public"
-   db-anon-role = "anon"
-   jwt-secret = "<ข้อความสุ่มยาวอย่างน้อย 32 ตัวอักษร>"
-   server-port = 3000
-   db-pool = 10
-   ```
-4. **Key ของ server** — `SUPABASE_SERVICE_ROLE_KEY` ของจริงคือ JWT ที่มี claim `role: service_role` เซ็นด้วย `jwt-secret` ข้างบน สร้างเองได้ด้วย Node (อายุ 10 ปี):
-   ```bash
-   node -e "const c=require('crypto');const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const h=b({alg:'HS256',typ:'JWT'});const p=b({role:'service_role',iss:'postgrest',exp:Math.floor(Date.now()/1000)+315360000});console.log(h+'.'+p+'.'+c.createHmac('sha256',process.argv[1]).update(h+'.'+p).digest('base64url'))" '<jwt-secret>'
-   ```
-5. **Reverse proxy** — supabase-js ต่อ `/rest/v1` ท้าย `SUPABASE_URL` เสมอ จึงต้องให้ `https://<โดเมน>/rest/v1/` ส่งต่อไป PostgREST โดยตัด prefix ออก — Caddy: `handle_path /rest/v1/* { reverse_proxy 127.0.0.1:3000 }` · nginx: `location /rest/v1/ { proxy_pass http://127.0.0.1:3000/; }` (เครื่องหมาย `/` ท้าย `proxy_pass` คือตัวตัด prefix) แล้วตั้ง `.env` ของแอป: `SUPABASE_URL=https://<โดเมน>` กับ `SUPABASE_SERVICE_ROLE_KEY` จากข้อ 4 — เปิด `/api/health` ต้องได้ `{"ok":true}` (ถ้าแอปกับ PostgREST อยู่เครื่องเดียวกัน ใช้ `SUPABASE_URL=http://127.0.0.1:<port ของ proxy>` เพื่อไม่วิ่งออกอินเทอร์เน็ต)
-6. **แอป** — เหมือน Render: `npm ci && npm run build` แล้ว `node dist/<project-name>/server/server.mjs` ภายใต้ systemd/pm2 ตั้ง `NG_ALLOWED_HOSTS` เป็นโดเมนจริง
+ฐานข้อมูล (PostgreSQL + PostgREST) ตั้งค่าไปแล้วใน "ตั้งค่าฐานข้อมูล" แบบ B — ส่วนแอปทำเหมือน Render: `npm ci && npm run build` แล้ว `node dist/<project-name>/server/server.mjs` ภายใต้ systemd/pm2 ตั้ง `NG_ALLOWED_HOSTS` เป็นโดเมนจริง (ถ้าแอปกับ PostgREST อยู่เครื่องเดียวกัน ใช้ `SUPABASE_URL=http://127.0.0.1:<port ของ proxy>` เพื่อไม่วิ่งออกอินเทอร์เน็ต)
 
 ข้อจำกัดเมื่อไม่ได้อยู่บน Supabase cloud: ไม่มี Supabase Storage (จุดขยาย "อัปโหลดไฟล์" ต้องสลับ `storage-server.service.ts` ไปเก็บบนดิสก์หรือ S3) และ `pg_cron` ต้องติดตั้ง extension เอง — กติกาที่ทำให้ระบบย้ายได้ทุกเมื่ออยู่ใน `AGENTS.md` → Supabase ("Stay portable") และ [ARCHITECTURE.md ข้อ 6](docs/ARCHITECTURE.md)
 
 ## เอกสารของ template
 
-| ไฟล์                                         | เนื้อหา                                                                                                           |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [AGENTS.md](AGENTS.md)                       | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing)                                             |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template                                             |
-| `.claude/skills/system-spec-builder/`        | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                                                                        |
-| `.agents/skills/`                            | สำเนาของ `.claude/skills/` สำหรับ AI agent เจ้าอื่น — ต้องเหมือนกันทุกไฟล์ ถ้าแก้ฝั่งหนึ่งให้คัดลอกทับอีกฝั่งเสมอ |
+| ไฟล์                                                 | เนื้อหา                                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [AGENTS.md](AGENTS.md)                               | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing)                                             |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)         | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template                                             |
+| [docs/EXTENSION_POINTS.md](docs/EXTENSION_POINTS.md) | ที่วางไฟล์ของจุดขยาย (login, อัปโหลด, แจ้งเตือน, งานตามเวลา, รายงาน ฯลฯ) — agent อ่านเมื่อ SPEC ต้องการ           |
+| `.claude/skills/system-spec-builder/`                | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                                                                        |
+| `.agents/skills/`                                    | สำเนาของ `.claude/skills/` สำหรับ AI agent เจ้าอื่น — ต้องเหมือนกันทุกไฟล์ ถ้าแก้ฝั่งหนึ่งให้คัดลอกทับอีกฝั่งเสมอ |
 
-Skill ภายนอก (`supabase-postgres-best-practices`, `angular-developer`, `angular-new-app` — บันทึกไว้ใน `skills-lock.json`) เป็นความรู้ทั่วไป ส่วน `tailwind-css-patterns` (แก้จากของเดิมให้รองรับ Angular โดยตรง) และ `system-spec-builder` ดูแลเองในเทมเพลตนี้ จึงไม่อยู่ใน lock file ทั้งหมดนี้ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy) — skill `supabase` ของ Supabase ถูกเอาออกโดยตั้งใจ เพราะเนื้อหาส่วนใหญ่เป็น Auth/Realtime/Storage ฝั่ง client และ workflow แบบ local ที่ template นี้ไม่ใช้ ไม่ต้องติดตั้งกลับ
+Skill ภายนอก (`supabase-postgres-best-practices`, `angular-developer` — บันทึกไว้ใน `skills-lock.json`) เป็นความรู้ทั่วไป ส่วน `tailwind-css-patterns` (แก้จากของเดิมให้รองรับ Angular โดยตรง) และ `system-spec-builder` ดูแลเองในเทมเพลตนี้ จึงไม่อยู่ใน lock file ทั้งหมดนี้ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy) — skill `supabase` ของ Supabase ถูกเอาออกโดยตั้งใจ เพราะเนื้อหาส่วนใหญ่เป็น Auth/Realtime/Storage ฝั่ง client และ workflow แบบ local ที่ template นี้ไม่ใช้ ไม่ต้องติดตั้งกลับ

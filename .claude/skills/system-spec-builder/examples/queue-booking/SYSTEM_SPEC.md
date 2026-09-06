@@ -138,7 +138,9 @@ waiting → called → done
 โครงสร้าง โฟลเดอร์ ชื่อไฟล์ และกติกาโค้ดใช้ตาม `docs/ARCHITECTURE.md` และ `AGENTS.md` ทุกข้อ ส่วนนี้มีแค่สิ่งที่ต่างกันต่อโปรเจกต์
 
 ### 2.1 Stack และ deploy
-- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.9
+- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.11
+- ฐานข้อมูล: Supabase cloud — ตั้งค่าใน Task 1 ตาม README → "ตั้งค่าฐานข้อมูล" แบบ A
+- ชื่อโปรเจกต์ (slug): `barber-queue` — ชื่อโปรเจกต์บน Supabase, `name` ใน package.json, script `serve:ssr:barber-queue` และ path `dist/barber-queue/`
 - Deploy: Render (Node web service) ตั้ง env ใน dashboard รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render
 
 ### 2.2 API ที่ต้องมี [LOCKED]

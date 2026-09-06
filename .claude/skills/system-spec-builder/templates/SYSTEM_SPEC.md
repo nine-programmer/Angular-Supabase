@@ -104,6 +104,8 @@
 
 ### 2.1 Stack และ deploy
 - Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template [X.Y] [หรือระบุสิ่งที่ต่าง]
+- ฐานข้อมูล: [Supabase cloud / PostgreSQL + PostgREST บน VPS ของตัวเอง] — ตั้งค่าใน Task 1 ตาม README → "ตั้งค่าฐานข้อมูล" [แบบ A / แบบ B]
+- ชื่อโปรเจกต์ (slug): `[project-name]` — ใช้เป็นชื่อโปรเจกต์ Supabase (cloud) หรือชื่อฐานข้อมูล `[project_name]` (VPS), `name` ใน package.json, script `serve:ssr:[project-name]` และ path `dist/[project-name]/`
 - Deploy: [Render / Vercel / เซิร์ฟเวอร์ตัวเอง]
 
 ### 2.2 API ที่ต้องมี [LOCKED]
@@ -125,4 +127,4 @@
 - [เช่น อัปเดตหน้าจอด้วย polling ทุก 10 วินาที ไม่ใช้ realtime]
 
 ### 2.5 ตัวแปร .env เพิ่มเติม (นอกจากมาตรฐานใน ARCHITECTURE.md ข้อ 8)
-- [ไม่มี / ระบุ]
+- [ไม่มี / ระบุ] [ฐานข้อมูลบน VPS: ย้ำว่าต้องตั้ง `DATABASE_URL` ใน `.env` สำหรับ `db:push:url` / `db:types:url` — แอปไม่อ่าน]

@@ -6,13 +6,13 @@
 
 สถานะ: `[ ]` รอทำ · `[~]` กำลังทำ · `[x]` ผ่าน (บรรทัด "ผล:" ตาม Section 0 ข้อ 5) · `[!]` ติดปัญหา (เขียนเหตุผลในบรรทัด "ผล:")
 
-กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรกปกติ 7–13 Task (ระบบเล็กมากน้อยกว่าได้ เกิน 15 ให้เสนอผู้ใช้ย้ายฟีเจอร์ไปรอบถัดไป); ลำดับ Task สลับได้ถ้าเขียนเหตุผลไว้ใต้บรรทัดนี้; ทุก Task ที่มีหน้าจอทำตาม `docs/DESIGN.md` (เกิดจาก Task 2); รอบ feature 2–6 Task: ข้าม 3 Task แรกด้านล่าง (ชื่อโปรเจกต์, Design, ฐานข้อมูล) — Task 1 ของรอบ feature คือ migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums และหน้าจอใหม่ใช้ `docs/DESIGN.md` เดิม; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
+กฎ: 1 Task = 1 หน้าจอ หรือ 1 resource API พร้อมหน้าที่ใช้มัน — ไม่ใหญ่กว่านี้; รอบแรกปกติ 7–13 Task (ระบบเล็กมากน้อยกว่าได้ เกิน 15 ให้เสนอผู้ใช้ย้ายฟีเจอร์ไปรอบถัดไป); ลำดับ Task สลับได้ถ้าเขียนเหตุผลไว้ใต้บรรทัดนี้; ทุก Task ที่มีหน้าจอทำตาม `docs/DESIGN.md` (เกิดจาก Task 2); รอบ feature 2–6 Task: ข้าม 3 Task แรกด้านล่าง (ตั้งค่าฐานข้อมูล+ชื่อโปรเจกต์, Design, ฐานข้อมูล) — Task 1 ของรอบ feature คือ migration (`npm run db:migration -- <name>`) + `npm run db:push` + `npm run db:types` + enums และหน้าจอใหม่ใช้ `docs/DESIGN.md` เดิม; ทำทีละ Task ผ่านก่อนค่อยไปต่อ; เขียน spec เฉพาะไฟล์ที่มีการคำนวณ / logic ซับซ้อน / ต้องแก้บ่อย (ตาม AGENTS.md → Testing) — CRUD ธรรมดาไม่ต้องมี spec
 
 ---
 
-### [x] Task 1: ตั้งชื่อโปรเจกต์ + หน้าแรก
-- ทำ: ตั้งชื่อ `barber-queue` (package.json, angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`); หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` และ `<title>` ใน `src/index.html`) — Supabase เชื่อมไว้แล้วตอน clone template (README ข้อ 2); โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
-- ทดสอบ: `npm start` เปิด http://localhost:4200 เห็นข้อความ; เปิด `/api/health` เห็น `{ ok: true }`; `npm test` ผ่าน
+### [x] Task 1: ตั้งค่าฐานข้อมูล + ตั้งชื่อโปรเจกต์ + หน้าแรก
+- ทำ: (1) `node -v` เข้าเงื่อนไข `engines` แล้ว `npm install` (2) ตั้งค่าฐานข้อมูลตาม SPEC 2.1 = Supabase cloud — agent พาผู้ใช้ทำตาม README → "ตั้งค่าฐานข้อมูล" แบบ A ทีละขั้นโดยยกข้อความจาก README (ห้ามเดา ห้ามอ่าน `.env`): ผู้ใช้สร้างโปรเจกต์ที่ supabase.com ชื่อ `barber-queue` และจดรหัสผ่านฐานข้อมูล → `cp .env.example .env` → ผู้ใช้ใส่ `SUPABASE_URL` และ `SUPABASE_SERVICE_ROLE_KEY` ตาม comment ใน `.env.example` → ผู้ใช้รัน `npx supabase login` → agent รัน `npm run db:link -- --project-ref <ref>` → `npm run db:push` → `npm run db:types` → `npm start` เปิด `/api/health` ได้ `{ ok: true }` (3) ตั้งชื่อ `barber-queue` (package.json, key ของ project ใน angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`) (4) หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` และ `<title>` ใน `src/index.html`) — โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
+- ทดสอบ: เปิด http://localhost:4200/api/health เห็น `{ ok: true }`; เปิด http://localhost:4200 เห็นข้อความ; `npm test` ผ่าน
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1540-task-1-setup.md`
 
 ### [x] Task 2: Design UX/UI

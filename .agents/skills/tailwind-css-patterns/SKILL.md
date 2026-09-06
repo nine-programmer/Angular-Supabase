@@ -21,40 +21,7 @@ built-in utilities:
 
 ## Project setup
 
-**Check first — do not assume either way.** A project is already wired up when all three of these
-are true:
-
-| Piece | Location | Expected content |
-| --- | --- | --- |
-| PostCSS plugin | `.postcssrc.json` | `{ "plugins": { "@tailwindcss/postcss": {} } }` |
-| Stylesheet entry | `src/styles.css` | `@import 'tailwindcss';` — in this template it is `@import 'tailwindcss' source(none);` + `@source '../src';` (an allowlist; keep both lines) |
-| Registered in build | `angular.json` → `styles` | `src/styles.css` |
-
-If all three are present, **do not re-run setup or add config files** — go straight to the patterns
-below.
-
-If any are missing, prefer the sibling skill `angular-developer` and read its
-`references/tailwind-css.md`. When that skill is not installed alongside this one, the whole setup
-is these three steps:
-
-```shell
-npm install tailwindcss @tailwindcss/postcss postcss
-```
-
-```json
-// .postcssrc.json at the project root
-{ "plugins": { "@tailwindcss/postcss": {} } }
-```
-
-```css
-/* src/styles.css — the entire configuration surface */
-@import 'tailwindcss';
-```
-
-Never create `tailwind.config.js`. Angular CLI already registers `src/styles.css`, so nothing else
-is needed. Confirm the installed major version with
-`node -p "require('tailwindcss/package.json').version"` — everything in this skill assumes **v4**
-(written against v4.3) and much of it is wrong for v3.
+Already done in this template: `.postcssrc.json` (`@tailwindcss/postcss`), `src/styles.css` (`@import 'tailwindcss' source(none);` + `@source '../src';` — an allowlist, keep both lines) and `angular.json` → `styles`. Do not re-run setup, add config files, or create `tailwind.config.js`. Everything in this skill assumes **v4** (written against v4.3); confirm with `node -p "require('tailwindcss/package.json').version"` if in doubt.
 
 ## Hard rules (Tailwind v4)
 
@@ -78,22 +45,7 @@ These are build-breaking or silently-wrong if violated.
 
 ## Angular binding rules
 
-These are Angular v20+ conventions (and the defaults in v22). Violating them fails review even when
-the CSS itself is correct. If the project has a `CLAUDE.md` or `AGENTS.md`, its rules win over this
-table.
-
-| Do | Don't |
-| --- | --- |
-| `class="rounded-lg p-4"` (static) | — |
-| `[class.hidden]="isHidden()"` | `[ngClass]="{hidden: isHidden()}"` |
-| `[class]="buttonClasses()"` from a `computed()` | string concatenation of class fragments |
-| `[style.width.px]="width()"` | `[ngStyle]="{width: width() + 'px'}"` |
-| `@if` / `@for` / `@switch` | `*ngIf` / `*ngFor` / `*ngSwitch` |
-| `input()`, `output()`, `model()`, `computed()` | `@Input()`, `@Output()` decorators |
-| `host: { class: '...' }` in the decorator | `@HostBinding('class')` |
-| `NgOptimizedImage` (`ngSrc`) for static images | plain `<img src>` for static assets |
-
-Static and bound classes **merge** — `class="btn" [class.btn-lg]="large()"` renders both.
+Template syntax rules (`[class.x]` / `[class]` from a `computed()` instead of `ngClass` or string concatenation, `[style.x]` instead of `ngStyle`, `@if`/`@for`, `input()`/`output()`, `host:` instead of `@HostBinding`) are defined once in the root `AGENTS.md` (Angular Best Practices, Components, Templates) and win over anything here. Static and bound classes **merge** — `class="btn" [class.btn-lg]="large()"` renders both.
 
 ## Quick reference
 
@@ -109,25 +61,6 @@ Static and bound classes **merge** — `class="btn" [class.btn-lg]="large()"` re
 
 Unprefixed utilities apply at every size. `max-sm:` … `max-2xl:` target *below* a breakpoint, and
 they stack into ranges: `md:max-xl:flex`.
-
-### v3 → v4 renames (common mistakes)
-
-| Old (v3) | New (v4) |
-| --- | --- |
-| `bg-opacity-50`, `text-opacity-*`, `ring-opacity-*` | `bg-black/50`, `text-black/50`, `ring-black/50` |
-| `bg-gradient-to-r` | `bg-linear-to-r` |
-| `shadow-sm` → `shadow-xs`, `shadow` → `shadow-sm` | shifted one step down |
-| `rounded-sm` → `rounded-xs`, `rounded` → `rounded-sm` | shifted one step down |
-| `blur`, `drop-shadow`, `backdrop-blur` (bare) | `blur-sm`, `drop-shadow-sm`, `backdrop-blur-sm` |
-| `outline-none` (invisible outline) | `outline-hidden` |
-| `ring` (3px) | `ring-3` (bare `ring` is now 1px) |
-| `flex-shrink-0` / `flex-grow-0` | `shrink-0` / `grow-0` |
-| `overflow-ellipsis` | `text-ellipsis` |
-| `!flex` | `flex!` (important goes last) |
-| `bg-[--brand]` | `bg-(--brand)` |
-| `grid-cols-[max-content,auto]` | `grid-cols-[max-content_auto]` |
-| `first:*:pt-0` | `*:first:pt-0` (variants read left-to-right) |
-| `focus:transform-none` after `scale-150` | `focus:scale-none` |
 
 ### Changed defaults you must handle
 
@@ -241,17 +174,7 @@ export class ItemCard {
    one in the `class` attribute. Only apply the one you want.
 4. Genuinely need a runtime-computed name? Safelist it: `@source inline("bg-red-500");`.
 
-**The CSS bundle is far larger than the app's actual class usage** — something in the repo mentions
-classes the app never renders. Markdown is scanned like any other file, so in-repo docs, root
-`AGENTS.md` / `README.md`, component galleries, and agent-skill folders (including this one)
-compile their examples into the bundle. In an Angular app every template lives under `src/`, so
-scan that and nothing else — an allowlist, rather than chasing each new doc folder with
-`@source not`:
-
-```css
-@import 'tailwindcss' source(none);
-@source '../src';
-```
+**The CSS bundle is far larger than the app's actual class usage** — Markdown and docs are scanned too. This template already scans only `src/` (`@import 'tailwindcss' source(none);` + `@source '../src';` in `src/styles.css`, see `AGENTS.md` → Tailwind CSS v4); keep that allowlist and never re-add `@source not` exclusions.
 
 **`border` shows no color / `ring` looks thin** — v4 defaults (`currentColor`, 1px). Be explicit.
 
