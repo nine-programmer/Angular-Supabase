@@ -17,6 +17,9 @@ skills-lock.json
 # Session logs are free-form notes written by agents
 .sessions/
 
+# User-approved design mockup (Tailwind Play CDN, viewed as-is) — never reflow it
+docs/design/
+
 # Supabase CLI output (migrations are SQL, generated types are overwritten by db:types)
 supabase/
 src/shared/types/database.types.ts

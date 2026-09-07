@@ -10,16 +10,17 @@
 คุณคือผู้ช่วยสร้างซอฟต์แวร์ ผู้ใช้ไม่ใช่โปรแกรมเมอร์ ทำตามกติกานี้อย่างเคร่งครัด:
 
 **ลำดับการทำงาน**
-1. อ่านให้ครบก่อน: `AGENTS.md` (กติกาโค้ด) → `docs/ARCHITECTURE.md` (โครงสร้าง) → เอกสารนี้ → `docs/DESIGN.md` (ระบบออกแบบ — มีหลัง Task Design UX/UI ผ่าน; ถ้ามีแล้ว ทุก Task ที่มีหน้าจอต้องทำตาม) → `docs/TASKS.md` (ความคืบหน้า) → บันทึกล่าสุดใน `.sessions/` (ถ้ามี — สิ่งที่ AI คนก่อนทำและตัดสินใจไว้; log ที่มีบรรทัด "ล้าสมัยบางส่วน" ให้เชื่อ SPEC/TASKS ปัจจุบันก่อน) — เครื่องมือที่โหลด `AGENTS.md`/`docs/ARCHITECTURE.md` ให้อัตโนมัติอยู่แล้ว (เช่น Claude Code ผ่าน `CLAUDE.md`) ไม่ต้องอ่านสองไฟล์นั้นซ้ำ
+1. อ่านให้ครบก่อน: `AGENTS.md` (กติกาโค้ด) → `docs/ARCHITECTURE.md` (โครงสร้าง) → เอกสารนี้ → `docs/DESIGN.md` (ระบบออกแบบ — มีหลัง Task Design UX/UI ผ่าน; ถ้ามีแล้ว ทุก Task ที่มีหน้าจอต้องทำตาม) → `docs/TASKS.md` (ความคืบหน้า) → บันทึกล่าสุดใน `.sessions/` (ถ้ามี — สิ่งที่ AI คนก่อนทำและตัดสินใจไว้; log ที่มีบรรทัด "ล้าสมัยบางส่วน" ให้เชื่อ SPEC/TASKS ปัจจุบันก่อน) — ไฟล์ไหนที่เครื่องมือโหลดให้แล้ว (เห็นเนื้อหาอยู่ใน context — Claude Code โหลด `AGENTS.md` และ `docs/ARCHITECTURE.md` ผ่าน `CLAUDE.md`; Codex / Cursor / Gemini CLI โหลดเฉพาะ `AGENTS.md`) ไม่ต้องอ่านซ้ำ ไฟล์ที่เหลือต้องเปิดอ่านเอง
 2. สรุปสิ่งที่เข้าใจกลับมาเป็นภาษาไทยไม่เกิน 5 บรรทัด พร้อมบอกว่า Task ถัดไปคืออะไร — ถ้าข้อความของผู้ใช้มีคำว่า "เริ่ม" อยู่แล้ว (เช่น prompt มาตรฐานด้านล่าง) ให้ทำ Task ถัดไปต่อทันทีหลังสรุป ไม่ต้องรอยืนยันอีกรอบ; ถ้าไม่มี ให้รอผู้ใช้สั่ง
 3. Task ถัดไป = Task แรกใน `docs/TASKS.md` ที่เป็น `[~]` (ค้างจาก session ก่อน — อ่าน log ล่าสุดใน `.sessions/` ก่อนทำต่อ) ถ้าไม่มีจึงเป็น `[ ]` แรก; ถ้าเจอ `[!]` ให้ถามผู้ใช้ก่อนว่าจะแก้หรือข้าม; เปลี่ยนเป็น `[~]` ก่อนแก้ไฟล์แรก ทำ**เพียง Task เดียว**แล้วหยุด; ถ้าต้องหยุดกลางทาง (ผู้ใช้สั่งหยุด/ติดปัญหา) เขียนสั้นๆ ในบรรทัด "ผล:" ว่าทำถึงไหน ไฟล์ไหนยังไม่เสร็จ — agent ถัดไปอ่านบรรทัดนี้แทน log
-4. ทุกครั้งที่ส่งงาน บอกให้ครบ: แก้ไฟล์ไหน / รันคำสั่งอะไร / ทดสอบอย่างไร — วิธีทดสอบต้องเป็นสิ่งที่ผู้ใช้กดในเบราว์เซอร์แล้วเห็นได้ หรือสิ่งที่ agent รันให้เอง (`npm test`); ห้ามให้ผู้ใช้ใช้ curl/SQL/เครื่องมือของโปรแกรมเมอร์เอง — ถ้าจำเป็นต้องตรวจที่ฐานข้อมูล agent เขียน SQL block ให้ผู้ใช้วางใน Supabase Dashboard → SQL Editor แล้วกด Run พร้อมบอกผลที่ต้องเห็น
+4. ทุกครั้งที่ส่งงาน บอกให้ครบ: แก้ไฟล์ไหน / รันคำสั่งอะไร / ทดสอบอย่างไร — วิธีทดสอบต้องเป็นสิ่งที่ผู้ใช้กดในเบราว์เซอร์แล้วเห็นได้ หรือสิ่งที่ agent รันให้เอง (`npm test`); ห้ามให้ผู้ใช้ใช้ curl/SQL/เครื่องมือของโปรแกรมเมอร์เอง — ถ้าจำเป็นต้องตรวจที่ฐานข้อมูล agent เขียน SQL block ให้ผู้ใช้วางใน Supabase Dashboard → SQL Editor แล้วกด Run (ฐานข้อมูลบน server ของตัวเอง: รันด้วย `psql`) พร้อมบอกผลที่ต้องเห็น
 5. รอผู้ใช้ทดสอบ ถ้า "ผ่าน" → ใน `docs/TASKS.md` เปลี่ยนเป็น `[x]` ใส่วันที่ในบรรทัด "ผล:" อัปเดตบรรทัด header แล้วปิดท้ายด้วย**ข้อความเดียว**: "Task นี้เสร็จสิ้นแล้วครับ — (1) จะบันทึกงานลง `.sessions/` ไหม (2) จะทำ Task ถัดไปที่ session นี้เลย หรือเปิด session ใหม่? ตอบสั้นๆ ได้ เช่น 'บันทึก, ต่อเลย' — ถ้าเปิดใหม่ ใช้ prompt นี้: `อ่าน docs/SYSTEM_SPEC.md แล้วเริ่มตาม Section 0`" แล้ว**หยุดรอ** ห้ามเริ่ม Task ถัดไปเอง และไม่ต้องแนะนำว่าควรเลือกแบบไหน
    - ถ้าผู้ใช้ให้บันทึก: เขียน `.sessions/YYYY-MM-DD-HHmm-<task-slug>.md` (สร้างโฟลเดอร์เองถ้ายังไม่มี) ตามโครง `.claude/skills/system-spec-builder/templates/SESSION_LOG.md`: ทำอะไร แก้ไฟล์ไหน ตัดสินใจอะไรเพราะอะไร **ปัญหาที่เจอ+วิธีแก้** ทดสอบอย่างไร Task ถัดไปคืออะไร แล้วเติมชื่อไฟล์ต่อท้ายบรรทัด "ผล:" — เพื่อให้ AI เจ้าอื่นอ่านแล้วทำต่อได้; ปัญหาข้อไหนเป็นความรู้ระดับ template (เช่น Dashboard UI เปลี่ยน, เวอร์ชันเครื่องมือ) ให้แจ้งผู้ใช้ว่าควรนำกลับไปแก้ที่ template ด้วย
    - ถ้าไม่ผ่าน: แก้จนผ่านก่อน; ถ้าติดปัญหาที่แก้เองไม่ได้: ใส่ `[!]` พร้อมเหตุผลในบรรทัด "ผล:" แล้วถามผู้ใช้
 6. ห้ามทำหลาย Task พร้อมกัน ห้ามเพิ่มฟีเจอร์นอกเหนือจาก Section 1 — แต่รายละเอียดคุณภาพที่ไม่เพิ่มข้อมูล/API/หน้าใหม่ (สถานะกำลังโหลด, empty state, ยืนยันก่อนทำรายการ, ข้อความ validation, ข้อความ error ที่อ่านรู้เรื่อง) ไม่นับเป็นฟีเจอร์ ทำได้เลยโดยไม่ต้องถาม
 7. ถ้าเอกสารไม่ชัด แยก 2 แบบ: เรื่อง**พฤติกรรมของระบบ** (ใครทำอะไรได้ คิดยอดยังไง สถานะหมายความว่าอะไร หน้าจอต้องแสดงอะไร) ให้ถามก่อน (ไม่เกิน 3 คำถามต่อครั้ง) ห้ามเดา; เรื่อง**เทคนิค**ที่ทางเลือกไหนก็ไม่ขัด spec / `docs/ARCHITECTURE.md` / `AGENTS.md` (แบ่งไฟล์ยังไง จัด component ยังไง ข้อความ error) ให้ตัดสินใจเองแล้วจดเหตุผลสั้นๆ ในบรรทัด "ผล:" ของ Task หรือ `.sessions/` — ไม่ต้องถามผู้ใช้ในเรื่องที่ผู้ใช้ตอบไม่ได้
-8. เมื่อ Task สุดท้ายผ่าน เขียน README.md ที่บอกวิธีรันและ deploy
+8. ห้ามอ่านไฟล์ `.env` ด้วยเครื่องมือใดๆ (มีความลับจริง) — อ่านได้เฉพาะ `.env.example`; ถ้าต้องมีตัวแปรใหม่ ให้เพิ่มใน `.env.example` พร้อม comment แล้วบอกผู้ใช้ให้ไปใส่ค่าจริงใน `.env` เอง; ถ้าขั้นตอนไหนต้องใช้ค่าจาก `.env` (เช่น รหัสโปรเจกต์ รหัสผ่าน) ให้ถามผู้ใช้แทนการเปิดไฟล์
+9. เมื่อ Task สุดท้ายผ่าน เขียน README.md ที่บอกวิธีรันและ deploy
 
 **สิ่งที่ LOCKED**
 - ตาราง/ฟิลด์ใน 1.5, กติกาธุรกิจใน 1.7, และ API path ใน 2.2 ถือว่า **LOCKED**
@@ -123,13 +124,11 @@ waiting → called → done
 - [ ] ข้อมูลไม่หายเมื่อปิดแอปเปิดใหม่
 - [ ] ทุกหน้าใช้ได้บนมือถือความกว้าง 375px
 
-### 1.9 สมมติฐาน (ผู้ใช้ยังไม่ได้ยืนยัน แก้ได้ภายหลัง)
-- หลายคิวอาจอยู่สถานะ `called` พร้อมกันได้ (ช่างหลายคน) — จอแสดงทุกคิวที่ถูกเรียก
-- ลูกค้าคนเดียวรับได้หลายคิวต่อวัน (ไม่ตรวจเบอร์ซ้ำ)
-- เวลาทำการไม่จำกัด (ไม่ปิดรับคิวอัตโนมัติ) — ช่างปิดบริการเองด้วย `is_active`
-- การอัปเดตอัตโนมัติใช้ polling ไม่ใช้ realtime เพื่อความง่าย
-- ไม่มีข้อมูลเดิมต้องนำเข้า; ตอนตั้งระบบใส่บริการตัวอย่าง 3 รายการ (ตัดผมชาย 30 นาที, ตัดผมหญิง 45, โกนหนวด 15)
-- Deploy บน Render
+### 1.9 สมมติฐาน, โทน และข้อมูลเริ่มต้น
+- สมมติฐานที่ผู้ใช้ยังไม่ได้ยืนยัน (แก้ได้ภายหลัง): หลายคิวอาจอยู่สถานะ `called` พร้อมกันได้ (ช่างหลายคน) — จอแสดงทุกคิวที่ถูกเรียก; ลูกค้าคนเดียวรับได้หลายคิวต่อวัน (ไม่ตรวจเบอร์ซ้ำ); เวลาทำการไม่จำกัด (ไม่ปิดรับคิวอัตโนมัติ) — ช่างปิดบริการเองด้วย `is_active`; การอัปเดตอัตโนมัติใช้ polling ไม่ใช้ realtime เพื่อความง่าย; Deploy บน Render
+- โทน/สไตล์ที่ผู้ใช้บอกไว้ (Task Design ใช้): เรียบ สะอาด อ่านง่ายบนมือถือ (ผู้ใช้ไม่ได้ระบุ — ค่าเริ่มต้น)
+- ข้อมูลเริ่มต้นที่ต้องมีจริง: ไม่มี (ไม่มีข้อมูลเดิมต้องนำเข้า)
+- ข้อมูลตัวอย่างเพื่อทดสอบ: บริการ 3 รายการ (ตัดผมชาย 30 นาที, ตัดผมหญิง 45, โกนหนวด 15) — ช่างปิดใช้/แก้ได้ที่หน้า `/staff/services`
 
 ---
 
@@ -138,7 +137,9 @@ waiting → called → done
 โครงสร้าง โฟลเดอร์ ชื่อไฟล์ และกติกาโค้ดใช้ตาม `docs/ARCHITECTURE.md` และ `AGENTS.md` ทุกข้อ ส่วนนี้มีแค่สิ่งที่ต่างกันต่อโปรเจกต์
 
 ### 2.1 Stack และ deploy
-- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.9
+- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.13
+- ฐานข้อมูล: Supabase cloud — ตั้งค่าใน Task 1 ตาม README → "ตั้งค่าฐานข้อมูล" แบบ A
+- ชื่อโปรเจกต์ (slug): `barber-queue` — ชื่อโปรเจกต์บน Supabase, `name` ใน package.json, script `serve:ssr:barber-queue` และ path `dist/barber-queue/`
 - Deploy: Render (Node web service) ตั้ง env ใน dashboard รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render
 
 ### 2.2 API ที่ต้องมี [LOCKED]
@@ -158,10 +159,10 @@ waiting → called → done
 ### 2.3 ฟีเจอร์ → ไฟล์
 | ฟีเจอร์ | feature folder (`src/app/features/`) + หน้า | API ที่หน้าใช้ | server (`routes/`, `services/`) | shared (`dto/`, `enums/`) |
 |---|---|---|---|---|
-| F1 | `services/` หน้า `/staff/services` (`pages/service-manager.page.ts`), `services-client.service.ts`, `services.routes.ts` | GET/POST/PUT /api/services | `services.routes.ts`, `services-server.service.ts` | `services.dto.ts` |
-| F2 | `bookings/` หน้า `/` (`pages/booking-form.page.ts`), `/ticket/:id` (`pages/ticket.page.ts`), `bookings-client.service.ts`, `bookings.routes.ts` | GET /api/services?active=true, POST /api/bookings, GET /api/bookings/:id | `bookings.routes.ts`, `bookings-server.service.ts` | `bookings.dto.ts`, `bookings.enums.ts` |
-| F3 | `bookings/` หน้า `/staff` (`pages/queue-board.page.ts`) | GET /api/bookings/today, PATCH /api/bookings/:id/status | (ใช้ของ F2) | (ใช้ของ F2) |
-| F4 | `bookings/` หน้า `/display` (`pages/display.page.ts`) | GET /api/bookings/today | (ใช้ของ F2) | (ใช้ของ F2) |
+| F1 | `services/` หน้า `/staff/services` (`pages/service-manager.page.ts + .page.html`), `services-client.service.ts`, `services.routes.ts` | GET/POST/PUT /api/services | `services.routes.ts`, `services-server.service.ts` | `services.dto.ts` |
+| F2 | `bookings/` หน้า `/` (`pages/booking-form.page.ts + .page.html`), `/ticket/:id` (`pages/ticket.page.ts + .page.html`), `bookings-client.service.ts`, `bookings.routes.ts` | GET /api/services?active=true, POST /api/bookings, GET /api/bookings/:id | `bookings.routes.ts`, `bookings-server.service.ts` | `bookings.dto.ts`, `bookings.enums.ts` |
+| F3 | `bookings/` หน้า `/staff` (`pages/queue-board.page.ts + .page.html`) | GET /api/bookings/today, PATCH /api/bookings/:id/status | (ใช้ของ F2) | (ใช้ของ F2) |
+| F4 | `bookings/` หน้า `/display` (`pages/display.page.ts + .page.html`) | GET /api/bookings/today | (ใช้ของ F2) | (ใช้ของ F2) |
 
 ลำดับ route ใน `app.routes.ts`: `staff/services` (feature services) ต้องมาก่อน `staff` (feature bookings)
 
@@ -169,6 +170,7 @@ waiting → called → done
 - polling: `/ticket/:id` และ `/staff` ทุก 10 วินาที, `/display` ทุก 5 วินาที (ดู 1.9)
 - `queue_date` คำนวณฝั่ง Postgres ใน `create_booking()` ด้วย timezone `Asia/Bangkok`; `/api/bookings/today` ใช้วันเดียวกันนี้
 - RenderMode: `/`, `/ticket/:id`, `/staff`, `/staff/services` = `Server`; `/display` = `Client` (รีเฟรชถี่ ไม่ได้ประโยชน์จาก SSR)
+- rate limit ของ endpoint สาธารณะ: `POST /api/bookings` 30 ครั้ง/15 นาที ต่อ IP (ค่าเริ่มต้นจาก AGENTS — ผู้ใช้ไม่ได้ระบุ) ผ่าน `src/server/rate-limit.ts`; ไม่มี login
 
 ### 2.5 ตัวแปร .env เพิ่มเติม (นอกจากมาตรฐานใน ARCHITECTURE.md ข้อ 8)
 - ไม่มี

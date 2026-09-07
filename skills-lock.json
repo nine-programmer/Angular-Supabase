@@ -7,12 +7,6 @@
       "skillPath": "angular-developer/SKILL.md",
       "computedHash": "b20b0c586bdc14f88265377031fad8f1763d899b64caca3a10ddf24cb5ac8e77"
     },
-    "angular-new-app": {
-      "source": "angular/skills",
-      "sourceType": "github",
-      "skillPath": "angular-new-app/SKILL.md",
-      "computedHash": "d9f712544847ab80ef7ed20043820afd275c394ca05340c2f20a0f051e35d945"
-    },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
