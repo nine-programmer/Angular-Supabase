@@ -11,6 +11,7 @@
     "serve:ssr:angular-supabase": "node dist/angular-supabase/server/server.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:size": "node -e \"const fs=require('fs'),path=require('path');const files=[];(function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=path.join(d,e.name);if(e.isDirectory())walk(f);else if(['.ts','.html','.css'].includes(path.extname(e.name))&&!e.name.endsWith('.spec.ts')&&e.name!=='database.types.ts')files.push(f);}})('src');let bad=0;for(const f of files){const n=fs.readFileSync(f,'utf8').split(String.fromCharCode(10)).length;if(n>400){bad++;console.error('TOO LONG ('+n+' lines, limit 400): '+f);}else if(n>300)console.warn('warning ('+n+' lines, aim < 300): '+f);}console.log(files.length+' hand-written files under src/ checked');process.exit(bad?1:0)\"",
     "db:link": "supabase link",
     "db:migration": "supabase migration new",
     "db:push": "supabase db push",

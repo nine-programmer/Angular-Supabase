@@ -49,6 +49,7 @@ src/
 │   ├── supabase.ts                        createClient<Database>() ตัวเดียวของทั้งระบบ — lazy singleton ผ่าน getSupabase()
 │   ├── api.ts                             รวม router ทุก feature ไว้ใต้ /api + 404 JSON + error handler (server.ts import ตัวนี้ตัวเดียว)
 │   ├── api-error.ts                       HttpError, throwApiError(), apiErrorHandler — แปลง error ของ Supabase/Postgres เป็น status + ข้อความไทย (มากับ template ทุก feature ใช้ตัวนี้)
+│   ├── rate-limit.ts                      rateLimit({ windowMs, max }) middleware จำกัดต่อ IP สำหรับ endpoint ที่เขียนข้อมูลโดยไม่ login (มากับ template — AGENTS.md → API Layer)
 │   ├── routes/<feature>.routes.ts         1 ไฟล์ = 1 resource → express.Router (มากับ template: health.routes.ts)
 │   └── services/<feature>-server.service.ts   business logic; ที่เดียวที่เรียก Supabase — รับ client เป็น parameter สุดท้าย `db = getSupabase()` (มากับ template: health-server.service.ts)
 │
@@ -107,7 +108,7 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 | middleware (Express)          | `<name>.middleware.ts` ใน `src/server/`                                                                                                                                                   | `auth.middleware.ts`                         |
 | component เฉพาะ feature       | `components/<name>.component.ts`                                                                                                                                                          | `loan-row.component.ts`                      |
 | UI ใช้ซ้ำ (`src/app/ui/`)     | `<name>.component.ts` / `<name>.pipe.ts` / `<name>.directive.ts`                                                                                                                          | `status-badge.component.ts`                  |
-| helper                        | `src/shared/utils/<name>.ts` (ทั้งสองฝั่งใช้) · `src/server/<name>.ts` (server เท่านั้น — รวม helper ที่ไม่แตะ DB จึงไม่อยู่ใน `services/`) · `src/app/core/<name>.ts` (browser เท่านั้น) | `thai-date.ts`, `api-error.ts`, `auth.ts`    |
+| helper                        | `src/shared/utils/<name>.ts` (ทั้งสองฝั่งใช้) · `src/server/<name>.ts` (server เท่านั้น — รวม helper ที่ไม่แตะ DB จึงไม่อยู่ใน `services/`) · `src/app/core/<name>.ts` (browser เท่านั้น) | `thai-date.ts`, `rate-limit.ts`, `auth.ts`   |
 | migration                     | `<timestamp>_description.sql` (CLI ตั้งให้)                                                                                                                                               | `20260827120000_init.sql`                    |
 
 service ฝั่ง browser กับ server ของ feature เดียวกันต้องชื่อไม่ซ้ำกัน (จึงมี `-client` / `-server`) ส่วน `<feature>.routes.ts` ใช้ชื่อเดียวกันได้ทั้งสองฝั่ง เพราะอยู่คนละโฟลเดอร์ (`src/app/features/<feature>/` กับ `src/server/routes/`)
@@ -151,7 +152,7 @@ docs/
 
 ตัวแปรมาตรฐาน 5 ตัว: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server เท่านั้น ห้ามส่งต่อ), `PORT` (ค่าเริ่มต้น 4000), `NG_ALLOWED_HOSTS` (โดเมนที่ SSR ยอมเรนเดอร์ให้ — ตั้งเป็นโดเมนจริงก่อน deploy มิฉะนั้นทุกหน้าจะได้ 400), `DATABASE_URL` (เฉพาะฐานข้อมูลบน VPS ใช้กับ `db:push:url` / `db:types:url` แอปไม่อ่าน) — คำอธิบายเต็มของแต่ละตัว (คืออะไร เอามาจากไหน ใครใช้) อยู่ใน `.env.example` agent อ่านไฟล์นั้นแทน `.env` เสมอ และตัวแปรใหม่ของโปรเจกต์ต้องเพิ่มที่นั่นพร้อม comment (AGENTS.md → Supabase)
 
-คำสั่งเป็น npm script ใน `package.json` (ตัวที่ใช้บ่อยพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` แล้ว `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ migration ในข้อ 6
+คำสั่งเป็น npm script ใน `package.json` (ตัวที่ใช้บ่อยพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` → `npm run check:size` → `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ migration ในข้อ 6
 
 Deploy: ขั้นตอน (Render หรือ host Node ใดๆ, และแอปบน VPS) อยู่ใน `README.md` → Deploy — Task ปิดงานเก็บหัวข้อนั้นไว้ใน README ของโปรเจกต์แล้วแทน `<project-name>` ด้วยชื่อจริง
 

@@ -145,6 +145,7 @@ npm run build                          # build production
 npm run serve:ssr:<project-name>       # รัน build จริงที่ http://localhost:4000
 npm run format                         # จัดรูปแบบโค้ดด้วย Prettier
 npm run format:check                   # ตรวจรูปแบบโดยไม่แก้ไฟล์
+npm run check:size                     # นับบรรทัดไฟล์ที่เขียนมือใต้ src/ (เกิน 400 = ไม่ผ่าน, เกิน 300 = เตือน)
 npm run db:link -- --project-ref <ref> # เชื่อม CLI กับโปรเจกต์ Supabase (ครั้งเดียว)
 npm run db:migration -- <description>  # สร้างไฟล์ migration ใหม่ใน supabase/migrations/
 npm run db:push                        # apply migration ขึ้นโปรเจกต์ Supabase
