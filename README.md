@@ -46,6 +46,22 @@ Task 1 คือ **ตั้งค่าฐานข้อมูล + ตั้�
 
 เรียก skill `system-spec-builder` อีกครั้งพร้อมบอกฟีเจอร์ที่ต้องการ — จะได้ `docs/features/<name>/SPEC.md` + `TASKS.md` แยกต่างหาก โดยอ้างอิงตารางเดิมจาก `docs/SYSTEM_SPEC.md`
 
+## เอกสารของ template
+
+| ไฟล์                                                 | เนื้อหา                                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [AGENTS.md](AGENTS.md)                               | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing)                                             |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)         | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template                                             |
+| [docs/EXTENSION_POINTS.md](docs/EXTENSION_POINTS.md) | ที่วางไฟล์ของจุดขยาย (login, อัปโหลด, แจ้งเตือน, งานตามเวลา, รายงาน ฯลฯ) — agent อ่านเมื่อ SPEC ต้องการ           |
+| `.claude/skills/system-spec-builder/`                | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                                                                        |
+| `.agents/skills/`                                    | สำเนาของ `.claude/skills/` สำหรับ AI agent เจ้าอื่น — ต้องเหมือนกันทุกไฟล์ ถ้าแก้ฝั่งหนึ่งให้คัดลอกทับอีกฝั่งเสมอ |
+
+Skill ภายนอก (`supabase-postgres-best-practices`, `angular-developer` — บันทึกไว้ใน `skills-lock.json`) เป็นความรู้ทั่วไป ส่วน `tailwind-css-patterns` (แก้จากของเดิมให้รองรับ Angular โดยตรง) และ `system-spec-builder` ดูแลเองในเทมเพลตนี้ จึงไม่อยู่ใน lock file ทั้งหมดนี้ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy) — skill `supabase` ของ Supabase ถูกเอาออกโดยตั้งใจ เพราะเนื้อหาส่วนใหญ่เป็น Auth/Realtime/Storage ฝั่ง client และ workflow แบบ local ที่ template นี้ไม่ใช้ ไม่ต้องติดตั้งกลับ
+
+โปรเจกต์ที่ clone จาก template รุ่นก่อน 1.9 แล้ว push `*_health.sql` ไปแล้ว: ถ้านำ `*_roles.sql` มาเพิ่ม CLI จะเตือนว่ามี migration ที่ timestamp อยู่ก่อนตัวที่ push แล้ว ให้ตอบยืนยัน หรือรัน `npx supabase db push --include-all` ครั้งเดียว — บน server ของตัวเอง `npm run db:push:url -- --include-all`
+
+<!-- ส่วนของ template จบตรงนี้ — Task ปิดงาน: ลบตั้งแต่หัวข้อ "เริ่มใช้งานระบบใหม่" ถึงบรรทัดนี้ แล้วเก็บส่วนล่างไว้ (แทน <project-name> ด้วยชื่อจริง) -->
+
 ## ตั้งค่าฐานข้อมูล
 
 งานของ Task 1 ใน `docs/TASKS.md` ทำหลังจากมี `docs/SYSTEM_SPEC.md` แล้ว เลือกแบบตามที่ระบุไว้ใน SPEC 2.1 — ทั้งสองแบบจบเมื่อเปิด http://localhost:4200/api/health ได้ `{"ok":true}` (ติดตรงไหนดู "ปัญหาที่พบบ่อยตอนตั้งค่า" ด้านล่าง)
@@ -65,7 +81,7 @@ cp .env.example .env
 ```bash
 npx supabase login                       # คุณรันเอง — เปิด browser ให้ล็อกอิน
 npm run db:link -- --project-ref <ref>   # คุณรันเอง — <ref> คือรหัสใน URL: supabase.com/dashboard/project/<ref> (ถ้าถามรหัสผ่านฐานข้อมูล ใส่รหัสที่ตั้งตอนสร้างโปรเจกต์)
-npm run db:push                          # agent รันได้ — ส่ง migration ที่มากับ template (role ของ PostgREST + function health()) ขึ้นโปรเจกต์
+npm run db:push                          # agent รันได้ — ส่ง migration พื้นฐาน (role ของ PostgREST + function health()) ขึ้นโปรเจกต์
 npm run db:types                         # agent รันได้ — สร้าง type จากโปรเจกต์ที่ link ไว้
 ```
 
@@ -75,7 +91,7 @@ npm run db:types                         # agent รันได้ — สร�
 
 ### แบบ B: PostgreSQL + PostgREST บน VPS ของตัวเอง
 
-Template ไม่ได้ผูกกับ Supabase cloud: server คุยกับฐานข้อมูลผ่าน [PostgREST](https://postgrest.org) เท่านั้น (โปรแกรมตัวเดียวกับที่ Supabase รันให้อยู่เบื้องหลัง — ทดสอบผ่านจริงแล้วกับ Node v26.7.0, PostgreSQL 16.15, PostgREST 16.2 และ Caddy 2) จึงย้ายไป VPS ที่ติดตั้ง PostgreSQL + PostgREST เองได้โดยเปลี่ยนแค่ค่าใน `.env` — ติดตั้ง PostgreSQL เปล่าๆ อย่างเดียว**ไม่พอ** ต้องมี PostgREST ด้วย (VPS RAM 1 GB พอสำหรับแอป + PostgreSQL + PostgREST; ไม่ต้องติดตั้ง Supabase self-hosted ทั้งชุด)
+ระบบไม่ได้ผูกกับ Supabase cloud: server คุยกับฐานข้อมูลผ่าน [PostgREST](https://postgrest.org) เท่านั้น (โปรแกรมตัวเดียวกับที่ Supabase รันให้อยู่เบื้องหลัง — ทดสอบผ่านจริงแล้วกับ Node v26.7.0, PostgreSQL 16.15, PostgREST 16.2 และ Caddy 2) จึงย้ายไป VPS ที่ติดตั้ง PostgreSQL + PostgREST เองได้โดยเปลี่ยนแค่ค่าใน `.env` — ติดตั้ง PostgreSQL เปล่าๆ อย่างเดียว**ไม่พอ** ต้องมี PostgREST ด้วย (VPS RAM 1 GB พอสำหรับแอป + PostgreSQL + PostgREST; ไม่ต้องติดตั้ง Supabase self-hosted ทั้งชุด)
 
 แบบนี้ต้องมีคนที่เข้า server ได้ (คุณหรือผู้ดูแล server): ข้อ 1, 3, 5 ทำบน server ข้อ 2 และ 4 ทำที่เครื่องพัฒนา (agent รัน `db:push:url` / `db:types:url` ให้ได้ เพราะอ่าน `DATABASE_URL` จาก `.env` เอง) รายละเอียดการติดตั้ง PostgreSQL / systemd / Caddy ที่ไม่ได้เขียนไว้ตรงนี้ agent เสนอคำสั่งมาตรฐานให้ได้ แต่ต้องบอกว่าเป็นส่วนที่อยู่นอก README และให้คุณยืนยันก่อนรันบน server; ชื่อฐานข้อมูล `<db>` ใช้ slug จาก SPEC 2.1 แบบ snake_case (เช่น `barber_queue` — หรือชื่อที่ผู้ดูแลตั้งไว้แล้ว จดชื่อจริงใน SPEC 2.1) สร้างด้วย `createdb <db>` หรือ `create database <db>;` ใน `psql`; ถ้าแอปจะรันบนเครื่องเดียวกับฐานข้อมูล ไม่ต้องเปิด port 5432 ออกอินเทอร์เน็ต ให้รัน migration จากเครื่องนั้นหรือผ่าน SSH tunnel แทน
 
@@ -139,26 +155,14 @@ npm run db:types:url                   # เหมือน db:types แต่�
 
 Supabase CLI ติดมากับ `devDependencies` แล้ว ไม่ต้องติดตั้ง global — เรียกผ่าน `npx supabase <cmd>` หรือ script ด้านบนได้เลย
 
-Template มี migration มาให้ 2 ไฟล์ — `supabase/migrations/*_roles.sql` (role + สิทธิ์ของ PostgREST ที่ Supabase cloud มีอยู่แล้ว จึงไม่ทำอะไรบน cloud แต่จำเป็นเมื่อฐานข้อมูลอยู่บน server ของตัวเอง) และ `*_health.sql` (function `health()` ที่เรียกได้เฉพาะ `service_role`) ซึ่ง `GET /api/health` ใช้ตรวจว่า `.env` และ `db:push` ใช้ได้ — ห้ามลบหรือเปลี่ยนชื่อสองไฟล์นี้ migration ของระบบจริงจะต่อจากสองไฟล์นี้ไป (โปรเจกต์ที่ clone จาก template รุ่นก่อน 1.9 แล้ว push `*_health.sql` ไปแล้ว: ถ้านำ `*_roles.sql` มาเพิ่ม CLI จะเตือนว่ามี migration ที่ timestamp อยู่ก่อนตัวที่ push แล้ว ให้ตอบยืนยัน หรือรัน `npx supabase db push --include-all` ครั้งเดียว — บน server ของตัวเอง `npm run db:push:url -- --include-all`)
+Migration พื้นฐาน 2 ไฟล์แรกใน `supabase/migrations/` — `*_roles.sql` (role + สิทธิ์ของ PostgREST ที่ Supabase cloud มีอยู่แล้ว จึงไม่ทำอะไรบน cloud แต่จำเป็นเมื่อฐานข้อมูลอยู่บน server ของตัวเอง) และ `*_health.sql` (function `health()` ที่เรียกได้เฉพาะ `service_role`) ซึ่ง `GET /api/health` ใช้ตรวจว่า `.env` และ `db:push` ใช้ได้ — ห้ามลบหรือเปลี่ยนชื่อสองไฟล์นี้ migration ของระบบจริงต่อจากสองไฟล์นี้ไป
 
 ## Deploy
 
-Render (หรือ host Node ใดๆ): Build command `npm ci && npm run build` · Start command `node dist/<project-name>/server/server.mjs` (= script `serve:ssr:<project-name>`) · Node ตาม `engines` ใน `package.json` · ตั้ง env 3 ตัว `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NG_ALLOWED_HOSTS=<โดเมนจริง>` ใน dashboard ของ host (`PORT` host มักตั้งให้เอง ส่วน `DATABASE_URL` ไม่ต้องตั้งบน host เพราะแอปไม่อ่าน) · ห้ามตั้ง CDN/proxy cache หน้า HTML เพราะเป็นข้อมูลต่อผู้ใช้ — README ปิดงานของโปรเจกต์คัดลอกย่อหน้านี้ไปใส่ชื่อจริง
+Render (หรือ host Node ใดๆ): Build command `npm ci && npm run build` · Start command `node dist/<project-name>/server/server.mjs` (= script `serve:ssr:<project-name>`) · Node ตาม `engines` ใน `package.json` · ตั้ง env 3 ตัว `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NG_ALLOWED_HOSTS=<โดเมนจริง>` ใน dashboard ของ host (`PORT` host มักตั้งให้เอง ส่วน `DATABASE_URL` ไม่ต้องตั้งบน host เพราะแอปไม่อ่าน) · ห้ามตั้ง CDN/proxy cache หน้า HTML เพราะเป็นข้อมูลต่อผู้ใช้
 
 ### แอปบน VPS ของตัวเอง
 
 ฐานข้อมูล (PostgreSQL + PostgREST) ตั้งค่าไปแล้วใน "ตั้งค่าฐานข้อมูล" แบบ B — ส่วนแอปทำเหมือน Render: `npm ci && npm run build` แล้ว `node dist/<project-name>/server/server.mjs` ภายใต้ systemd/pm2 ตั้ง `NG_ALLOWED_HOSTS` เป็นโดเมนจริง (ถ้าแอปกับ PostgREST อยู่เครื่องเดียวกัน ใช้ `SUPABASE_URL=http://127.0.0.1:<port ของ proxy>` เพื่อไม่วิ่งออกอินเทอร์เน็ต)
 
 ข้อจำกัดเมื่อไม่ได้อยู่บน Supabase cloud: ไม่มี Supabase Storage (จุดขยาย "อัปโหลดไฟล์" ต้องสลับ `storage-server.service.ts` ไปเก็บบนดิสก์หรือ S3) และ `pg_cron` ต้องติดตั้ง extension เอง — กติกาที่ทำให้ระบบย้ายได้ทุกเมื่ออยู่ใน `AGENTS.md` → Supabase ("Stay portable") และ [ARCHITECTURE.md ข้อ 6](docs/ARCHITECTURE.md)
-
-## เอกสารของ template
-
-| ไฟล์                                                 | เนื้อหา                                                                                                           |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [AGENTS.md](AGENTS.md)                               | กติกาการเขียนโค้ดทั้งหมด (Angular, SSR, API layer, Supabase, testing)                                             |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)         | โครงสร้างโฟลเดอร์, การไหลของข้อมูล, ทิศทาง import, ขอบเขตของ template                                             |
-| [docs/EXTENSION_POINTS.md](docs/EXTENSION_POINTS.md) | ที่วางไฟล์ของจุดขยาย (login, อัปโหลด, แจ้งเตือน, งานตามเวลา, รายงาน ฯลฯ) — agent อ่านเมื่อ SPEC ต้องการ           |
-| `.claude/skills/system-spec-builder/`                | skill สำหรับสัมภาษณ์และเขียน spec ระบบใหม่                                                                        |
-| `.agents/skills/`                                    | สำเนาของ `.claude/skills/` สำหรับ AI agent เจ้าอื่น — ต้องเหมือนกันทุกไฟล์ ถ้าแก้ฝั่งหนึ่งให้คัดลอกทับอีกฝั่งเสมอ |
-
-Skill ภายนอก (`supabase-postgres-best-practices`, `angular-developer` — บันทึกไว้ใน `skills-lock.json`) เป็นความรู้ทั่วไป ส่วน `tailwind-css-patterns` (แก้จากของเดิมให้รองรับ Angular โดยตรง) และ `system-spec-builder` ดูแลเองในเทมเพลตนี้ จึงไม่อยู่ใน lock file ทั้งหมดนี้ถ้าขัดกับ `AGENTS.md` ให้ยึด `AGENTS.md` (เช่น template นี้ไม่ใช้ local database / Docker และไม่เขียน RLS policy) — skill `supabase` ของ Supabase ถูกเอาออกโดยตั้งใจ เพราะเนื้อหาส่วนใหญ่เป็น Auth/Realtime/Storage ฝั่ง client และ workflow แบบ local ที่ template นี้ไม่ใช้ ไม่ต้องติดตั้งกลับ

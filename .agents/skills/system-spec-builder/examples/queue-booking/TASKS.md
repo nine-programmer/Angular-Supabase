@@ -11,14 +11,14 @@
 ---
 
 ### [x] Task 1: ตั้งค่าฐานข้อมูล + ตั้งชื่อโปรเจกต์ + หน้าแรก
-- ทำ: (1) `node -v` เข้าเงื่อนไข `engines` แล้ว `npm install` (2) ตั้งค่าฐานข้อมูลตาม SPEC 2.1 = Supabase cloud — agent พาผู้ใช้ทำตาม README → "ตั้งค่าฐานข้อมูล" แบบ A ทีละขั้นโดยยกข้อความจาก README (ห้ามเดา ห้ามอ่าน `.env`): agent `cp .env.example .env` → ผู้ใช้สร้างโปรเจกต์ที่ supabase.com ชื่อ `barber-queue` จดรหัสผ่านฐานข้อมูล แล้วใส่ `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` ใน `.env` ตาม comment ใน `.env.example` → ผู้ใช้รัน `npx supabase login` และ `npm run db:link -- --project-ref <ref>` ในเทอร์มินัลของตัวเอง → agent ตรวจ `supabase/.temp/project-ref` = `<ref>` → agent รัน `npm run db:push` → `npm run db:types` → agent รัน `npm start` ค้างไว้เบื้องหลัง เปิด `/api/health` ได้ `{ ok: true }` (3) ตั้งชื่อ `barber-queue` (package.json, key ของ project ใน angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`) (4) หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` และ `<title>` ใน `src/index.html`) — โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
+- ทำ: (1) `node -v` เข้าเงื่อนไข `engines` แล้ว `npm install` (2) ตั้งค่าฐานข้อมูลตาม SPEC 2.1 = Supabase cloud — agent พาผู้ใช้ทำตาม README → "ตั้งค่าฐานข้อมูล" แบบ A ทีละขั้นโดยยกข้อความจาก README (ห้ามเดา ห้ามอ่าน `.env`): agent `cp .env.example .env` → ผู้ใช้สร้างโปรเจกต์ที่ supabase.com ชื่อ `barber-queue` จดรหัสผ่านฐานข้อมูล แล้วใส่ `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` ใน `.env` ตาม comment ใน `.env.example` → ผู้ใช้รัน `npx supabase login` และ `npm run db:link -- --project-ref <ref>` ในเทอร์มินัลของตัวเอง → agent ตรวจ `supabase/.temp/project-ref` = `<ref>` → agent รัน `npm run db:push` → `npm run db:types` → agent รัน `npm start` ค้างไว้เบื้องหลัง เปิด `/api/health` ได้ `{ ok: true }` (3) ตั้งชื่อ `barber-queue` (`name` + `version` เป็น `1.0.0` ใน package.json, key ของ project ใน angular.json, script `serve:ssr:barber-queue` + path `dist/barber-queue/...`, `project_id` ใน `supabase/config.toml`) (4) หน้า `/` แสดงข้อความ "ระบบจองคิว" เฉยๆ (แก้ `title` ใน `src/app/app.ts`, ข้อความใน `src/app/app.html` และ `<title>` ใน `src/index.html`) — โครง server, interceptor, `provideHttpClient` มากับ template แล้ว
 - ทดสอบ: เปิด http://localhost:4200/api/health เห็น `{ ok: true }`; เปิด http://localhost:4200 เห็นข้อความ; `npm test` ผ่าน
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1540-task-1-setup.md`
 
 ### [x] Task 2: Design UX/UI
 
-- ทำ: อ่าน SPEC 1.2, 1.3, 1.6, 1.9 → mockup 4 หน้า (`/` รับคิว, `/ticket/:id`, `/staff`, `/display`) ใน `docs/design/mockup.html` (มือถือ 375px, Tailwind Play CDN — ห้ามเพิ่มเข้า `@source`) ฟอนต์ไทยจาก Google Fonts เสนอ 2–3 ตัวเลือก + ไอคอน Material Symbols ห้ามใช้ emoji → ผู้ใช้ติชมจนพอใจ → เขียน `docs/DESIGN.md` ตามโครง `.claude/skills/system-spec-builder/templates/DESIGN.md` → ลง token ใน `@theme` ของ `src/styles.css` + โหลดฟอนต์/ไอคอนใน `src/index.html`
-- ทดสอบ: ผู้ใช้เปิด mockup แล้วยืนยันว่าตรงที่ต้องการ; ทุกคู่สีใน DESIGN.md ระบุ ratio และผ่าน WCAG AA; `npm test` ผ่าน — ผ่านแล้ว `docs/DESIGN.md` ถือว่า LOCKED
+- ทำ: อ่าน SPEC 1.2, 1.3, 1.6, 1.9 → mockup 4 หน้า (`/` รับคิว, `/ticket/:id`, `/staff`, `/display`) ใน `docs/design/mockup.html` (มือถือ 375px, Tailwind Play CDN — ห้ามเพิ่มเข้า `@source`) ฟอนต์ไทยจาก Google Fonts เสนอ 2–3 ตัวเลือก + ไอคอน Material Symbols ห้ามใช้ emoji → ผู้ใช้ติชมจนพอใจ → เขียน `docs/DESIGN.md` ตามโครง `.claude/skills/system-spec-builder/templates/DESIGN.md` → ลง token ใน `@theme` ของ `src/styles.css` + โหลดฟอนต์/ไอคอนใน `src/index.html` → สร้าง `alert`, `status-badge`, `dialog`, `empty-state` component ใน `src/app/ui/` ตาม pattern ใน DESIGN.md
+- ทดสอบ: ผู้ใช้เปิด mockup แล้วยืนยันว่าตรงที่ต้องการ; ทุกคู่สีใน DESIGN.md ระบุ ratio และผ่าน WCAG AA; component ทั้ง 4 แสดงในหน้าแรกชั่วคราวตรงกับ DESIGN.md และปุ่มหลักใช้ `bg-primary` ไม่ใช่สี Tailwind ตรง; `npm test` ผ่าน — ผ่านแล้ว `docs/DESIGN.md` ถือว่า LOCKED
 - ผล: ผ่าน 2026-08-26 — `.sessions/2026-08-26-1730-task-2-design.md` — ผู้ใช้ขอเลขคิวใหญ่ขึ้นบนหน้า ticket (แก้ใน mockup รอบ 2 แล้วจดเป็น pattern "เลขคิว display" ใน DESIGN.md ข้อ 3)
 
 ### [x] Task 3: ฐานข้อมูล
@@ -27,26 +27,26 @@
 - ผล: ผ่าน 2026-08-27 — `.sessions/2026-08-27-0915-task-3-database.md` — หมายเหตุ: ใช้ advisory lock ตาม R1 แทน `FOR UPDATE` เพราะคิวแรกของวันยังไม่มีแถวให้ล็อก
 
 ### [~] Task 4: F1 จัดการบริการ
-- ทำ: API GET/POST/PUT `/api/services` (`src/server/routes/services.routes.ts` + `services/services-server.service.ts`, dto ใน `src/shared/dto/services.dto.ts`); หน้า `/staff/services` ใน `src/app/features/services/` (`pages/service-manager.page.ts`, `services-client.service.ts`): ตารางบริการ + ฟอร์มเพิ่ม/แก้ + สวิตช์เปิด/ปิดใช้ ตาม pattern ใน `docs/DESIGN.md`; route lazy-load + `RenderMode.Server`
-- ทดสอบ: เพิ่มบริการใหม่ → รีเฟรช → ยังอยู่; ปิดใช้ → สวิตช์เปลี่ยนและรีเฟรชแล้วยังปิดอยู่ (CRUD ธรรมดา — ไม่ต้องมี spec)
+- ทำ: เปิด `docs/design/mockup.html` ส่วนหน้า `/staff/services` ก่อน แล้วทำโครง/ลำดับ element/ข้อความปุ่มให้ตรง; API GET/POST/PUT `/api/services` (`src/server/routes/services.routes.ts` + `services/services-server.service.ts`, dto ใน `src/shared/dto/services.dto.ts`); หน้า `/staff/services` ใน `src/app/features/services/` (`pages/service-manager.page.ts + service-manager.page.html`, `services-client.service.ts`): ตารางบริการ + ฟอร์มเพิ่ม/แก้ + สวิตช์เปิด/ปิดใช้ ตาม pattern ใน `docs/DESIGN.md` (ใช้ `status-badge`/`alert` จาก `src/app/ui/`); shell ของหน้า `/staff*` ตาม DESIGN.md ข้อ 4 สร้างเป็น `src/app/ui/staff-shell.component.ts` ใน Task นี้; route lazy-load + `RenderMode.Server`
+- ทดสอบ: เพิ่มบริการใหม่ → รีเฟรช → ยังอยู่; ปิดใช้ → สวิตช์เปลี่ยนและรีเฟรชแล้วยังปิดอยู่; เปิดหน้าจริงกับ mockup ข้างกันที่ 375px ลำดับ element/ข้อความปุ่ม/empty state ตรงกัน (CRUD ธรรมดา — ไม่ต้องมี spec)
 - ผล: —
 
 ### [ ] Task 5: F2 รับคิว (ฝั่งลูกค้า)
-- ทำ: API `POST /api/bookings` (ตรวจ R3 → `create_booking()`), `GET /api/bookings/:id` (+ `service_name`, `ahead` ตามนิยามใน 2.2) ใน `bookings.routes.ts` + `bookings-server.service.ts`, dto ใน `bookings.dto.ts`; หน้า `/` (`pages/booking-form.page.ts`): รายการบริการที่เปิด → ฟอร์มชื่อ/เบอร์ → "รับคิว" → ไป `/ticket/:id`; หน้า `/ticket/:id` (`pages/ticket.page.ts`): เลขคิว, บริการ, "อีก N คิวถึงคุณ", polling 10 วินาที; `bookings-client.service.ts`
+- ทำ: เปิด mockup ส่วนหน้า `/` และ `/ticket/:id` ก่อนแล้วทำให้ตรง; API `POST /api/bookings` (rate limit ตาม SPEC 2.4 ผ่าน `src/server/rate-limit.ts`; ตรวจ R3 → `create_booking()`), `GET /api/bookings/:id` (+ `service_name`, `ahead` ตามนิยามใน 2.2) ใน `bookings.routes.ts` + `bookings-server.service.ts`, dto ใน `bookings.dto.ts`; หน้า `/` (`pages/booking-form.page.ts + .page.html`): รายการบริการที่เปิด (Selected Option Card) → ฟอร์มชื่อ/เบอร์ → "รับคิว" → ไป `/ticket/:id`; หน้า `/ticket/:id` (`pages/ticket.page.ts + .page.html`): เลขคิว, บริการ, "อีก N คิวถึงคุณ", polling 10 วินาที; `bookings-client.service.ts`
 - ทดสอบ: รับคิว 3 ครั้งได้เลข 1,2,3; เปิด ticket ของคิว 3 เห็น "อีก 2 คิว"; บริการที่ปิดใช้ใน Task 4 ไม่แสดงบนหน้า `/`; เปิดฟอร์มค้างไว้แล้วให้ช่างปิดบริการนั้นในอีกแท็บ กดรับคิว → error ภาษาไทย (400); spec `bookings-server.service.spec.ts`: คำนวณ `ahead` (นับเฉพาะ waiting/called ที่ `queue_no` น้อยกว่า) ผ่าน `npm test`
 - ผล: —
 
 ### [ ] Task 6: F3 จัดการคิว (ฝั่งช่าง)
-- ทำ: API `GET /api/bookings/today` (+ `service_name`), `PATCH /api/bookings/:id/status` → `set_booking_status()`; หน้า `/staff` (`pages/queue-board.page.ts`): 3 กลุ่มตาม 1.6 ข้อ 4; ปุ่ม เรียก/เสร็จ/ยกเลิก; polling 10 วินาที; ลำดับ route ตาม 2.3
+- ทำ: เปิด mockup ส่วนหน้า `/staff` ก่อนแล้วทำให้ตรง; API `GET /api/bookings/today` (+ `service_name`), `PATCH /api/bookings/:id/status` → `set_booking_status()`; หน้า `/staff` (`pages/queue-board.page.ts + .page.html`, ใช้ `staff-shell` จาก Task 4): 3 กลุ่มตาม 1.6 ข้อ 4; ปุ่ม เรียก/เสร็จ/ยกเลิก; polling 10 วินาที; ลำดับ route ตาม 2.3
 - ทดสอบ: กดเรียกคิว 1 → คิว 1 ย้ายไปกลุ่ม "กำลังเรียก" และแสดงเวลาที่เรียก; กดเสร็จ → ย้ายไปกลุ่ม "เสร็จแล้ว"; ไม่มีปุ่มย้อนสถานะบนหน้าจอ (การบังคับอยู่ใน `set_booking_status()` → `P0409` ทดสอบแล้วใน Task 3); ticket ของคิว 3 ตอนคิว 1 เป็น called ยังเห็น "อีก 2 คิว" และหลัง done เห็น "อีก 1 คิว" (route ส่งต่อไป `set_booking_status()` อย่างเดียว — logic อยู่ใน DB function ตาม Task 3 ไม่ต้องมี spec)
 - ผล: —
 
 ### [ ] Task 7: F4 จอแสดงคิว
-- ทำ: หน้า `/display` (`pages/display.page.ts`, `RenderMode.Client`): ตัวหนังสือใหญ่ "กำลังเรียก: [ทุกเลขที่ status = called]" + "คิวถัดไป: [3 เลขแรกที่ waiting]"; polling 5 วินาที; ไม่มีปุ่ม
+- ทำ: เปิด mockup ส่วนหน้า `/display` ก่อนแล้วทำให้ตรง; หน้า `/display` (`pages/display.page.ts + .page.html`, `RenderMode.Client`): ตัวหนังสือใหญ่ "กำลังเรียก: [ทุกเลขที่ status = called]" + "คิวถัดไป: [3 เลขแรกที่ waiting]"; polling 5 วินาที; ไม่มีปุ่ม
 - ทดสอบ: เปิด `/display` บนคอม เปิด `/staff` บนมือถือ กดเรียก → จอเปลี่ยนภายใน 5 วินาที
 - ผล: —
 
 ### [ ] Task 8: ปิดงาน
-- ทำ: ยืนยันว่า `queue_no` เริ่ม 1 ใหม่เมื่อ `queue_date` เปลี่ยน (agent ให้ SQL block แก้ `queue_date` ของแถวทดสอบเป็นเมื่อวาน แล้วผู้ใช้กดรับคิวใหม่ในเบราว์เซอร์ต้องได้เลข 1); ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; ทุกหน้าใช้ token/pattern ตาม `docs/DESIGN.md`; error ทุกจุดแสดงข้อความไทย; เขียน README.md (วิธีตั้ง Supabase, วิธีรัน, วิธี deploy ขึ้น Render (build `npm run build`, start `npm run serve:ssr:barber-queue`, Node ตาม `engines` ใน package.json), รายการ env รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render)
-- ทดสอบ: คนอื่นอ่าน README แล้วรันได้โดยไม่ต้องถาม
+- ทำ: ยืนยันว่า `queue_no` เริ่ม 1 ใหม่เมื่อ `queue_date` เปลี่ยน (agent ให้ SQL block แก้ `queue_date` ของแถวทดสอบเป็นเมื่อวาน แล้วผู้ใช้กดรับคิวใหม่ในเบราว์เซอร์ต้องได้เลข 1); ไล่เช็ค SPEC 1.8 ทุกข้อ; ทุกหน้าที่ 375px; ทุกหน้าใช้ token/pattern ตาม `docs/DESIGN.md`; error ทุกจุดแสดงข้อความไทย; README.md: ลบส่วนของ template ตามเครื่องหมาย `<!-- ส่วนของ template จบตรงนี้ -->` แล้วเติมส่วนของโปรเจกต์ (ฐานข้อมูลบน Supabase cloud + วิธีตั้ง `.env`, วิธีรัน, วิธี deploy ขึ้น Render (build `npm run build`, start `npm run serve:ssr:barber-queue`, Node ตาม `engines` ใน package.json), รายการ env รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render; แทน `<project-name>` ด้วย `barber-queue`)
+- ทดสอบ: README ไม่เหลือคำว่า template / skill / clone และคนอื่นอ่านแล้วรันได้โดยไม่ต้องถาม
 - ผล: —

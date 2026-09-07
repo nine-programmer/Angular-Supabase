@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.11 | อัปเดต: 2026-09-06
+> เวอร์ชัน template: 1.12 | อัปเดต: 2026-09-07
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -37,7 +37,7 @@ src/
 │   ├── ui/                                component / pipe / directive ใช้ซ้ำข้าม feature (2+ feature)
 │   ├── features/
 │   │   └── <feature>/                     1 โฟลเดอร์ต่อ 1 feature (ปกติ = 1 resource)
-│   │       ├── pages/<name>.page.ts       หน้าจอที่มี route
+│   │       ├── pages/<name>.page.ts + <name>.page.html   หน้าจอที่มี route (template แยกไฟล์เสมอ)
 │   │       ├── components/                component ที่ใช้เฉพาะใน feature นี้
 │   │       ├── <feature>-client.service.ts   เรียก /api/<feature> ด้วย HttpClient / httpResource
 │   │       └── <feature>.routes.ts           lazy-load จาก app.routes.ts ด้วย loadChildren
@@ -93,21 +93,22 @@ src/app/  ──▶  src/shared/  ◀──  src/server/
 
 ## 5. การตั้งชื่อไฟล์
 
-| ชนิด                          | รูปแบบ                                                                                                                                 | ตัวอย่าง                                     |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| หน้า (routed)                 | `<name>.page.ts`                                                                                                                       | `booking-form.page.ts`                       |
-| service ฝั่ง browser          | `<feature>-client.service.ts`                                                                                                          | `bookings-client.service.ts`                 |
-| service ฝั่ง server           | `<feature>-server.service.ts`                                                                                                          | `bookings-server.service.ts`                 |
-| router ฝั่ง server            | `<feature>.routes.ts`                                                                                                                  | `bookings.routes.ts`                         |
-| DTO                           | `<feature>.dto.ts`                                                                                                                     | `bookings.dto.ts`                            |
-| enum                          | `<feature>.enums.ts`                                                                                                                   | `bookings.enums.ts`                          |
-| spec                          | ชื่อเดิม + `.spec.ts` วางข้างกัน                                                                                                       | `bookings-server.service.spec.ts`            |
-| guard / interceptor (Angular) | `<name>.guard.ts` / `<name>.interceptor.ts` ใน `src/app/core/`                                                                         | `auth.guard.ts`, `ssr-cookie.interceptor.ts` |
-| middleware (Express)          | `<name>.middleware.ts` ใน `src/server/`                                                                                                | `auth.middleware.ts`                         |
-| component เฉพาะ feature       | `components/<name>.component.ts`                                                                                                       | `loan-row.component.ts`                      |
-| UI ใช้ซ้ำ (`src/app/ui/`)     | `<name>.component.ts` / `<name>.pipe.ts` / `<name>.directive.ts`                                                                       | `status-badge.component.ts`                  |
-| helper                        | `src/shared/utils/<name>.ts` (ทั้งสองฝั่งใช้) · `src/server/<name>.ts` (server เท่านั้น) · `src/app/core/<name>.ts` (browser เท่านั้น) | `thai-date.ts`, `api-error.ts`               |
-| migration                     | `<timestamp>_description.sql` (CLI ตั้งให้)                                                                                            | `20260827120000_init.sql`                    |
+| ชนิด                          | รูปแบบ                                                                                                                                                                                    | ตัวอย่าง                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| หน้า (routed)                 | `<name>.page.ts`                                                                                                                                                                          | `booking-form.page.ts`                       |
+| template ของหน้า              | `<name>.page.html` ข้าง `.page.ts` (ทุกหน้าที่มี route)                                                                                                                                   | `booking-form.page.html`                     |
+| service ฝั่ง browser          | `<feature>-client.service.ts`                                                                                                                                                             | `bookings-client.service.ts`                 |
+| service ฝั่ง server           | `<feature>-server.service.ts`                                                                                                                                                             | `bookings-server.service.ts`                 |
+| router ฝั่ง server            | `<feature>.routes.ts`                                                                                                                                                                     | `bookings.routes.ts`                         |
+| DTO                           | `<feature>.dto.ts`                                                                                                                                                                        | `bookings.dto.ts`                            |
+| enum                          | `<feature>.enums.ts`                                                                                                                                                                      | `bookings.enums.ts`                          |
+| spec                          | ชื่อเดิม + `.spec.ts` วางข้างกัน                                                                                                                                                          | `bookings-server.service.spec.ts`            |
+| guard / interceptor (Angular) | `<name>.guard.ts` / `<name>.interceptor.ts` ใน `src/app/core/`                                                                                                                            | `auth.guard.ts`, `ssr-cookie.interceptor.ts` |
+| middleware (Express)          | `<name>.middleware.ts` ใน `src/server/`                                                                                                                                                   | `auth.middleware.ts`                         |
+| component เฉพาะ feature       | `components/<name>.component.ts`                                                                                                                                                          | `loan-row.component.ts`                      |
+| UI ใช้ซ้ำ (`src/app/ui/`)     | `<name>.component.ts` / `<name>.pipe.ts` / `<name>.directive.ts`                                                                                                                          | `status-badge.component.ts`                  |
+| helper                        | `src/shared/utils/<name>.ts` (ทั้งสองฝั่งใช้) · `src/server/<name>.ts` (server เท่านั้น — รวม helper ที่ไม่แตะ DB จึงไม่อยู่ใน `services/`) · `src/app/core/<name>.ts` (browser เท่านั้น) | `thai-date.ts`, `api-error.ts`, `auth.ts`    |
+| migration                     | `<timestamp>_description.sql` (CLI ตั้งให้)                                                                                                                                               | `20260827120000_init.sql`                    |
 
 service ฝั่ง browser กับ server ของ feature เดียวกันต้องชื่อไม่ซ้ำกัน (จึงมี `-client` / `-server`) ส่วน `<feature>.routes.ts` ใช้ชื่อเดียวกันได้ทั้งสองฝั่ง เพราะอยู่คนละโฟลเดอร์ (`src/app/features/<feature>/` กับ `src/server/routes/`)
 
@@ -122,7 +123,7 @@ service ฝั่ง browser กับ server ของ feature เดียว�
 - **ย้ายออกจาก Supabase cloud ได้เสมอ**: server พึ่งแค่ Postgres + PostgREST (ตัวเดียวกับที่ Supabase รันให้) จึงย้ายไป PostgreSQL + PostgREST บน VPS ของตัวเองได้ด้วยการเปลี่ยนค่าใน `.env` (ขั้นตอนใน README → "ตั้งค่าฐานข้อมูล" แบบ B) — ทุก Task จึง**ห้ามพึ่งของที่มีเฉพาะบน Supabase cloud**: Auth, Realtime, Edge Functions, การอ้าง schema `auth.` / `storage.` ใน SQL, และ extension นอกชุดมาตรฐานของ Postgres; ข้อยกเว้นมี 2 อย่าง — Storage HTTP API ผ่าน `supabase-js` ใช้ได้แต่ต้องอยู่ในไฟล์เดียวเพื่อสลับเป็นดิสก์/S3 ได้ (`docs/EXTENSION_POINTS.md`) และ `pg_cron` ใช้ได้เมื่อ SPEC 2.4 ระบุว่าบน VPS ต้องติดตั้ง extension เองพร้อมแผนสำรอง (`src/server/jobs/`) (กติกาเต็มใน `AGENTS.md` → Supabase)
 - คอลัมน์เสริมเมื่อ spec ต้องการ: `updated_at timestamptz` ให้ตั้งค่าด้วย trigger ใน migration เดียวกัน (`create or replace function set_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;` + `create trigger ... before update ... execute function set_updated_at()`) ไม่ใช่ให้ API ส่งมา; การ "ลบ" ข้อมูลหลักที่ถูกอ้างถึงใช้ `is_active boolean default true` (soft delete) แทน `DELETE`
 - error ที่ function ตั้งใจส่งกลับ: `RAISE EXCEPTION 'ข้อความไทย'` (= SQLSTATE `P0001`) เมื่อกติกาไม่ผ่าน → API ตอบ 400; `RAISE EXCEPTION 'ข้อความไทย' USING ERRCODE = 'P0409'` เมื่อสถานะไม่ตรงเงื่อนไข → 409 — `src/server/api-error.ts` แปลงให้ทุก route เหมือนกัน (รายละเอียด `AGENTS.md` → API Layer) จึงเขียนข้อความไทยไว้ใน function ได้เลย
-- ทุก query ที่คืนรายการต้องมี `.order()` เสมอ; ระบบเล็กไม่ทำ pagination เว้นแต่ SPEC 2.4 กำหนด; "วันนี้" เทียบด้วยเวลาไทยทั้งใน SQL และ TypeScript (`src/shared/utils/thai-date.ts`)
+- ทุก query ที่คืนรายการต้องมี `.order()` เสมอ (รวม query ภายใน service ที่ดึงมาคำนวณ); ระบบเล็กไม่ทำ pagination เว้นแต่ SPEC 2.4 กำหนด; "วันนี้" เทียบด้วยเวลาไทยทั้งใน SQL และ TypeScript (`src/shared/utils/thai-date.ts`)
 - ข้อมูลเริ่มต้นที่ต้องมีจริง (admin คนแรก, รายการประเภท, ข้อมูลเดิมจากไฟล์ Excel/CSV ที่ผู้ใช้ส่งให้ — agent แปลงเป็น `insert`) อยู่ใน migration; ข้อมูลตัวอย่างเพื่อทดสอบใส่ใน migration ได้เฉพาะเมื่อ SPEC 1.9 ระบุ และต้องลบ/ปิดใช้งานผ่านหน้าจอได้ (ฐานข้อมูลมีชุดเดียว ไม่แยก dev/prod)
 
 ## 7. เอกสารและบันทึกของโปรเจกต์
@@ -152,7 +153,7 @@ docs/
 
 คำสั่งเป็น npm script ใน `package.json` (ตัวที่ใช้บ่อยพร้อมคำอธิบายอยู่ใน `README.md` → คำสั่งที่ใช้บ่อย) ที่ต้องจำตอนสร้างระบบมีแค่: `npm run format` แล้ว `npm test` ก่อนส่งงานทุก Task (AGENTS.md) และลำดับ migration ในข้อ 6
 
-Deploy: ขั้นตอน (Render หรือ host Node ใดๆ, และแอปบน VPS) อยู่ใน `README.md` → Deploy — README ปิดงานของโปรเจกต์คัดลอกย่อหน้านั้นไปใส่ชื่อจริง
+Deploy: ขั้นตอน (Render หรือ host Node ใดๆ, และแอปบน VPS) อยู่ใน `README.md` → Deploy — Task ปิดงานเก็บหัวข้อนั้นไว้ใน README ของโปรเจกต์แล้วแทน `<project-name>` ด้วยชื่อจริง
 
 ## 9. จุดขยาย (extension points) — เมื่อระบบต้องการมากกว่า CRUD
 

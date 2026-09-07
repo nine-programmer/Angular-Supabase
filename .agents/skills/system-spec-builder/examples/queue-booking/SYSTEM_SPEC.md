@@ -124,13 +124,11 @@ waiting → called → done
 - [ ] ข้อมูลไม่หายเมื่อปิดแอปเปิดใหม่
 - [ ] ทุกหน้าใช้ได้บนมือถือความกว้าง 375px
 
-### 1.9 สมมติฐาน (ผู้ใช้ยังไม่ได้ยืนยัน แก้ได้ภายหลัง)
-- หลายคิวอาจอยู่สถานะ `called` พร้อมกันได้ (ช่างหลายคน) — จอแสดงทุกคิวที่ถูกเรียก
-- ลูกค้าคนเดียวรับได้หลายคิวต่อวัน (ไม่ตรวจเบอร์ซ้ำ)
-- เวลาทำการไม่จำกัด (ไม่ปิดรับคิวอัตโนมัติ) — ช่างปิดบริการเองด้วย `is_active`
-- การอัปเดตอัตโนมัติใช้ polling ไม่ใช้ realtime เพื่อความง่าย
-- ไม่มีข้อมูลเดิมต้องนำเข้า; ตอนตั้งระบบใส่บริการตัวอย่าง 3 รายการ (ตัดผมชาย 30 นาที, ตัดผมหญิง 45, โกนหนวด 15)
-- Deploy บน Render
+### 1.9 สมมติฐาน, โทน และข้อมูลเริ่มต้น
+- สมมติฐานที่ผู้ใช้ยังไม่ได้ยืนยัน (แก้ได้ภายหลัง): หลายคิวอาจอยู่สถานะ `called` พร้อมกันได้ (ช่างหลายคน) — จอแสดงทุกคิวที่ถูกเรียก; ลูกค้าคนเดียวรับได้หลายคิวต่อวัน (ไม่ตรวจเบอร์ซ้ำ); เวลาทำการไม่จำกัด (ไม่ปิดรับคิวอัตโนมัติ) — ช่างปิดบริการเองด้วย `is_active`; การอัปเดตอัตโนมัติใช้ polling ไม่ใช้ realtime เพื่อความง่าย; Deploy บน Render
+- โทน/สไตล์ที่ผู้ใช้บอกไว้ (Task Design ใช้): เรียบ สะอาด อ่านง่ายบนมือถือ (ผู้ใช้ไม่ได้ระบุ — ค่าเริ่มต้น)
+- ข้อมูลเริ่มต้นที่ต้องมีจริง: ไม่มี (ไม่มีข้อมูลเดิมต้องนำเข้า)
+- ข้อมูลตัวอย่างเพื่อทดสอบ: บริการ 3 รายการ (ตัดผมชาย 30 นาที, ตัดผมหญิง 45, โกนหนวด 15) — ช่างปิดใช้/แก้ได้ที่หน้า `/staff/services`
 
 ---
 
@@ -139,7 +137,7 @@ waiting → called → done
 โครงสร้าง โฟลเดอร์ ชื่อไฟล์ และกติกาโค้ดใช้ตาม `docs/ARCHITECTURE.md` และ `AGENTS.md` ทุกข้อ ส่วนนี้มีแค่สิ่งที่ต่างกันต่อโปรเจกต์
 
 ### 2.1 Stack และ deploy
-- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.11
+- Stack: มาตรฐานตาม `docs/ARCHITECTURE.md` เวอร์ชัน template 1.12
 - ฐานข้อมูล: Supabase cloud — ตั้งค่าใน Task 1 ตาม README → "ตั้งค่าฐานข้อมูล" แบบ A
 - ชื่อโปรเจกต์ (slug): `barber-queue` — ชื่อโปรเจกต์บน Supabase, `name` ใน package.json, script `serve:ssr:barber-queue` และ path `dist/barber-queue/`
 - Deploy: Render (Node web service) ตั้ง env ใน dashboard รวม `NG_ALLOWED_HOSTS` = โดเมนของ Render
@@ -161,10 +159,10 @@ waiting → called → done
 ### 2.3 ฟีเจอร์ → ไฟล์
 | ฟีเจอร์ | feature folder (`src/app/features/`) + หน้า | API ที่หน้าใช้ | server (`routes/`, `services/`) | shared (`dto/`, `enums/`) |
 |---|---|---|---|---|
-| F1 | `services/` หน้า `/staff/services` (`pages/service-manager.page.ts`), `services-client.service.ts`, `services.routes.ts` | GET/POST/PUT /api/services | `services.routes.ts`, `services-server.service.ts` | `services.dto.ts` |
-| F2 | `bookings/` หน้า `/` (`pages/booking-form.page.ts`), `/ticket/:id` (`pages/ticket.page.ts`), `bookings-client.service.ts`, `bookings.routes.ts` | GET /api/services?active=true, POST /api/bookings, GET /api/bookings/:id | `bookings.routes.ts`, `bookings-server.service.ts` | `bookings.dto.ts`, `bookings.enums.ts` |
-| F3 | `bookings/` หน้า `/staff` (`pages/queue-board.page.ts`) | GET /api/bookings/today, PATCH /api/bookings/:id/status | (ใช้ของ F2) | (ใช้ของ F2) |
-| F4 | `bookings/` หน้า `/display` (`pages/display.page.ts`) | GET /api/bookings/today | (ใช้ของ F2) | (ใช้ของ F2) |
+| F1 | `services/` หน้า `/staff/services` (`pages/service-manager.page.ts + .page.html`), `services-client.service.ts`, `services.routes.ts` | GET/POST/PUT /api/services | `services.routes.ts`, `services-server.service.ts` | `services.dto.ts` |
+| F2 | `bookings/` หน้า `/` (`pages/booking-form.page.ts + .page.html`), `/ticket/:id` (`pages/ticket.page.ts + .page.html`), `bookings-client.service.ts`, `bookings.routes.ts` | GET /api/services?active=true, POST /api/bookings, GET /api/bookings/:id | `bookings.routes.ts`, `bookings-server.service.ts` | `bookings.dto.ts`, `bookings.enums.ts` |
+| F3 | `bookings/` หน้า `/staff` (`pages/queue-board.page.ts + .page.html`) | GET /api/bookings/today, PATCH /api/bookings/:id/status | (ใช้ของ F2) | (ใช้ของ F2) |
+| F4 | `bookings/` หน้า `/display` (`pages/display.page.ts + .page.html`) | GET /api/bookings/today | (ใช้ของ F2) | (ใช้ของ F2) |
 
 ลำดับ route ใน `app.routes.ts`: `staff/services` (feature services) ต้องมาก่อน `staff` (feature bookings)
 
@@ -172,6 +170,7 @@ waiting → called → done
 - polling: `/ticket/:id` และ `/staff` ทุก 10 วินาที, `/display` ทุก 5 วินาที (ดู 1.9)
 - `queue_date` คำนวณฝั่ง Postgres ใน `create_booking()` ด้วย timezone `Asia/Bangkok`; `/api/bookings/today` ใช้วันเดียวกันนี้
 - RenderMode: `/`, `/ticket/:id`, `/staff`, `/staff/services` = `Server`; `/display` = `Client` (รีเฟรชถี่ ไม่ได้ประโยชน์จาก SSR)
+- rate limit ของ endpoint สาธารณะ: `POST /api/bookings` 30 ครั้ง/15 นาที ต่อ IP (ค่าเริ่มต้นจาก AGENTS — ผู้ใช้ไม่ได้ระบุ) ผ่าน `src/server/rate-limit.ts`; ไม่มี login
 
 ### 2.5 ตัวแปร .env เพิ่มเติม (นอกจากมาตรฐานใน ARCHITECTURE.md ข้อ 8)
 - ไม่มี

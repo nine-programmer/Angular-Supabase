@@ -50,8 +50,8 @@
 
 2. `docs/EXTENSION_POINTS.md` — เพิ่ม**แถวใหม่**ในตาราง (วางถัดจากแถว login) และตัดประโยค rate limit ออกจากช่องหมายเหตุของแถว login เหลือแค่ "login ใช้แถว rate limit ด้วยเสมอ":
 
-   | ความต้องการ | วางที่ | หมายเหตุ |
-   | --- | --- | --- |
+   | ความต้องการ                                                  | วางที่                                                                                                          | หมายเหตุ                                                                                                                                                                              |
+   | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
    | endpoint สาธารณะที่เขียนข้อมูล (login, สมัคร, จอง, ส่งฟอร์ม) | `src/server/rate-limit.ts` (agent เขียนเองในโปรเจกต์ จนกว่า template จะส่งมาให้) ใช้เป็น middleware ระดับ route | จำกัดต่อ IP ตอบ `429 { error: 'ลองใหม่ภายหลัง' }`; ตัวเลขระบุใน SPEC 2.4 (ค่าเริ่มต้นและรูปแบบใน `AGENTS.md` → API Layer); ตัวนับเก็บใน `Map` ในหน่วยความจำของ process ไม่ต้องมีตาราง |
 
 3. `.claude/skills/system-spec-builder/references/interview-guide.md` ข้อ 3 "คลังคำถามตามหัวข้อ" เพิ่มคำถาม: "มีหน้าไหนที่คนทั่วไปกดส่งข้อมูลได้โดยไม่ล็อกอินไหม (จอง สมัคร ส่งฟอร์ม) → ควรจำกัดกี่ครั้งต่อกี่นาทีต่อเครื่อง ถ้าผู้ใช้ไม่รู้ ใช้ค่าเริ่มต้นใน AGENTS แล้วบอกผู้ใช้"
@@ -65,11 +65,11 @@
 
 **ปัญหาที่เจอ** — ชื่อไม่ตรงกัน 3 แหล่ง:
 
-| แหล่ง | ชื่อที่ใช้ |
-| --- | --- |
-| `docs/EXTENSION_POINTS.md` แถว login + `docs/ARCHITECTURE.md` ข้อ 5 | `src/server/auth.middleware.ts` (`requireAuth`, `requireRole`, `requireAdmin`) + `src/app/core/auth.guard.ts` |
-| SPEC 2.3 ของ barber-queue ที่ skill เขียนให้ | feature `admin-auth/`, `admin-auth.routes.ts`, `admin-auth-server.service.ts` (ทั้งที่ไม่มีตารางผู้ใช้), `admin-auth.middleware.ts`, `admin-auth.guard.ts`, `admin-auth-client.service.ts` |
-| โค้ดจริงของ barber-queue | `src/server/admin-auth.ts` (helper ตรวจรหัส/สร้าง-ตรวจ cookie ไม่แตะ DB), `admin-auth.middleware.ts` export `adminAuthMiddleware`; ไม่มี `-server.service` |
+| แหล่ง                                                               | ชื่อที่ใช้                                                                                                                                                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/EXTENSION_POINTS.md` แถว login + `docs/ARCHITECTURE.md` ข้อ 5 | `src/server/auth.middleware.ts` (`requireAuth`, `requireRole`, `requireAdmin`) + `src/app/core/auth.guard.ts`                                                                              |
+| SPEC 2.3 ของ barber-queue ที่ skill เขียนให้                        | feature `admin-auth/`, `admin-auth.routes.ts`, `admin-auth-server.service.ts` (ทั้งที่ไม่มีตารางผู้ใช้), `admin-auth.middleware.ts`, `admin-auth.guard.ts`, `admin-auth-client.service.ts` |
+| โค้ดจริงของ barber-queue                                            | `src/server/admin-auth.ts` (helper ตรวจรหัส/สร้าง-ตรวจ cookie ไม่แตะ DB), `admin-auth.middleware.ts` export `adminAuthMiddleware`; ไม่มี `-server.service`                                 |
 
 ต้นเหตุ: (1) ตาราง 2.3 ใน `templates/SYSTEM_SPEC.md` มีแต่แถว "ฟีเจอร์ = resource" login ไม่ใช่ resource skill จึงคิดชื่อเอง (2) EXTENSION_POINTS สมมติว่ามีตารางผู้ใช้เสมอ (bcrypt, `user_id`) แบบ "รหัสผ่านเดียว ไม่มีตารางผู้ใช้" ไม่มีที่วาง helper ที่ไม่แตะ DB เพราะ `services/` สงวนให้ไฟล์ที่เรียก Supabase (3) ไม่มีกติกาเรื่องคำนำหน้าบทบาท
 
@@ -77,16 +77,16 @@
 
 **ชุดชื่อ**
 
-| ฝั่ง | ไฟล์ | หน้าที่ |
-| --- | --- | --- |
-| server | `src/server/auth.ts` | ตรวจรหัส/สร้าง-ตรวจ session cookie — ไม่แตะ DB |
-| server | `src/server/auth.middleware.ts` | `requireAuth`, `requireRole(...roles)` |
-| server | `src/server/routes/auth.routes.ts` | `/api/auth/*` (login, me, logout และวิธีอื่นของโปรเจกต์) |
-| server | `src/server/services/auth-server.service.ts` | **เฉพาะเมื่อมีตารางผู้ใช้** — ไฟล์เดียวที่แตะ DB เรื่อง auth |
-| browser | `src/app/core/auth.guard.ts` | guard (UX เท่านั้น สิทธิ์จริงอยู่ที่ middleware) |
-| browser | `src/app/features/auth/pages/login.page.ts` + `.page.html` | หน้า login — path เป็นของโปรเจกต์ (SPEC 2.3) |
-| browser | `src/app/features/auth/auth-client.service.ts` | เรียก `/api/auth/*` |
-| shared | `src/shared/dto/auth.dto.ts` | zod ของ request/response |
+| ฝั่ง    | ไฟล์                                                       | หน้าที่                                                      |
+| ------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| server  | `src/server/auth.ts`                                       | ตรวจรหัส/สร้าง-ตรวจ session cookie — ไม่แตะ DB               |
+| server  | `src/server/auth.middleware.ts`                            | `requireAuth`, `requireRole(...roles)`                       |
+| server  | `src/server/routes/auth.routes.ts`                         | `/api/auth/*` (login, me, logout และวิธีอื่นของโปรเจกต์)     |
+| server  | `src/server/services/auth-server.service.ts`               | **เฉพาะเมื่อมีตารางผู้ใช้** — ไฟล์เดียวที่แตะ DB เรื่อง auth |
+| browser | `src/app/core/auth.guard.ts`                               | guard (UX เท่านั้น สิทธิ์จริงอยู่ที่ middleware)             |
+| browser | `src/app/features/auth/pages/login.page.ts` + `.page.html` | หน้า login — path เป็นของโปรเจกต์ (SPEC 2.3)                 |
+| browser | `src/app/features/auth/auth-client.service.ts`             | เรียก `/api/auth/*`                                          |
+| shared  | `src/shared/dto/auth.dto.ts`                               | zod ของ request/response                                     |
 
 **แก้ที่**
 
@@ -124,11 +124,15 @@
 
 ```ts
 // barbers.dto.ts — แบบที่ 1: intersection มือ
-export type Barber = z.infer<typeof createBarberSchema> & { id: string; updated_at: string; created_at: string };
+export type Barber = z.infer<typeof createBarberSchema> & {
+  id: string;
+  updated_at: string;
+  created_at: string;
+};
 // shop-settings.dto.ts — แบบที่ 2: object type เขียนมือทั้งก้อน
-export type ShopSettings = { id: string; open_time: string; /* ... */ };
+export type ShopSettings = { id: string; open_time: string /* ... */ };
 // bookings.dto.ts — แบบที่ 3: zod schema ของแถวตารางทั้งแถว
-export const bookingSchema = z.object({ id: z.string().uuid(), /* ทุกคอลัมน์ */ });
+export const bookingSchema = z.object({ id: z.string().uuid() /* ทุกคอลัมน์ */ });
 export type Booking = z.infer<typeof bookingSchema>;
 ```
 
@@ -149,7 +153,11 @@ export const createBarberSchema = z.object({ nickname: z.string().trim().min(1).
 export type CreateBarber = z.infer<typeof createBarberSchema>; // (1) request
 export type Barber = Tables<'barbers'>; // (2) full row
 export type PublicBarber = Pick<Tables<'barbers'>, 'id' | 'nickname'>; // (2) subset for a public endpoint
-export const bookingSlotSchema = z.object({ start_time: z.string(), end_time: z.string(), free_barbers: z.number() });
+export const bookingSlotSchema = z.object({
+  start_time: z.string(),
+  end_time: z.string(),
+  free_barbers: z.number(),
+});
 export type BookingSlot = z.infer<typeof bookingSlotSchema>; // (3) computed shape
 ```
 
@@ -181,7 +189,9 @@ export type BookingSlot = z.infer<typeof bookingSlotSchema>; // (3) computed sha
   imports: [ReactiveFormsModule, StatusBadgeComponent],
   templateUrl: './booking-form.page.html',
 })
-export class BookingFormPage { /* signals + handlers only */ }
+export class BookingFormPage {
+  /* signals + handlers only */
+}
 ```
 
 **รอรอบโค้ด** — script `check:size` ใน package.json (นับบรรทัดไฟล์ที่เขียนมือใต้ `src/` ยกเว้น `*.spec.ts`, `database.types.ts`) แล้วให้ finish step เป็น `npm run format` → `npm run check:size` → `npm test`
@@ -251,8 +261,14 @@ end if;
    - **Selected Option Card** (การ์ด/ปุ่มตัวเลือก เช่น บริการ ช่องเวลา ช่าง): เป็น `<button type="button">` เสมอ ใส่ `[attr.aria-pressed]="selected()"` และสถานะเลือกต้องมีไอคอน `check_circle` หรือข้อความ "เลือกแล้ว" ประกอบสี ไม่ใช่สีอย่างเดียว; class ปกติ/เลือก `[class]` / `[class]`
 
      ```html
-     <button type="button" [attr.aria-pressed]="isSelected()" class="rounded-xl border border-line bg-card p-4 text-left aria-pressed:border-primary aria-pressed:bg-primary/10">
-       <span class="material-symbols-outlined" aria-hidden="true">{{ isSelected() ? 'check_circle' : 'radio_button_unchecked' }}</span>
+     <button
+       type="button"
+       [attr.aria-pressed]="isSelected()"
+       class="rounded-xl border border-line bg-card p-4 text-left aria-pressed:border-primary aria-pressed:bg-primary/10"
+     >
+       <span class="material-symbols-outlined" aria-hidden="true"
+         >{{ isSelected() ? 'check_circle' : 'radio_button_unchecked' }}</span
+       >
        ตัดผมชาย · 30 นาที
      </button>
      ```
@@ -316,17 +332,17 @@ end if;
 
 ## C. ดัชนี: ไฟล์ → ข้อที่แตะ (ใช้ตรวจว่าทำครบ)
 
-| ไฟล์ | ข้อ |
-| --- | --- |
-| `AGENTS.md` → API Layer | 1, 3, 4, 6 |
-| `AGENTS.md` → Components / Working Rules / Appendix | 5 |
-| `README.md` | 11 |
-| `docs/ARCHITECTURE.md` ข้อ 3, 5, 6 | 2, 5, 6 |
-| `docs/EXTENSION_POINTS.md` แถว login + แถวใหม่ rate limit | 1, 2, 3 |
-| `.claude/skills/system-spec-builder/templates/SYSTEM_SPEC.md` | 1, 2, 4, 5, 7, 10 |
-| `.claude/skills/system-spec-builder/templates/TASKS.md` | 5, 7, 8, 9, 11 |
-| `.claude/skills/system-spec-builder/templates/DESIGN.md` | 8 |
-| `.claude/skills/system-spec-builder/references/interview-guide.md` | 1, 2, 7, 10 |
-| `.agents/skills/system-spec-builder/**` (สำเนา) | ทุกข้อที่แตะ skill |
+| ไฟล์                                                               | ข้อ                |
+| ------------------------------------------------------------------ | ------------------ |
+| `AGENTS.md` → API Layer                                            | 1, 3, 4, 6         |
+| `AGENTS.md` → Components / Working Rules / Appendix                | 5                  |
+| `README.md`                                                        | 11                 |
+| `docs/ARCHITECTURE.md` ข้อ 3, 5, 6                                 | 2, 5, 6            |
+| `docs/EXTENSION_POINTS.md` แถว login + แถวใหม่ rate limit          | 1, 2, 3            |
+| `.claude/skills/system-spec-builder/templates/SYSTEM_SPEC.md`      | 1, 2, 4, 5, 7, 10  |
+| `.claude/skills/system-spec-builder/templates/TASKS.md`            | 5, 7, 8, 9, 11     |
+| `.claude/skills/system-spec-builder/templates/DESIGN.md`           | 8                  |
+| `.claude/skills/system-spec-builder/references/interview-guide.md` | 1, 2, 7, 10        |
+| `.agents/skills/system-spec-builder/**` (สำเนา)                    | ทุกข้อที่แตะ skill |
 
 รอรอบโค้ด (ไม่ทำในรอบนี้): `src/server/rate-limit.ts` (ข้อ 1), script `check:size` (ข้อ 5)
