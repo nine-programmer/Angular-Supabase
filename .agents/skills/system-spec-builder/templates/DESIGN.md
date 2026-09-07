@@ -44,7 +44,7 @@
 
 ## 3. Component patterns [LOCKED]
 
-เขียนเป็น Tailwind class ตายตัว copy ไปใช้ได้เลย (เปลี่ยนเฉพาะข้อความ) — class ทุกตัวในข้อนี้ต้องอ้าง token จากข้อ 2 (`bg-primary`, `text-on-primary`, `bg-bg-card`, `border-line`, `text-danger`) ไม่ใช้ชื่อสี Tailwind ตรง (`bg-amber-500`) — Tailwind 4 สร้าง class จากชื่อ `--color-*` ใน `@theme` ให้อัตโนมัติ; pattern ที่ใช้ซ้ำ 2+ feature ทำเป็น component ใน `src/app/ui/` (alert, status-badge, dialog, empty-state สร้างใน Task Design เลย — AGENTS.md)
+เขียนเป็น Tailwind class ตายตัว copy ไปใช้ได้เลย (เปลี่ยนเฉพาะข้อความ) — class ทุกตัวในข้อนี้ต้องอ้าง token จากข้อ 2 (`bg-primary`, `text-on-primary`, `bg-bg-card`, `border-line`, `text-danger`) ไม่ใช้ชื่อสี Tailwind ตรง (`bg-amber-500`) — Tailwind 4 สร้าง class จากชื่อ `--color-*` ใน `@theme` ให้อัตโนมัติ โดย class = prefix + ชื่อ token ตรงตัว (`--color-bg-card` → `bg-bg-card`, `--color-text-muted` → `text-text-muted` — ไม่ใช่ `bg-card`); pattern ที่ใช้ซ้ำ 2+ feature ทำเป็น component ใน `src/app/ui/` (alert, status-badge, dialog, empty-state สร้างใน Task Design เลย — AGENTS.md)
 
 ### ปุ่ม
 

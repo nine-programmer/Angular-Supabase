@@ -1,6 +1,6 @@
 # ARCHITECTURE — โครงสร้างมาตรฐานของ template `Angular-Supabase`
 
-> เวอร์ชัน template: 1.12 | อัปเดต: 2026-09-07
+> เวอร์ชัน template: 1.13 | อัปเดต: 2026-09-07
 > ไฟล์นี้เป็นของ **template** ใช้เหมือนกันทุกโปรเจกต์ที่ clone ไป
 > ห้ามแก้ในโปรเจกต์ลูกค้า ถ้าต้องเปลี่ยน ให้แก้ที่ template แล้วค่อยนำมาใช้
 > กติกาการเขียนโค้ดอยู่ใน `AGENTS.md` (root) · สิ่งที่ระบบนี้ต้องทำอยู่ใน `docs/SYSTEM_SPEC.md`
@@ -45,7 +45,7 @@ src/
 │   └── app.routes.server.ts               RenderMode ต่อหน้า (Server / Prerender / Client)
 │
 ├── server/                                API layer — รันบน Node เท่านั้น
-│   ├── env.ts                             อ่าน + ตรวจ process.env ที่เดียว
+│   ├── env.ts                             อ่าน process.env ที่เดียว (ตัวแปรบังคับขาดตัวไหนแจ้ง error ชัด)
 │   ├── supabase.ts                        createClient<Database>() ตัวเดียวของทั้งระบบ — lazy singleton ผ่าน getSupabase()
 │   ├── api.ts                             รวม router ทุก feature ไว้ใต้ /api + 404 JSON + error handler (server.ts import ตัวนี้ตัวเดียว)
 │   ├── api-error.ts                       HttpError, throwApiError(), apiErrorHandler — แปลง error ของ Supabase/Postgres เป็น status + ข้อความไทย (มากับ template ทุก feature ใช้ตัวนี้)
@@ -60,7 +60,7 @@ src/
 │
 ├── server.ts                              Express host เท่านั้น: mount /api แล้วส่งที่เหลือให้ Angular
 ├── main.ts · main.server.ts · index.html
-├── styles.css                             Tailwind: @import ... source(none) + @source '../src' (สแกนเฉพาะ src/), @theme
+├── styles.css                             Tailwind: @import ... source(none) + @source '../src' (สแกนเฉพาะ src/) — @theme ยังไม่มี Task Design เป็นคนเพิ่ม
 └── environments/                          config ฝั่ง browser ที่ไม่ใช่ความลับ (`environment.ts` + `environment.development.ts` สลับด้วย fileReplacements ใน angular.json)
 
 supabase/config.toml                       มากับ template (ไม่ต้องรัน `supabase init`) — เป็นไฟล์มาตรฐานของ CLI ส่วนที่พูดถึง local stack / studio / db diff / declarative schema ไม่ได้ใช้ อย่ายึดตาม comment ในไฟล์นั้น; `.temp/` = ข้อมูล link ของเครื่องนี้
@@ -114,7 +114,7 @@ service ฝั่ง browser กับ server ของ feature เดียว�
 
 ## 6. ฐานข้อมูลและสิทธิ์
 
-- ทุกตารางมี `id uuid default gen_random_uuid() primary key` และ `created_at timestamptz default now()` — primary key เป็น `uuid` เสมอ ไม่ใช้ `bigint identity` ตามที่ skill Postgres แนะนำ; ถ้าโปรเจกต์ Supabase อยู่บน Postgres 18+ ใช้ `uuidv7()` (เรียงตามเวลา) แทน `gen_random_uuid()` ได้
+- ทุกตารางมี `id uuid default gen_random_uuid() primary key` และ `created_at timestamptz default now()` — primary key เป็น `uuid` เสมอ ไม่ใช้ `bigint identity` ตามที่ skill Postgres แนะนำ; ถ้าโปรเจกต์ Supabase อยู่บน Postgres 18+ ใช้ `uuidv7()` (เรียงตามเวลา) แทน `gen_random_uuid()` ได้ (บน cloud ดูจาก `supabase/.temp/postgres-version` หลัง `db:link`; บน VPS ถามผู้ดูแล; ไม่แน่ใจใช้ `gen_random_uuid()`)
 - ทุกตาราง **เปิด RLS โดยไม่มี policy** ให้ `anon` / `authenticated` (ปิดตาย) — เข้าถึงได้ทาง `service_role` ของ server เท่านั้น
 - ค่าสถานะใน DB บังคับด้วย `CHECK (status IN (...))` และค่าเดียวกันประกาศใน `shared/enums/` เป็น `as const` object + union type (ไม่ใช้ TS `enum`)
 - กติกาที่ต้อง atomic (นับสต็อก, เลขรันต่อเนื่อง, เปลี่ยนสถานะ) บังคับที่ฐานข้อมูล — ไม่ทำแบบอ่านแล้วค่อยเขียนใน API: นับสต็อก เลขรัน และการเปลี่ยนสถานะที่มีผลข้างเคียง (จด log, ตั้งเวลา, แตะตารางอื่น) อยู่ใน Postgres function เรียกผ่าน `.rpc()` หรือ DB constraint; การเปลี่ยนสถานะแถวเดียวแบบไม่มีผลข้างเคียงใช้ conditional update ใน service ได้ (`update ... eq('id') eq('status', เดิม)` แล้วถือว่า 0 แถว = conflict) — รายละเอียดใน `AGENTS.md` → API Layer

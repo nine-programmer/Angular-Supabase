@@ -18,6 +18,7 @@ built-in utilities:
   first, or substitute any default palette color. Undefined color utilities produce no CSS and fail
   silently.
 - `ui-*` selectors are a naming convention for shared presentational components, nothing more.
+- `dark:` variants in the references are illustration only — use them only when `docs/DESIGN.md` defines dark-mode tokens (`AGENTS.md` → Tailwind CSS v4); otherwise ship light mode.
 
 ## Project setup
 
@@ -139,8 +140,7 @@ import { NgOptimizedImage } from '@angular/common';
   imports: [NgOptimizedImage],
   template: `
     <article
-      class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200
-             sm:flex dark:bg-gray-900 dark:ring-gray-800"
+      class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 sm:flex"
     >
       <img
         [ngSrc]="image()"
@@ -150,8 +150,8 @@ import { NgOptimizedImage } from '@angular/common';
         class="h-48 w-full object-cover sm:h-auto sm:w-48"
       />
       <div class="flex flex-col gap-2 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ title() }}</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">{{ description() }}</p>
+        <h3 class="text-lg font-semibold text-gray-900">{{ title() }}</h3>
+        <p class="text-sm text-gray-600">{{ description() }}</p>
       </div>
     </article>
   `,
